@@ -12,6 +12,18 @@
     "website": ""
   },  
   {
+    "id": "animesamamanga",
+    "name": "AnimeSama (Manga)",
+    "description": "AnimeSama is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/animesama/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesama.png",
+    "website": ""
+  }, 
+  {
     "id": "taiyo",
     "name": "Taiyo",
     "description": "Taiyo is a manga provider for Seanime",
