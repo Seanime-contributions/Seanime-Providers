@@ -1,0 +1,13 @@
+{
+  "id": "mangaworldadult",
+  "name": "MangaWorldAdult",
+  "description": "MangaWorldAdult is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/MangaWorldAdult/manifest.json",
+  "version": "1.0.0",
+  "author": "pal",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/MangaWorld.jpeg",
+  "type": "manga-provider",
+  "language": "typescript",
+  "lang": "it",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/MangaWorldAdult/provider.ts"
+}

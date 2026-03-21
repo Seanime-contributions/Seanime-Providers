@@ -52,25 +52,25 @@
             const results = [];
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             // Select all rows in the search results table
             const rows = doc.querySelectorAll('table tbody tr');
-            
+
             rows.forEach(row => {
                 const titleLink = row.querySelector('td:nth-child(2) a');
                 if (!titleLink) return;
-                
+
                 const title = titleLink?.textContent?.trim() || "Unknown Title";
                 let novelUrl = titleLink?.getAttribute('href') || "#";
-                
+
                 // Convert relative URL to absolute
                 if (novelUrl.startsWith("/")) {
                     novelUrl = `${NOVELHALL_URL}${novelUrl}`;
                 }
-                
+
                 const latestChapterElement = row.querySelector('td:nth-child(3) a.chapter');
                 const latestChapter = latestChapterElement?.textContent?.trim() || "No Chapter";
-              
+
                 // NovelHall doesn't have images in search results, use empty string
                 results.push({ 
                     title: title, 
@@ -97,34 +97,34 @@
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Chapter fetch failed: ${res.status}`);
             const html = await res.text();
-            
+
             const chapters = [];
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             // Select the "All Section Catalog" div (hidden-xs with id "morelist")
             const allSectionDiv = doc.querySelector('.book-catalog.inner.mt20.hidden-xs#morelist');
             if (!allSectionDiv) {
                 throw new Error("Could not find 'All Section Catalog' section.");
             }
-            
+
             // Get all chapter links within this div
             const chapterItems = allSectionDiv.querySelectorAll('ul li a');
-            
+
             chapterItems.forEach(link => {
                 let url = link.getAttribute('href');
                 const title = link.textContent?.trim() || "Unknown Chapter";
-                
+
                 // Convert relative URL to absolute
                 if (url && url.startsWith("/")) {
                     url = `${NOVELHALL_URL}${url}`;
                 }
-                
+
                 if (url) {
                     chapters.push({ url: url, title: title });
                 }
             });
-            
+
             // Return chapters in correct order (newest first based on the HTML structure)
             return chapters.reverse();
         } catch (err) {
@@ -145,20 +145,20 @@
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             const contentElement = doc.querySelector('#htmlContent');
-    
+
             if (!contentElement) {
                 throw new Error("Could not extract chapter content.");
             }
-    
+
             // Clean and process the content
             // 1. Clone the element to avoid modifying the original DOM
             const contentClone = contentElement.cloneNode(true);
-            
+
             // 2. Remove any script tags, ads, or unwanted elements
             contentClone.querySelectorAll('script, style, ins, iframe, .ads, [class*="ad-"], [id*="ad-"]').forEach(el => el.remove());
-            
+
             // 3. Clean up each text node
             const walker = document.createTreeWalker(contentClone, NodeFilter.SHOW_TEXT, null, false);
             const textNodes = [];
@@ -166,7 +166,7 @@
             while (node = walker.nextNode()) {
                 textNodes.push(node);
             }
-            
+
             textNodes.forEach(textNode => {
                 let text = textNode.nodeValue;
                 // Remove excessive whitespace and line breaks
@@ -174,19 +174,19 @@
                 text = text.replace(/\s*<br\s*\/?>\s*/gi, '<br>');
                 textNode.nodeValue = text;
             });
-            
+
             // 4. Wrap consecutive text in paragraphs or preserve existing structure
             let cleanHtml = contentClone.innerHTML;
-            
+
             // Ensure proper paragraph structure
             // Replace double <br> tags with paragraph breaks
             cleanHtml = cleanHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '</p><p>');
-            
+
             // Wrap in paragraphs if not already
             if (!cleanHtml.includes('<p>') && !cleanHtml.includes('<div')) {
                 cleanHtml = `<p>${cleanHtml}</p>`;
             }
-            
+
             return cleanHtml;
         } catch (err) {
             console.error("[novel-plugin] NovelHall ChapterContent Error:", err);
@@ -202,7 +202,7 @@
      */
     async function autoMatch(romajiTitle, englishTitle) {
         console.log(`[novel-plugin-matcher] (NovelHall) START: Matching for "${romajiTitle}"`);
-        
+
         // 1. Get results for Romaji title
         const romajiResults = await manualSearch(romajiTitle);
         let bestRomajiMatch = null;

@@ -1,6 +1,6 @@
 class Provider {
   constructor() {
-    this.api = "{{domain}}";
+    this.api = "https://scanita.org";
   }
 
   api = "";

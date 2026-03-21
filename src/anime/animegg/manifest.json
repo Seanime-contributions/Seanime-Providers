@@ -1,0 +1,13 @@
+{
+  "id": "animegg",
+  "name": "AnimeGG",
+  "description": "AnimeGG is an online streaming provider for sub/dub anime in english",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animegg/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "en",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animegg.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animegg/provider.js"
+}

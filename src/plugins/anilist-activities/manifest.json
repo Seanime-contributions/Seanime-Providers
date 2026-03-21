@@ -1,14 +1,14 @@
 {
   "id": "anilist-activity",
   "name": "Anilist activity",
-  "version": "1.0.3",
-  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/src/plugins/anilist-activities/manifest.json",
+  "version": "1.1.2",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/anilist-activities/manifest.json",
   "description": "A plugin for viewing your friend's and your Anilist activities inside Seanime.",
   "author": "Pal",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/anilist.ico",
   "language": "typescript",
   "type": "plugin",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/development/src/plugins/anilist-activities/main.ts",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/anilist-activities/main.ts",
   "lang": "multi",
   "plugin": {
     "version": "1",
@@ -22,7 +22,7 @@
         "unsafeFlags": [
           {
             "flag": "dom-script-manipulation",
-            "reason": "Allows script injection to render Anilist activity components"
+            "reason": "Allows script injection to render Anilist activity."
           }
         ]
       }

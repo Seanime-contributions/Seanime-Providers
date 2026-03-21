@@ -1,0 +1,21 @@
+{
+    "id": "cookie-clicker",
+    "name": "Cookie Clicker",
+    "version": "1.0.0",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Cookie-Clicker/refs/heads/main/manifest.json",
+    "language": "typescript",
+    "type": "plugin",
+    "description": "A cookie clicker tray based plugin",
+    "author": "SyntaxSama & Pal",
+    "icon": "",
+    "website": "",
+    "lang": "EN",
+    "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Cookie-Clicker/refs/heads/main/cookie-clicker.ts",
+    "plugin": {
+        "version": "1",
+        "permissions": {
+            "scopes": ["storage"]
+        }
+    },
+    "isDevelopment": false
+}

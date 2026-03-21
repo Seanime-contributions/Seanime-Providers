@@ -1,0 +1,13 @@
+{
+  "id": "mynimeku",
+  "name": "MyNimeKu",
+  "description": "MyNimeKu is an online streaming provider for indonesian subs.",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/mynimeku/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "typescript",
+  "lang": "id",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mynimeku.jpg",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/mynimeku/provider.ts"
+}

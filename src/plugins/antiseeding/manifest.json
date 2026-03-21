@@ -1,0 +1,24 @@
+{
+    "id": "antiseeding",
+    "name": "Anti-Seeding",
+    "version": "1.0.0",
+    "manifestURI": "https://raw.githubusercontent.com/pal-droid/seanime-marketplace/refs/heads/main/antiseeding.json",
+    "language": "typescript",
+    "type": "plugin",
+    "description": "Prevents torrent seeding",
+    "author": "ItsSkaiya & Pal",
+    "icon": "",
+    "website": "",
+    "lang": "en",
+    "payloadURI": "https://raw.githubusercontent.com/pal-droid/seanime-marketplace/refs/heads/main/antiseeding.ts",
+    "plugin": {
+        "version": "1",
+        "permissions": {
+            "scopes": [
+                "torrent-client"
+            ],
+            "allow": {}
+        }
+    },
+    "isDevelopment": false
+}

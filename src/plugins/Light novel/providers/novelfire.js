@@ -53,29 +53,29 @@
             const results = [];
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             // Select all novel items
             const novelItems = doc.querySelectorAll('.novel-item');
-            
+
             novelItems.forEach(item => {
                 const link = item.querySelector('a');
                 if (!link) return;
-                
+
                 const title = link.getAttribute('title')?.trim() || "Unknown Title";
                 let novelUrl = link.getAttribute('href') || "#";
-                
+
                 // Convert relative URL to absolute
                 if (novelUrl.startsWith("/")) {
                     novelUrl = `${NOVELFIRE_URL}${novelUrl}`;
                 }
-                
+
                 // Get cover image
                 const imgElement = item.querySelector('.novel-cover img');
                 let image = imgElement?.getAttribute('src') || "";
                 if (image && image.startsWith("/")) {
                     image = `${NOVELFIRE_URL}${image}`;
                 }
-                
+
                 // Get chapters count from stats
                 const stats = item.querySelectorAll('.novel-stats');
                 let latestChapter = "No Chapter";
@@ -87,7 +87,7 @@
                         // Could use rank as fallback info
                     }
                 });
-              
+
                 results.push({ 
                     title: title, 
                     url: novelUrl, 
@@ -116,33 +116,33 @@
                     ? `${novelUrl}chapters` 
                     : `${novelUrl}/chapters`;
             }
-            
+
             const url = `${CORS_PROXY_URL}${chaptersUrl}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Chapter fetch failed: ${res.status}`);
             const html = await res.text();
-            
+
             const chapters = [];
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             // Select all chapter items
             const chapterItems = doc.querySelectorAll('.chapter-list li a');
-            
+
             chapterItems.forEach(link => {
                 let url = link.getAttribute('href');
                 const title = link.getAttribute('title')?.trim() || link.querySelector('.chapter-title')?.textContent?.trim() || "Unknown Chapter";
-                
+
                 // Convert relative URL to absolute
                 if (url && url.startsWith("/")) {
                     url = `${NOVELFIRE_URL}${url}`;
                 }
-                
+
                 if (url) {
                     chapters.push({ url: url, title: title });
                 }
             });
-            
+
             // Return chapters in correct order (already in order from the HTML)
             return chapters;
         } catch (err) {
@@ -163,38 +163,38 @@
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            
+
             const contentElement = doc.querySelector('#content');
-    
+
             if (!contentElement) {
                 throw new Error("Could not extract chapter content.");
             }
-    
+
             // Clean and process the content
             // 1. Clone the element to avoid modifying the original DOM
             const contentClone = contentElement.cloneNode(true);
-            
+
             // 2. Remove any script tags, ads, or unwanted elements
             contentClone.querySelectorAll('script, style, ins, iframe, .ads, [class*="ad-"], [id*="ad-"]').forEach(el => el.remove());
-            
+
             // 3. Clean up italics and other formatting
             contentClone.querySelectorAll('i, em').forEach(el => {
                 const text = el.textContent;
                 el.replaceWith(`<em>${text}</em>`);
             });
-            
+
             // 4. Ensure proper paragraph structure
             let cleanHtml = contentClone.innerHTML;
-            
+
             // Replace any double line breaks with paragraph breaks
             cleanHtml = cleanHtml.replace(/(<\/p>\s*<p>)/g, '</p><p>');
-            
+
             // If there's no paragraph structure, wrap in paragraphs
             if (!cleanHtml.includes('<p>')) {
                 const paragraphs = cleanHtml.split('\n').filter(p => p.trim());
                 cleanHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
             }
-            
+
             return cleanHtml;
         } catch (err) {
             console.error("[novel-plugin] NovelFire ChapterContent Error:", err);
@@ -210,7 +210,7 @@
      */
     async function autoMatch(romajiTitle, englishTitle) {
         console.log(`[novel-plugin-matcher] (NovelFire) START: Matching for "${romajiTitle}"`);
-        
+
         // 1. Get results for Romaji title
         const romajiResults = await manualSearch(romajiTitle);
         let bestRomajiMatch = null;

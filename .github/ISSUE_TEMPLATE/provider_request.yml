@@ -1,0 +1,17 @@
+name: Provider request
+description: Suggest a new provider or improvement
+title: "[REQUEST] "
+labels: ["request"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Short description of the feature
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      placeholder: Explain the idea

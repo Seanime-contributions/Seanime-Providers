@@ -1,0 +1,13 @@
+{
+  "id": "agefans",
+  "name": "AgeFans",
+  "description": "AgeFans is an online streaming provider for subbed anime in chinese",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/agefans/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "zh",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/agefans.ico",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/agefans/provider.js"
+}

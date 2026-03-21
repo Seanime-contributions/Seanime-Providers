@@ -1,0 +1,13 @@
+{
+  "id": "hentaiworld",
+  "name": "HentaiWorld",
+  "description": "HentaiWorld is an online streaming provider for subbed/dubbed Hentai in Italian",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/hentaiworld/manifest.json",
+  "version": "1.1.1",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "typescript",
+  "lang": "it",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/hentaiworld.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/hentaiworld/provider.ts"
+}

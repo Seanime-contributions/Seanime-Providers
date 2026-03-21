@@ -1,19 +1,27 @@
 {
   "id": "LN-reader",
   "name": "Light Novel Reader",
-  "version": "1.2.2",
-  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/src/plugins/Light%20novel/manifest.json",
-  "description": "Read light‑novels from NovelBuddy inside Seanime.",
+  "version": "1.5.4",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/Light%20novel/manifest.json",
+  "description": "A simple plugin for reading Light Novels inside Seanime.",
   "author": "Pal",
-  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/public/ln.png",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/ln.png",
   "language": "typescript",
   "type": "plugin",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/development/src/plugins/Light%20novel/main.ts",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/Light%20novel/main.ts",
   "lang": "EN",
   "plugin": {
     "version": "1",
     "permissions": {
-      "scopes": []
+      "scopes": [],
+      "allow": {
+        "unsafeFlags": [
+          {
+            "flag": "dom-script-manipulation",
+            "reason": "Needed for injecting scripts into the reader view"
+          }
+        ]
+      }
     }
   }
 }

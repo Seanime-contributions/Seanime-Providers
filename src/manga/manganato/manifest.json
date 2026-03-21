@@ -1,32 +1,13 @@
 {
-  "id": "mangakakalove",
-  "name": "MangaKakalove",
-  "description": "MangaKakalove is a manga provider for Seanime",
-  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/development/src/manga/manganato/manifest.json",
-  "version": "1.0.0",
-  "author": "pal",
-  "icon": "",
+  "id": "mangabats",
+  "name": "MangaBats",
+  "description": "MangaBats is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/manganato/manifest.json",
+  "version": "1.2.1",
+  "author": "Pal",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangabats.png",
   "type": "manga-provider",
   "language": "javascript",
   "lang": "en",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/development/src/manga/manganato/provider.js",
-  "userConfig": {
-    "requiresConfig": false,
-    "version": 1,
-    "fields": [
-      {
-        "name": "domain",
-        "label": "Preferred Domain",
-        "type": "select",
-        "default": "https://www.mangakakalove.com",
-        "options": [
-          { "label": "mangakakalove.com (Default)", "value": "https://www.mangakakalove.com" },
-          { "label": "natomanga.com", "value": "https://www.natomanga.com" },
-          { "label": "mangabats.com", "value": "https://www.mangabats.com" },
-          { "label": "nelomanga.net", "value": "https://www.nelomanga.net" },
-          { "label": "mangakakalot.gg", "value": "https://www.mangakakalot.gg" }
-        ]
-      }
-    ]
-  }
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/manganato/provider.js"
 }

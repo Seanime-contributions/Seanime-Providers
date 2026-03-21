@@ -27,6 +27,8 @@ function init() {
                     scriptQuery: "novel-plugin-queries",
                     scriptScraperBuddy: "novel-plugin-scrapers-novelbuddy",
                     scriptScraperBin: "novel-plugin-scrapers-novelbin",
+                    scriptScraperHall: "novel-plugin-scrapers-novelhall",
+                    scriptScraperFire: "novel-plugin-scrapers-novelfire",
                     backdrop: "novel-plugin-backdrop",
                     modal: "novel-plugin-modal-content",
                     wrapper: "novel-plugin-content-wrapper",
@@ -38,10 +40,12 @@ function init() {
                     appLayout: ".UI-AppLayout__root"
                 },
                 assets: {
-                    css: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/development/src/plugins/Light%20novel/styles.css",
-                    queries: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/src/plugins/Light%20novel/anilist.js",
-                    scraperBuddy: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/src/plugins/Light%20novel/providers/novelbuddy.js",
-                    scraperBin: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/development/src/plugins/Light%20novel/providers/novelbin.js",
+                    css: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/Light%20novel/styles.css",
+                    queries: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/anilist.js",
+                    scraperBuddy: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelbuddy.js",
+                    scraperBin: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelbin.js",
+                    scraperHall: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelhall.js",
+                    scraperFire: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelfire.js",
                 },
                 genres: [
                     "Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy", "Hentai",
@@ -1405,408 +1409,8 @@ function init() {
                     el.id = id;
                     el.textContent = txt;
                     if (type === 'style') {
-                        // INJECTED CSS UPDATES
-                        el.textContent += \`
-                            .novel-plugin-reader-header { 
-                                display: flex; 
-                                gap: 8px; 
-                                align-items: center; 
-                                position: sticky; 
-                                top: 0; 
-                                background: transparent; 
-                                z-index: 10; 
-                                padding-bottom: 10px; 
-                            } 
-                            
-                            /* Constraint Buttons: Prevent them from growing */
-                            .novel-plugin-reader-header .novel-plugin-button {
-                                box-sizing: border-box !important;
-                                height: 42px !important;
-                                width: auto !important; /* Force width to fit content */
-                                flex: 0 0 auto !important; /* Do not grow, do not shrink */
-                                margin: 0;
-                                padding: 0 16px; /* Comfortable padding */
-                                display: inline-flex;
-                                align-items: center;
-                                justify-content: center;
-                                white-space: nowrap;
-                            }
-
-                            /* Style for disabled buttons in reader */
-                            .novel-plugin-reader-header .novel-plugin-button.disabled {
-                                opacity: 0.5 !important;
-                                cursor: not-allowed !important;
-                                background: #3a3a3a !important;
-                                color: #888 !important;
-                                border-color: #3a3a3a !important;
-                            }
-                            .novel-plugin-reader-header .novel-plugin-button.disabled:hover {
-                                transform: none !important;
-                                background: #3a3a3a !important;
-                            }
-
-                            /* Settings Icon Special Handling */
-                            .novel-plugin-reader-header .novel-plugin-button.icon-only {
-                                min-width: 42px;
-                                padding: 0;
-                            }
-
-                            /* Select: Force it to take available space */
-                            .novel-plugin-reader-header .novel-plugin-select { 
-                                box-sizing: border-box !important;
-                                height: 42px !important;
-                                flex: 1 !important;    /* Grow to fill center */
-                                width: auto !important;
-                                margin: 0;
-                                padding: 0 10px;
-                                line-height: normal;
-                            }
-                            
-                            .novel-plugin-back-btn { width: auto; height: auto; padding: 4px 12px; border-radius: 9999px; }
-                            
-                            .novel-plugin-reader-container { display: flex; justify-content: center; padding: 20px; background: #000; min-height: 80vh; }
-                            .novel-plugin-reader-content { 
-                                width: 100%; 
-                                padding: 40px; 
-                                border-radius: 4px;
-                                text-align: left;
-                                transition: all 0.2s ease;
-                            }
-                            .novel-plugin-reader-content p { margin-bottom: 1em; }
-
-                            /* Ensure header sits above the banner so cover image is clickable */
-                            .novel-plugin-details-header {
-                                position: relative !important;
-                                z-index: 2 !important;
-                            }
-                            /* Ensure details cover image is clickable */
-                            .novel-plugin-details-cover {
-                                z-index: 3 !important;
-                                cursor: zoom-in !important;
-                                pointer-events: auto !important;
-                                transition: transform 0.2s;
-                            }
-                            .novel-plugin-details-cover:hover {
-                                transform: scale(1.02);
-                            }
-
-                            /* Settings Panel Styles */
-                            .novel-plugin-settings-panel {
-                                background: #2a2a2a;
-                                border: 1px solid #3a3a3a;
-                                border-radius: 8px;
-                                padding: 15px;
-                                margin-bottom: 15px;
-                                display: none;
-                            }
-                            .novel-plugin-setting-row {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                margin-bottom: 10px;
-                            }
-                            .novel-plugin-setting-row:last-child { margin-bottom: 0; }
-                            .novel-plugin-setting-row label { font-size: 0.9em; color: #ccc; }
-                            .novel-plugin-select.small { width: 120px; padding: 4px; font-size: 0.85em; }
-                            
-                            /* Image Modal Styles */
-                            .novel-plugin-image-modal {
-                                position: fixed;
-                                top: 0;
-                                left: 0;
-                                width: 100%;
-                                height: 100%;
-                                background: rgba(0, 0, 0, 0.85);
-                                backdrop-filter: blur(8px);
-                                -webkit-backdrop-filter: blur(8px);
-                                z-index: 99999;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                cursor: pointer;
-                                opacity: 0;
-                                transition: opacity 0.25s ease;
-                                pointer-events: none;
-                            }
-                            .novel-plugin-image-modal.visible {
-                                opacity: 1;
-                                pointer-events: auto;
-                            }
-                            .novel-plugin-image-modal img {
-                                max-width: 90vw;
-                                max-height: 90vh;
-                                border-radius: 8px;
-                                box-shadow: 0 0 25px rgba(0,0,0,0.5);
-                                transform: scale(0.95);
-                                transition: transform 0.25s ease;
-                                object-fit: contain;
-                            }
-                            .novel-plugin-image-modal.visible img {
-                                transform: scale(1);
-                            }
-
-                            /* TASK 2: Fix for misaligned buttons in library card overlay */
-                            .novel-plugin-library-grid-overlay {
-                                position: absolute;
-                                top: 0;
-                                left: 0;
-                                right: 0;
-                                bottom: 0;
-                                background: rgba(0,0,0,0.7);
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                gap: 8px;
-                                opacity: 0;
-                                transition: opacity 0.3s;
-                                flex-direction: row;
-                                align-items: center;
-                                justify-content: center;
-                            }
-                            .novel-plugin-library-grid-overlay .overlay-btn {
-                                margin: 0;
-                                padding: 8px 12px;
-                                font-size: 0.85em;
-                                height: 36px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            }
-                            .novel-plugin-library-grid-overlay .novel-plugin-button.icon-only {
-                                min-width: 36px;
-                                padding: 8px;
-                            }
-
-                            /* TASK 3: Center loading spinner in search page */
-                            #novel-plugin-search-results {
-                                position: relative;
-                                min-height: 200px;
-                            }
-                            #novel-plugin-search-results .novel-plugin-loader {
-                                position: absolute;
-                                top: 50%;
-                                left: 50%;
-                                transform: translate(-50%, -50%);
-                            }
-
-                            /* TASK 4: Library Page Styles */
-                            .novel-plugin-library-header {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                margin-bottom: 20px;
-                                flex-wrap: wrap;
-                                gap: 15px;
-                            }
-                            
-                            .novel-plugin-library-controls {
-                                display: flex;
-                                align-items: center;
-                                gap: 15px;
-                            }
-                            
-                            .novel-plugin-library-pagination {
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                            }
-                            
-                            .novel-plugin-library-page-info {
-                                font-size: 0.9em;
-                                color: #aaa;
-                                min-width: 80px;
-                                text-align: center;
-                            }
-                            
-                            .novel-plugin-library-content {
-                                min-height: 400px;
-                            }
-                            
-                            .novel-plugin-library-content.list-view {
-                                display: flex;
-                                flex-direction: column;
-                                gap: 12px;
-                            }
-                            
-                            .novel-plugin-library-content.grid-view {
-                                display: grid;
-                                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                                gap: 20px;
-                            }
-                            
-                            /* TASK 1 & 2: Updated Library List Card (without status) with proper button alignment */
-                            .novel-plugin-library-card-list {
-                                background: #1a1a1a;
-                                border-radius: 8px;
-                                padding: 16px;
-                                border: 1px solid #2a2a2a;
-                                transition: all 0.2s;
-                                cursor: pointer;
-                                display: flex;
-                                flex-direction: column;
-                                gap: 12px;
-                            }
-                            .novel-plugin-library-card-list:hover {
-                                border-color: #3a3a3a;
-                                background: #1f1f1f;
-                            }
-                            .novel-plugin-library-card-header {
-                                display: flex;
-                                gap: 16px;
-                            }
-                            .novel-plugin-library-img {
-                                width: 80px;
-                                height: 110px;
-                                border-radius: 4px;
-                                object-fit: cover;
-                                flex-shrink: 0;
-                            }
-                            .novel-plugin-library-info {
-                                flex: 1;
-                                min-width: 0;
-                            }
-                            .novel-plugin-library-title {
-                                font-weight: 600;
-                                font-size: 1.1em;
-                                margin-bottom: 8px;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            }
-                            .novel-plugin-library-chapter {
-                                font-size: 0.9em;
-                                color: #888;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                margin-bottom: 8px;
-                            }
-                            .novel-plugin-library-actions {
-                                display: flex;
-                                gap: 8px;
-                                justify-content: flex-end;
-                                align-items: center;
-                            }
-                            
-                            /* TASK 1 & 2: Library Grid Card without status */
-                            .novel-plugin-library-card-grid {
-                                background: #1a1a1a;
-                                border-radius: 8px;
-                                overflow: hidden;
-                                border: 1px solid #2a2a2a;
-                                transition: all 0.2s;
-                                cursor: pointer;
-                                display: flex;
-                                flex-direction: column;
-                            }
-                            .novel-plugin-library-card-grid:hover {
-                                border-color: #3a3a3a;
-                                transform: translateY(-2px);
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                            }
-                            .novel-plugin-library-grid-img-container {
-                                position: relative;
-                                width: 100%;
-                                height: 240px;
-                                overflow: hidden;
-                            }
-                            .novel-plugin-library-grid-img {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                transition: transform 0.3s;
-                            }
-                            .novel-plugin-library-card-grid:hover .novel-plugin-library-grid-img {
-                                transform: scale(1.05);
-                            }
-                            .novel-plugin-library-grid-info {
-                                padding: 12px;
-                                flex: 1;
-                            }
-                            .novel-plugin-library-grid-title {
-                                font-weight: 600;
-                                font-size: 0.95em;
-                                margin-bottom: 6px;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            }
-                            .novel-plugin-library-grid-chapter {
-                                font-size: 0.8em;
-                                color: #888;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                margin-bottom: 8px;
-                            }
-                            
-                            .novel-plugin-button.small {
-                                padding: 6px 12px;
-                                font-size: 0.9em;
-                                height: auto;
-                            }
-                            .novel-plugin-button.icon-only {
-                                padding: 8px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                min-width: 36px;
-                                height: 36px;
-                            }
-                            /* Center trash icon specifically */
-                            .novel-plugin-library-actions .novel-plugin-button.icon-only.remove-btn {
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 8px;
-                                height: 36px;
-                            }
-                            .novel-plugin-library-actions .novel-plugin-button.icon-only.remove-btn svg {
-                                margin: 0;
-                                display: block;
-                            }
-                            .novel-plugin-empty-state {
-                                text-align: center;
-                                padding: 40px 20px;
-                                color: #888;
-                            }
-                            .novel-plugin-empty-icon {
-                                font-size: 48px;
-                                margin-bottom: 20px;
-                                color: #4a4a4a;
-                            }
-                            .novel-plugin-empty-icon svg {
-                                width: 48px;
-                                height: 48px;
-                            }
-                            .novel-plugin-empty-title {
-                                font-size: 1.5em;
-                                margin-bottom: 12px;
-                                color: #aaa;
-                            }
-                            .novel-plugin-empty-text {
-                                margin-bottom: 24px;
-                                font-size: 1em;
-                            }
-
-                            /* Notification styles */
-                            .novel-plugin-notification {
-                                position: fixed;
-                                top: 20px;
-                                right: 20px;
-                                background: #2a2a2a;
-                                color: #fff;
-                                padding: 12px 16px;
-                                border-radius: 8px;
-                                border-left: 4px solid #4CAF50;
-                                z-index: 99999;
-                                animation: slideIn 0.3s ease;
-                            }
-                            @keyframes slideIn {
-                                from { transform: translateX(100%); opacity: 0; }
-                                to { transform: translateX(0); opacity: 1; }
-                            }
-                        \`;
+                        // All CSS is now in the external file, no need to add extra
+                        // Just set the fetched CSS content
                     }
                     document.head.appendChild(el);
                     console.log(\`[novel-plugin] Loaded \${logName}\`);
@@ -1825,7 +1429,9 @@ function init() {
                         loadAsset(CONFIG.assets.css, CONFIG.ids.style, 'style', 'CSS'),
                         loadAsset(CONFIG.assets.queries, CONFIG.ids.scriptQuery, 'script', 'Queries'),
                         loadAsset(CONFIG.assets.scraperBuddy, CONFIG.ids.scriptScraperBuddy, 'script', 'NovelBuddy'),
-                        loadAsset(CONFIG.assets.scraperBin, CONFIG.ids.scriptScraperBin, 'script', 'NovelBin')
+                        loadAsset(CONFIG.assets.scraperBin, CONFIG.ids.scriptScraperBin, 'script', 'NovelBin'),
+                        loadAsset(CONFIG.assets.scraperHall, CONFIG.ids.scriptScraperHall, 'script', 'NovelHall'),
+                        loadAsset(CONFIG.assets.scraperFire, CONFIG.ids.scriptScraperFire, 'script', 'NovelFire')
                     ]);
                     const backdrop = document.createElement("div");
                     backdrop.id = CONFIG.ids.backdrop;
@@ -1854,7 +1460,7 @@ function init() {
                 // REMOVE GLOBAL ESC
                 window.removeEventListener('keydown', handleGlobalEsc);
 
-                [CONFIG.ids.backdrop, CONFIG.ids.style, CONFIG.ids.scriptQuery, CONFIG.ids.scriptScraperBuddy, CONFIG.ids.scriptScraperBin]
+                [CONFIG.ids.backdrop, CONFIG.ids.style, CONFIG.ids.scriptQuery, CONFIG.ids.scriptScraperBuddy, CONFIG.ids.scriptScraperBin, CONFIG.ids.scriptScraperHall, CONFIG.ids.scriptScraperFire]
                     .forEach(id => document.getElementById(id)?.remove());
                 document.querySelector(\`script[data-novel-plugin-id="\${CONFIG.scriptId}"]\`)?.remove();
                 console.log("[novel-plugin] Cleaned up.");

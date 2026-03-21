@@ -20,13 +20,11 @@ function init() {
             BG_STYLE: "anilist-feed.bgStyle",
             RING_COLOR: "anilist-feed.ringColor",
             REPLY_POSITION: "anilist-feed.replyPosition",
-            TITLE_PREFERENCE: "anilist-feed.titlePreference",
         };
 
         const initialDropdownChoice = $storage.get(STORAGE_KEYS.DROPDOWN_CHOICE) ?? DEFAULT_CHOICE;
         const initialManualSelector = $storage.get(STORAGE_KEYS.MANUAL_OVERRIDE_SELECTOR) ?? '';
         const initialReplyPosition = $storage.get(STORAGE_KEYS.REPLY_POSITION) ?? 'right';
-        const initialTitlePreference = $storage.get(STORAGE_KEYS.TITLE_PREFERENCE) ?? 'english';
         
         const resolveTargetSelector = (dropdownChoice: string, manualOverride: string): string => {
             return (manualOverride && manualOverride.trim() !== "") 
@@ -41,7 +39,6 @@ function init() {
             bgStyle: $storage.get(STORAGE_KEYS.BG_STYLE) ?? 'glass',
             ringColor: $storage.get(STORAGE_KEYS.RING_COLOR) ?? '#FF6F61',
             replyPosition: initialReplyPosition,
-            titlePreference: initialTitlePreference,
         };
 
         const refs = {
@@ -50,7 +47,6 @@ function init() {
             bgStyle: ctx.fieldRef(state.bgStyle),
             ringColor: ctx.fieldRef(state.ringColor),
             replyPosition: ctx.fieldRef(state.replyPosition),
-            titlePreference: ctx.fieldRef(state.titlePreference),
         };
         
         ctx.registerEventHandler("save-feed-settings", () => {
@@ -64,7 +60,6 @@ function init() {
             $storage.set(STORAGE_KEYS.BG_STYLE, refs.bgStyle.current);
             $storage.set(STORAGE_KEYS.RING_COLOR, refs.ringColor.current);
             $storage.set(STORAGE_KEYS.REPLY_POSITION, refs.replyPosition.current);
-            $storage.set(STORAGE_KEYS.TITLE_PREFERENCE, refs.titlePreference.current);
             
             state.dropdownChoice = newDropdownChoice;
             state.manualOverrideSelector = newManualSelector;
@@ -72,7 +67,6 @@ function init() {
             state.bgStyle = refs.bgStyle.current;
             state.ringColor = refs.ringColor.current;
             state.replyPosition = refs.replyPosition.current;
-            state.titlePreference = refs.titlePreference.current;
 
             ctx.toast.success("Settings saved! Refresh page to apply.");
         });
@@ -131,14 +125,6 @@ function init() {
                     ],
                     help: "Choose where the 'View Replies' modal slides in from."
                 }),
-                tray.select("Title Preference", {
-                    fieldRef: refs.titlePreference,
-                    options: [
-                        { label: "English (Default)", value: "english" },
-                        { label: "Romaji", value: "romaji" },
-                    ],
-                    help: "Choose which title to display for media. If English is not available, Romaji will be shown."
-                }),
                 tray.button("Save & Apply", {
                     onClick: "save-feed-settings",
                     intent: "primary-subtle"
@@ -162,7 +148,6 @@ function init() {
             const IS_LIGHT = settings.bgStyle === 'light';
             const MAIN_TEXT_COLOR = IS_LIGHT ? '#374151' : '#E5E7EB';
             const REPLY_POSITION = settings.replyPosition;
-            const TITLE_PREFERENCE = settings.titlePreference;
 
             const styles = `
                 /* FEED STYLES */
@@ -191,105 +176,25 @@ function init() {
                 /* BASE STYLES - Mobile First */
                 .stories-container { display: flex; overflow-x: auto; gap: 20px; padding: 0 16px 5px 16px; scrollbar-width: none; }
                 .stories-container::-webkit-scrollbar { display: none; } 
-                .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; max-width: 65px; position: relative; }
-                
-                /* FLOATING PILL STYLE - No background behind profile */
-                .story-ring-container { 
-                    position: relative; 
-                    width: 58px; 
-                    height: 58px; 
-                    margin-bottom: 8px; 
-                }
-                
-                /* Profile image container - normal circular image */
-                .story-image-container { 
-                    width: 100%; 
-                    height: 100%; 
-                    border-radius: 50%; 
-                    overflow: hidden; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                }
-                
-                .story-image { 
-                    width: 100%; 
-                    height: 100%; 
-                    object-fit: cover; 
-                    border-radius: 50%; 
-                }
-                
-                /* Floating ring/pill - positioned around the profile */
-                .story-ring { 
-                    position: absolute; 
-                    top: -4px; 
-                    left: -4px; 
-                    right: -4px; 
-                    bottom: -4px; 
-                    border-radius: 50%; 
-                    z-index: 2; 
-                    pointer-events: none;
-                }
-                
-                /* Create the segmented ring effect using border */
-                .story-ring.segmented {
-                    background: conic-gradient(
-                        var(--segment-color) 0deg var(--segment-end),
-                        transparent var(--segment-end) calc(var(--segment-end) + 4deg),
-                        var(--segment-color) calc(var(--segment-end) + 4deg) calc(var(--segment-end) * 2),
-                        transparent calc(var(--segment-end) * 2) calc(var(--segment-end) * 2 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 2) calc(var(--segment-end) * 3),
-                        transparent calc(var(--segment-end) * 3) calc(var(--segment-end) * 3 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 3) calc(var(--segment-end) * 4),
-                        transparent calc(var(--segment-end) * 4) calc(var(--segment-end) * 4 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 4) calc(var(--segment-end) * 5),
-                        transparent calc(var(--segment-end) * 5) calc(var(--segment-end) * 5 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 5) calc(var(--segment-end) * 6),
-                        transparent calc(var(--segment-end) * 6) calc(var(--segment-end) * 6 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 6) calc(var(--segment-end) * 7),
-                        transparent calc(var(--segment-end) * 7) calc(var(--segment-end) * 7 + 4deg),
-                        var(--segment-color) calc(var(--segment-end) * 7) 360deg
-                    );
-                    mask: radial-gradient(circle, transparent 60%, black 61%);
-                    -webkit-mask: radial-gradient(circle, transparent 60%, black 61%);
-                }
-                
-                /* Single activity - solid ring */
-                .story-ring.solid {
-                    border: 3px solid var(--segment-color);
-                    background: none;
-                }
-                
-                /* Seanime accent styles */
+                .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; max-width: 65px; transition: transform 0.2s; }
+                .story-ring { width: 64px; height: 64px; padding: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; transition: transform 0.2s; }
+                .story-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #1F2937; }
+                .story-name { font-size: 0.75rem; font-weight: 500; color: ${MAIN_TEXT_COLOR}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+                /* SEANIME ACCENT STYLES */
                 .story-ring.seanime-accent {
-                    background: conic-gradient(
+                    background: conic-gradient(from -90deg, 
                         rgb(var(--color-brand-500)) 0deg 88deg, 
-                        transparent 88deg 92deg, 
-                        rgb(var(--color-brand-500)) 92deg 178deg, 
-                        transparent 178deg 182deg, 
-                        rgb(var(--color-brand-500)) 182deg 268deg, 
-                        transparent 268deg 272deg, 
-                        rgb(var(--color-brand-500)) 272deg 358deg, 
-                        transparent 358deg 360deg
-                    ) !important;
-                    mask: radial-gradient(circle, transparent 60%, black 61%);
-                    -webkit-mask: radial-gradient(circle, transparent 60%, black 61%);
+                        #1F2937 88deg 90deg, 
+                        rgb(var(--color-brand-500)) 90deg 178deg, 
+                        #1F2937 178deg 180deg, 
+                        rgb(var(--color-brand-500)) 180deg 268deg, 
+                        #1F2937 268deg 270deg, 
+                        rgb(var(--color-brand-500)) 270deg 358deg, 
+                        #1F2937 358deg 360deg) !important;
                 }
-                
                 .story-ring.seanime-accent.single-activity {
-                    border: 3px solid rgb(var(--color-brand-500)) !important;
-                    background: none !important;
-                }
-                
-                .story-name { 
-                    font-size: 0.75rem; 
-                    font-weight: 500; 
-                    color: ${MAIN_TEXT_COLOR}; 
-                    white-space: nowrap; 
-                    overflow: hidden; 
-                    text-overflow: ellipsis; 
-                    width: 100%; 
-                    margin-top: 4px;
+                    background: rgb(var(--color-brand-500)) !important;
                 }
 
                 /* DESKTOP / LARGE SCREEN ENHANCEMENTS */
@@ -309,21 +214,15 @@ function init() {
                         border-radius: 10px;
                     }
                     .stories-container::-webkit-scrollbar-thumb {
-                        background-color: rgba(107, 114, 128, 0.7); 
+                        background-color = rgba(107, 114, 128, 0.7); 
                         border-radius: 10px;
                         border: 2px solid transparent; 
                     }
                     .story-item { max-width: 80px; } 
-                    .story-ring-container { 
-                        width: 70px; 
-                        height: 70px; 
+                    .story-ring { 
+                        width: 80px; height: 80px; 
+                        padding: 4px; 
                         margin-bottom: 10px; 
-                    }
-                    .story-ring {
-                        top: -5px;
-                        left: -5px;
-                        right: -5px;
-                        bottom: -5px;
                     }
                     .story-name { font-size: 0.85rem; } 
                     
@@ -340,8 +239,7 @@ function init() {
                 .state-msg { text-align: center; color: #9CA3AF; width: 100%; padding: 0 16px 16px 16px; }
                 .error-msg { color: #F87171; margin-bottom: 8px; font-size: 0.9rem; }
 
-                /* VIEWER STYLES - Prevent body scroll when viewer is open */
-                .viewer-open { overflow: hidden !important; }
+                /* VIEWER STYLES */
                 #${VIEWER_ID} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; }
                 #${VIEWER_ID}.is-open { display: flex; animation: fadeIn 0.2s; }
                 .sv-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; filter: blur(40px) brightness(0.4); z-index: 0; background-size: cover; background-position: center; transition: background-image 0.5s ease; will-change: filter, background-image; }
@@ -353,8 +251,7 @@ function init() {
                 .sv-header { display: flex; align-items: center; padding: 0 16px; margin-top: 4px; height: 50px; }
                 .sv-avatar { width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; border: 1px solid rgba(255,255,255,0.2); }
                 .sv-username { color: white; font-weight: 600; font-size: 0.9rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-                .sv-close { margin-left: auto; color: white; background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 5px; opacity: 0.8; transition: opacity 0.2s; }
-                .sv-close:hover { opacity: 1; }
+                .sv-close { margin-left: auto; color: white; background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 5px; opacity: 0.8; }
                 .sv-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
                 .sv-card-img { width: 85%; max-height: 60vh; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
                 .sv-footer { padding: 20px; padding-bottom: 40px; color: white; text-align: center; }
@@ -367,7 +264,7 @@ function init() {
                 .sv-animate-enter { animation: fadeInScale 0.3s ease-out; }
                 @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
                 .sv-actions { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
-                .sv-action-btn { background: rgba(255, 255, 255, 0.15); border: none; padding: 8px 15px; border-radius: 8px; color: white; cursor: pointer; transition: background 0.2s; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+                .sv-action-btn { background: rgba(255, 255, 255, 0.15); border: none; padding: 8px 15px; border-radius: 8px; color: white; cursor: pointer; transition: background 0.2s; font-weight = 500; font-size: 0.9rem; }
                 .sv-action-btn:hover { background: rgba(255, 255, 255, 0.25); }
                 .pause-indicator { 
                     position: absolute; 
@@ -438,10 +335,9 @@ function init() {
 
                 .reply-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
                 .reply-header h3 { color: white; margin: 0; font-size: 1.1rem; }
-                .reply-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; transition: opacity 0.2s; }
-                .reply-close:hover { opacity: 0.8; }
+                .reply-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
                 .reply-list { flex-grow: 1; overflow-y: auto; padding: 10px 0; }
-                .reply-item { display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+                .reply-item { display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom = 1px solid rgba(255,255,255,0.05); }
                 .reply-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
                 .reply-body { flex-grow: 1; text-align: left; }
                 .reply-meta { font-size: 0.8rem; color: #9CA3AF; margin-bottom: 4px; }
@@ -449,153 +345,95 @@ function init() {
                 .reply-text { color: white; font-size: 0.9rem; line-height: 1.4; }
                 .reply-none { color: #9CA3AF; text-align: center; padding: 20px; }
 
-                /* DARK PREMIUM REPLY INPUT MODAL STYLES */
+                /* REPLY INPUT MODAL STYLES */
                 #${INPUT_MODAL_ID} {
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000;
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000;
                     display: none; justify-content: center; align-items: center;
                     animation: fadeIn 0.2s;
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
                 }
                 #${INPUT_MODAL_ID}.is-open { display: flex; }
                 .input-modal-card {
-                    background: linear-gradient(145deg, rgba(10, 15, 25, 0.98), rgba(15, 23, 42, 0.98));
-                    border-radius: 16px;
+                    background: #151f2e;
+                    border-radius: 12px;
                     width: 90%;
-                    max-width: 480px;
-                    padding: 24px;
-                    box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-                    color: #E2E8F0;
+                    max-width: 450px;
+                    padding: 20px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    color: white;
                     display: flex;
                     flex-direction: column;
-                    gap: 18px;
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    position: relative;
-                    overflow: hidden;
-                }
-                .input-modal-card::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 1px;
-                    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.3), transparent);
+                    gap: 15px;
                 }
                 .input-modal-card h3 {
                     margin: 0;
-                    font-size: 1.3rem;
+                    font-size: 1.2rem;
                     font-weight: 700;
-                    color: #E2E8F0;
-                    padding-bottom: 12px;
-                    position: relative;
-                }
-                .input-modal-card h3::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    width: 40px;
-                    height: 2px;
-                    background: linear-gradient(90deg, #64748B, transparent);
-                    border-radius: 2px;
+                    color: #3DB4F2;
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    padding-bottom: 10px;
                 }
                 .reply-textarea {
                     width: 100%;
-                    min-height: 120px;
-                    padding: 14px;
-                    border: 1px solid rgba(71, 85, 105, 0.6);
-                    border-radius: 10px;
-                    background: rgba(15, 23, 42, 0.8);
-                    color: #F1F5F9;
+                    min-height: 100px;
+                    padding: 10px;
+                    border: 1px solid #4B5563;
+                    border-radius: 8px;
+                    background: #1F2937;
+                    color: white;
                     font-size: 1rem;
-                    font-family: "Inter", sans-serif;
                     resize: vertical;
                     box-sizing: border-box;
-                    line-height: 1.5;
-                    transition: all 0.3s ease;
                 }
                 .reply-textarea:focus {
                     outline: none;
-                    border-color: #64748B;
-                    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.2);
-                    background: rgba(15, 23, 42, 0.9);
-                }
-                .reply-textarea::placeholder {
-                    color: #94A3B8;
-                    opacity: 0.7;
+                    border-color: #3DB4F2;
+                    box-shadow: 0 0 0 1px #3DB4F2;
                 }
                 .input-modal-footer {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-top: 10px;
                 }
                 .char-count {
                     font-size: 0.8rem;
-                    color: #94A3B8;
-                    font-weight: 500;
-                    transition: color 0.2s;
+                    color: #9CA3AF;
                 }
                 .char-count.error {
-                    color: #F87171;
+                    color: #EF4444;
                     font-weight: 600;
-                }
-                .input-modal-actions {
-                    display: flex;
-                    gap: 10px;
                 }
                 .input-modal-actions button {
-                    padding: 10px 20px;
-                    border-radius: 10px;
+                    padding: 8px 15px;
+                    border-radius: 8px;
                     font-weight: 600;
                     cursor: pointer;
-                    transition: all 0.3s ease;
-                    font-size: 0.9rem;
-                    min-width: 80px;
+                    transition: all 0.2s;
                 }
                 .input-modal-actions .cancel-btn {
                     background: transparent;
-                    border: 1px solid rgba(71, 85, 105, 0.6);
-                    color: #94A3B8;
+                    border: 1px solid #4B5563;
+                    color: #9CA3AF;
+                    margin-right: 10px;
                 }
                 .input-modal-actions .cancel-btn:hover {
-                    background: rgba(71, 85, 105, 0.2);
-                    border-color: rgba(100, 116, 139, 0.7);
-                    color: #CBD5E1;
+                    background: rgba(75, 85, 99, 0.1);
                 }
                 .input-modal-actions .submit-btn {
-                    background: linear-gradient(135deg, #475569, #334155);
-                    border: 1px solid rgba(100, 116, 139, 0.3);
-                    color: #F1F5F9;
-                    position: relative;
-                    overflow: hidden;
+                    background: #3DB4F2;
+                    border: none;
+                    color: white;
                 }
                 .input-modal-actions .submit-btn:hover {
-                    background: linear-gradient(135deg, #334155, #1E293B);
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
-                    border-color: rgba(100, 116, 139, 0.5);
+                    background: #2A9DD8;
                 }
                 .input-modal-actions .submit-btn:disabled {
-                    background: #1E293B;
-                    border-color: rgba(71, 85, 105, 0.3);
-                    color: #64748B;
+                    background: #374151;
                     cursor: not-allowed;
-                    transform: none;
-                    box-shadow: none;
-                }
-                .input-modal-actions .submit-btn:disabled:hover {
-                    background: #1E293B;
                 }
             `;
 
             const jsString = `
             (function() {
-                // Prevent multiple initializations
-                if (window.__anilistFeedInitialized) return;
-                window.__anilistFeedInitialized = true;
-                
                 const styles = \`${styles}\`; 
 
                 const BOX_ID = "${INJECTED_BOX_ID}";
@@ -603,8 +441,7 @@ function init() {
                 const INPUT_MODAL_ID = "${INPUT_MODAL_ID}";
                 const TARGET_SEL = '${settings.activeTargetSelector}';
                 const INJECTED_TOKEN = "${prefilledToken.replace(/"/g, '\\"')}";
-                const TITLE_PREFERENCE = '${TITLE_PREFERENCE}';
-                const CACHE_KEY = "anilist-feed-cache-" + TITLE_PREFERENCE;
+                const CACHE_KEY = "anilist-feed-cache";
                 const CACHE_DURATION_MS = 300000;
                 const STORY_DURATION = 5000;
                 const RING_COLOR = '${ringColor}';
@@ -625,8 +462,6 @@ function init() {
                 let isManuallyPaused = false;
                 let touchStartTime = 0;
                 let touchHoldTimeout = null;
-                let isInitialized = false;
-                let initializationAttempts = 0;
 
                 // --- TIMER CONTROL LOGIC ---
 
@@ -773,44 +608,64 @@ function init() {
                     return "Just now";
                 }
                 
-                // Function to create ring/pill style
-                function createRingStyle(count, isNew, color) {
-                    if (color === 'seanime') {
-                        // Seanime accent handled separately
-                        return { type: 'seanime', isNew: isNew, count: count };
+                function getSegmentedRingStyle(count, isNew) {
+                    if (RING_COLOR === 'seanime') {
+                        // For Seanime accent, we'll handle it separately
+                        return '';
                     }
                     
-                    if (count <= 1) {
-                        // Single activity - solid ring
-                        return { 
-                            type: 'solid', 
-                            color: isNew ? color : '#334155' 
-                        };
-                    } else {
-                        // Multiple activities - segmented ring
-                        const segments = Math.min(count, 8); // Max 8 segments for visibility
-                        const segmentSize = 360 / segments;
-                        const segmentEnd = segmentSize - 4; // 4 degree gap
-                        
-                        return {
-                            type: 'segmented',
-                            segmentEnd: segmentEnd,
-                            color: isNew ? color : '#334155'
-                        };
+                    const cN = RING_COLOR; 
+                    const cB = '#334155'; 
+                    const sep = '#1F2937';
+                    
+                    // Show the exact number of segments based on activity count
+                    // No longer limiting to 8 segments
+                    const segments = count;
+                    
+                    if (segments <= 1) {
+                        return \`background: \${isNew ? cN : cB}\`;
                     }
+                    
+                    const deg = 360 / segments;
+                    let stops = [];
+                    for (let i = 0; i < segments; i++) {
+                        const start = i * deg;
+                        const end = (i + 1) * deg;
+                        // For many segments, make the gap smaller (1 degree instead of 2) for better visibility
+                        const gapSize = segments > 12 ? 1 : 2;
+                        const segmentEnd = end - gapSize;
+                        stops.push(\`\${isNew ? cN : cB} \${start}deg \${segmentEnd}deg\`);
+                        stops.push(\`\${sep} \${segmentEnd}deg \${end}deg\`);
+                    }
+                    return 'background: conic-gradient(from -90deg, ' + stops.join(', ') + ')';
                 }
 
-                // Helper function to get media title based on preference
-                function getMediaTitle(titleObj) {
-                    if (!titleObj) return 'Unknown Title';
+                // Function to generate Seanime gradient based on activity count
+                function getSeanimeRingStyle(count, isNew) {
+                    const activeColor = 'rgb(var(--color-brand-500))';
+                    const baseColor = '#334155';
+                    const separatorColor = '#1F2937';
                     
-                    if (TITLE_PREFERENCE === 'english') {
-                        // Return English if available, otherwise Romaji
-                        return titleObj.english || titleObj.romaji || 'Unknown Title';
-                    } else {
-                        // Always return Romaji
-                        return titleObj.romaji || titleObj.english || 'Unknown Title';
+                    // Show the exact number of segments based on activity count
+                    // No longer limiting to 8 segments
+                    const segments = count;
+                    
+                    if (segments <= 1) {
+                        return \`background: \${activeColor} !important\`;
                     }
+                    
+                    const deg = 360 / segments;
+                    let stops = [];
+                    for (let i = 0; i < segments; i++) {
+                        const start = i * deg;
+                        const end = (i + 1) * deg;
+                        // For many segments, make the gap smaller (1 degree instead of 2) for better visibility
+                        const gapSize = segments > 12 ? 1 : 2;
+                        const segmentEnd = end - gapSize;
+                        stops.push(\`\${activeColor} \${start}deg \${segmentEnd}deg\`);
+                        stops.push(\`\${separatorColor} \${segmentEnd}deg \${end}deg\`);
+                    }
+                    return 'background: conic-gradient(from -90deg, ' + stops.join(', ') + ') !important';
                 }
 
                 // Helper function to capitalize activity status
@@ -919,19 +774,13 @@ function init() {
                     submitBtn.disabled = true;
                     
                     modal.classList.add('is-open');
-                    
-                    // Focus the textarea with a slight delay for animation
-                    setTimeout(() => {
-                        textarea.focus();
-                    }, 100);
+                    textarea.focus();
                 }
 
                 window.closeReplyInputModal = () => {
-                    const modal = document.getElementById(INPUT_MODAL_ID);
-                    if (modal) {
-                        modal.classList.remove('is-open');
-                    }
+                    document.getElementById(INPUT_MODAL_ID)?.classList.remove('is-open');
                     currentActivityIdForReply = null;
+
                     resumeViewerTimer(); 
                 }
 
@@ -972,7 +821,7 @@ function init() {
                         
                         const successMsg = document.createElement('div');
                         successMsg.innerText = "Reply posted successfully!";
-                        successMsg.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:#10B981; color:white; padding:8px 15px; border-radius:8px; font-weight:600; z-index: 10002; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);';
+                        successMsg.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:#10B981; color:white; padding:8px 15px; border-radius:8px; font-weight:600; z-index: 10002;';
                         document.getElementById(INPUT_MODAL_ID).appendChild(successMsg);
                         setTimeout(() => {
                             successMsg.remove();
@@ -1098,16 +947,6 @@ function init() {
                         return; 
                     }
 
-                    // Don't interfere with typing in textarea
-                    if (isInputModalOpen && document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
-                        // Allow all keys including space when typing in textarea
-                        if (e.key === 'Escape') {
-                            window.closeReplyInputModal();
-                            e.preventDefault();
-                        }
-                        return;
-                    }
-
                     if (e.key === 'Escape') {
                         if (isInputModalOpen) {
                             window.closeReplyInputModal();
@@ -1118,11 +957,9 @@ function init() {
                         }
                         e.preventDefault();
                     } else if (e.key === ' ' || e.code === 'Space') {
-                        // Spacebar to toggle pause, but only if not in input modal
-                        if (!isInputModalOpen && !isReplyModalVisible) {
-                            window.togglePause();
-                            e.preventDefault();
-                        }
+                        // Spacebar to toggle pause
+                        window.togglePause();
+                        e.preventDefault();
                     } else if (isReplyModalVisible || isInputModalOpen) {
                          return; 
                     } else if (e.key === 'ArrowRight') {
@@ -1144,9 +981,6 @@ function init() {
                     currentStoryGroupIndex = storyGroupIndex;
                     currentStoryIndex = 0;
                     
-                    // Prevent body scrolling
-                    document.body.classList.add('viewer-open');
-                    
                     renderStoryFrame(true);
                     document.getElementById(VIEWER_ID).classList.add('is-open');
 
@@ -1165,9 +999,6 @@ function init() {
                     document.getElementById(VIEWER_ID).classList.remove('is-open');
                     window.closeReplies(); 
                     window.closeReplyInputModal(); 
-                    
-                    // Re-enable body scrolling
-                    document.body.classList.remove('viewer-open');
                     
                     if(currentStoryTimer) clearTimeout(currentStoryTimer);
                     if(progressInterval) clearInterval(progressInterval); 
@@ -1420,34 +1251,26 @@ function init() {
                         content.innerHTML = headerHtml + '<div class="state-msg">No recent activity found.</div>';
                     } else {
                         const html = stories.map((s, index) => {
-                            const ringStyle = createRingStyle(s.activities.length, s.status === 'new', RING_COLOR);
-                            
-                            let ringClass = '';
-                            let ringAttrs = '';
-                            
                             if (RING_COLOR === 'seanime') {
-                                ringClass = s.activities.length <= 1 ? 'story-ring seanime-accent single-activity' : 'story-ring seanime-accent';
-                            } else {
-                                if (ringStyle.type === 'solid') {
-                                    ringClass = 'story-ring solid';
-                                    ringAttrs = \`style="--segment-color: \${ringStyle.color}"\`;
-                                } else {
-                                    ringClass = 'story-ring segmented';
-                                    ringAttrs = \`style="--segment-color: \${ringStyle.color}; --segment-end: \${ringStyle.segmentEnd}deg"\`;
-                                }
-                            }
-                            
-                            return \`
+                                // For Seanime accent, use dynamic gradient based on activity count
+                                const ringStyle = getSeanimeRingStyle(s.activities.length, s.status === 'new');
+                                return \`
                                 <div class="story-item" data-index="\${index}">
-                                    <div class="story-ring-container">
-                                        <div class="\${ringClass}" \${ringAttrs}></div>
-                                        <div class="story-image-container">
-                                            <img src="\${s.profileImage}" class="story-image" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
-                                        </div>
+                                    <div class="story-ring" style="\${ringStyle}">
+                                        <img src="\${s.profileImage}" class="story-image" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
                                     </div>
                                     <span class="story-name">\${s.name}</span>
-                                </div>
-                            \`;
+                                </div>\`;
+                            } else {
+                                const ring = getSegmentedRingStyle(s.activities.length, s.status === 'new');
+                                return \`
+                                <div class="story-item" data-index="\${index}">
+                                    <div class="story-ring" style="\${ring}">
+                                        <img src="\${s.profileImage}" class="story-image" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
+                                    </div>
+                                    <span class="story-name">\${s.name}</span>
+                                </div>\`;
+                            }
                         }).join('');
                         
                         content.innerHTML = headerHtml + '<div class="stories-container">' + html + '</div><div style="padding: 0 16px 16px 16px; min-height: 1px;"></div>';
@@ -1466,14 +1289,6 @@ function init() {
                     activeToken = token;
                     if (!token) return renderInputForm("Token not found. Please provide your AniList Access Token.");
                     
-                    // Prevent multiple concurrent API calls
-                    if (window.__anilistFeedFetching) {
-                        console.log('Already fetching activities, skipping duplicate request');
-                        return;
-                    }
-                    
-                    window.__anilistFeedFetching = true;
-                    
                     renderLoading(!forceRefresh); 
                     
                     const cached = localStorage.getItem(CACHE_KEY);
@@ -1482,7 +1297,6 @@ function init() {
                             const data = JSON.parse(cached);
                             if (Date.now() < data.timestamp + CACHE_DURATION_MS) {
                                 renderStories(data.stories, true);
-                                window.__anilistFeedFetching = false;
                                 return;
                             }
                         } catch (e) {
@@ -1534,8 +1348,7 @@ function init() {
                             const uName = act.user.name;
                             if (!grouped[uName]) grouped[uName] = { name: uName, profileImage: act.user.avatar.medium, status: 'new', activities: [] };
                             
-                            // Use the getMediaTitle function with preference - pass the title object
-                            const title = getMediaTitle(act.media.title);
+                            const title = act.media.title.english || act.media.title.romaji;
                             
                             // Use the new formatActivityStatus function for proper capitalization
                             const textMain = formatActivityStatus(act.status, act.progress);
@@ -1566,34 +1379,13 @@ function init() {
                             catch (cacheError) {}
                         }
                         renderInputForm(errMsg);
-                    } finally {
-                        window.__anilistFeedFetching = false;
                     }
                 }
             
                 function mainLoop() {
-                    initializationAttempts++;
-                    
-                    // Prevent infinite loops - max 10 attempts
-                    if (initializationAttempts > 10) {
-                        console.error('Failed to initialize after 10 attempts');
-                        return;
-                    }
-                    
-                    if (!ensureBox()) {
-                        setTimeout(mainLoop, 500);
-                        return;
-                    }
-                    
-                    // Only initialize once
-                    if (isInitialized) return;
-                    isInitialized = true;
-                    
-                    if (INJECTED_TOKEN && INJECTED_TOKEN.trim() !== "") {
-                        fetchActivities(INJECTED_TOKEN, false);
-                    } else {
-                        renderInputForm();
-                    }
+                    if (!ensureBox()) return setTimeout(mainLoop, 500);
+                    if (INJECTED_TOKEN && INJECTED_TOKEN.trim() !== "") return fetchActivities(INJECTED_TOKEN, false);
+                    renderInputForm();
                 }
                 mainLoop();
             })();
@@ -1620,8 +1412,7 @@ function init() {
                 activeTargetSelector: state.activeTargetSelector,
                 bgStyle: state.bgStyle,
                 ringColor: state.ringColor,
-                replyPosition: state.replyPosition,
-                titlePreference: state.titlePreference,
+                replyPosition: state.replyPosition, 
             };
 
             script.setText(getSmartInjectedScript(token, currentSettings));  

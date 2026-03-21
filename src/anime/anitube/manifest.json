@@ -1,0 +1,13 @@
+{
+  "id": "anitube",
+  "name": "AniTube",
+  "description": "AniTube is an online streaming provider for portugese subs.",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/anitube/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "typescript",
+  "lang": "pt",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/anitube.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/anitube/provider.ts"
+}

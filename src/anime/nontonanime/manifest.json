@@ -1,0 +1,13 @@
+{
+  "id": "nontonanime",
+  "name": "NonTonAnime",
+  "description": "NonTonAnime is an online streaming provider for indonesian anime.",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/nontonanime/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "id",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/nontonanime.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/nontonanime/provider.js"
+}

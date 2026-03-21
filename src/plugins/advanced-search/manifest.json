@@ -1,0 +1,19 @@
+{
+    "id": "always-advanced-search",
+    "name": "Always Advanced Search",
+    "version": "1.0.2",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/advanced-search/refs/heads/main/manifest.json",
+    "language": "typescript",
+    "type": "plugin",
+    "description": "Always use advanced search instead of the basic search feature.",
+    "author": "SyntaxSama & Pal",
+    "icon": "https://raw.githubusercontent.com/Pal-droid/advanced-search/refs/heads/main/2015046.png",
+    "website": "",
+    "lang": "EN",
+    "payloadURI": "https://raw.githubusercontent.com/Pal-droid/advanced-search/refs/heads/main/advsearch.ts",
+    "plugin": {
+        "version": "1",
+        "permissions": {}
+    },
+    "isDevelopment": false
+}

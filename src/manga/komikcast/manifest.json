@@ -1,0 +1,13 @@
+{
+  "id": "komikcast",
+  "name": "KomikCast",
+  "description": "KomikCast is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/komikcast/manifest.json",
+  "version": "1.2.0",
+  "author": "pal",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/komikcast.png",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "id",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/komikcast/provider.js"
+}
