@@ -1,0 +1,13 @@
+{
+  "id": "lelmanga",
+  "name": "LelManga",
+  "description": "LelManga is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/lelmanga/manifest.json",
+  "version": "1.0.0",
+  "author": "pal",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/lelmanga.png",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "fr",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/lelmanga/provider.js"
+}
