@@ -22,6 +22,18 @@
     "lang": "fr",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesama.png",
     "website": ""
+  },
+  {
+    "id": "lelmanga",
+    "name": "LelManga",
+    "description": "LelManga is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/lelmanga/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "fr",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/lelmanga.png",
+    "website": ""
   }, 
   {
     "id": "taiyo",
