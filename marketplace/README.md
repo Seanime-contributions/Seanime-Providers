@@ -30,6 +30,7 @@ Here’s a list of all currently available **extensions and plugins**:
 | <div align="center"><img src="https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/scanita.png" width="48" height="48"/><br><b>Scanita</b><br><img src="https://img.shields.io/badge/BROKEN-red?style=flat-square" /></div> | Italiano | Scanita is a manga provider for Seanime | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/scanita/manifest.json) |
 | <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/taiyo.jpeg" width="48" height="48"/><br><b>Taiyo</b></div> | Português | Taiyo is a manga provider for Brazilian / Portugese manga. | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/taiyo/manifest.json) |
 | <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animesama.png" width="48" height="48"/><br><b>AnimeSama</b></div> | Français | Taiyo is a manga provider for French manga. | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/animesama/manifest.json) |
+| <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/lelmanga.png" width="48" height="48"/><br><b>LelManga</b></div> | Français | LelManga is a manga provider for French manga. | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/lelmanga/manifest.json) |
 
 </details>
 
