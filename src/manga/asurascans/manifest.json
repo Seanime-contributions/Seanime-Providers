@@ -3,7 +3,7 @@
   "name": "AsuraScans",
   "description": "AsuraScans is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/asurascans/manifest.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Pal",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/asurascans.webp",
   "type": "manga-provider",
