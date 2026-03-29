@@ -1,6 +1,7 @@
 class Provider {
   constructor() {
-    this.api = "https://asuracomic.net";
+    this.api = "https://asurascans.com";
+    this.SLUG_SUFFIX = "f6174291"; // constant suffix used in all comic URLs
   }
 
   getSettings() {
@@ -22,33 +23,36 @@ class Provider {
   }
 
   async search(opts) {
-    const url = `${this.api}/series?page=1&name=${encodeURIComponent(opts.query)}`;
-
+    const url = `${this.api}/browse?search=${encodeURIComponent(opts.query)}`;
     try {
       const response = await this.fetchWithHeaders(url);
       if (!response.ok) return [];
-
       const html = await response.text();
-      const entryRegex = /<a[^>]+href="series\/([^"]+)"[\s\S]*?<img[^>]+src="([^"]+)"/gi;
+
+      const props = this._extractAstroProps(html, "BrowseFilters");
+      if (!props) {
+        console.error("Could not find BrowseFilters props");
+        return [];
+      }
+
+      const initialSeries = props["initialSeries"];
+      if (!initialSeries || initialSeries[0] !== 1) return [];
 
       const mangas = [];
-      let match;
+      for (const entry of initialSeries[1]) {
+        if (!Array.isArray(entry) || entry[0] !== 0) continue;
+        const s = entry[1];
 
-      while ((match = entryRegex.exec(html)) !== null) {
-        const id = match[1];
-        const img = match[2];
-        
-        const title = id
-          .replace(/-[\w\d]+$/, "")
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, c => c.toUpperCase());
+        const slug = this._astroVal(s["slug"]);
+        const title = this._astroVal(s["title"]);
+        const cover = this._astroVal(s["cover"]);
 
-        if (!id) continue;
+        if (!slug) continue;
 
         mangas.push({
-          id: id,
-          title: title,
-          image: img,
+          id: slug,
+          title: title || slug,
+          image: cover || "",
         });
       }
 
@@ -60,38 +64,35 @@ class Provider {
   }
 
   async findChapters(mangaId) {
+    // mangaId is the slug e.g. "solo-leveling-ragnarok"
+    // Comic page URL is always: /comics/{slug}-{SLUG_SUFFIX}
+    const comicUrl = `${this.api}/comics/${mangaId}-${this.SLUG_SUFFIX}`;
     try {
-      const response = await this.fetchWithHeaders(`${this.api}/series/${mangaId}`);
+      const response = await this.fetchWithHeaders(comicUrl);
       if (!response.ok) return [];
-
       const html = await response.text();
+
       const chapters = [];
-      const seenChapters = new Set(); // Deduplication Set
+      const seen = new Set();
 
-      const chapterRegex = new RegExp(
-        `<a[^>]+href="${mangaId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/chapter/([^"]+)"`,
-        "gi"
-      );
-
+      // Chapter links: href="/comics/{full-slug}/chapter/{num}"
+      const chapterRegex = /href="(\/comics\/[^"]+\/chapter\/([^"]+))"/gi;
       let match;
       while ((match = chapterRegex.exec(html)) !== null) {
-        const chapterNum = match[1];
+        const fullPath = match[1];
+        const chapterNum = match[2];
 
-        // Deduplication check
-        if (seenChapters.has(chapterNum)) continue;
-        seenChapters.add(chapterNum);
-
-        const chapterUrl = `${this.api}/series/${mangaId}/chapter/${chapterNum}`;
+        if (seen.has(chapterNum)) continue;
+        seen.add(chapterNum);
 
         chapters.push({
-          id: chapterUrl,
+          id: `${this.api}${fullPath}`,
           title: `Chapter ${chapterNum}`,
           chapter: chapterNum,
         });
       }
 
       return chapters.sort((a, b) => parseFloat(a.chapter) - parseFloat(b.chapter));
-
     } catch (e) {
       console.error("findChapters error:", e);
       return [];
@@ -102,41 +103,75 @@ class Provider {
     try {
       const response = await this.fetchWithHeaders(chapterUrl);
       if (!response.ok) return [];
-
       const html = await response.text();
 
-      // Updated Regex to match escaped quotes: \"pages\"
-      // Matches: ,\"pages\":[ ... ]
-      const pagesRegex = /pages\\":(\[.*?\])/;
-      const match = pagesRegex.exec(html);
-
-      if (!match) {
-        console.error("No pages found in regex match");
+      const props = this._extractAstroProps(html, "ChapterReader");
+      if (!props) {
+        console.error("Could not find ChapterReader props");
         return [];
       }
 
-      // match[1] contains the array string with escaped quotes inside
-      // Example: [{\"order\":1,\"url\":\"...\"}]
-      let rawString = match[1];
-
-      // Unescape the JSON string (remove backslashes before quotes)
-      const cleanJson = rawString.replace(/\\"/g, '"');
-
-      try {
-        const json = JSON.parse(cleanJson);
-        return json.map((p) => ({
-          url: p.url,
-          index: p.order || 0,
-          headers: { Referer: this.api }
-        }));
-      } catch (parseError) {
-        console.error("JSON Parse Error:", parseError);
+      // pages -> [1, [ [0, {url, width, height}], ... ]]
+      const pagesData = props["pages"];
+      if (!pagesData || pagesData[0] !== 1) {
+        console.error("No pages data found in props");
         return [];
       }
 
+      const pages = [];
+      for (let i = 0; i < pagesData[1].length; i++) {
+        const entry = pagesData[1][i];
+        if (!Array.isArray(entry) || entry[0] !== 0) continue;
+        const p = entry[1];
+
+        const pageUrl = this._astroVal(p["url"]);
+        if (!pageUrl) continue;
+
+        pages.push({
+          url: pageUrl,
+          index: i,
+          headers: { Referer: this.api },
+        });
+      }
+
+      return pages;
     } catch (e) {
       console.error("findChapterPages error:", e);
       return [];
     }
+  }
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
+
+  // Extract and parse the props JSON from a named astro-island component.
+  _extractAstroProps(html, componentName) {
+    const regex = new RegExp(
+      `component-export="default"[^>]*props="([^"]+)"[^>]*ssr[^>]*client="load"[^>]*opts="[^"]*${componentName}`
+    );
+    const match = regex.exec(html);
+    if (!match) return null;
+
+    const propsJson = match[1]
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, "&")
+      .replace(/&#x27;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+
+    try {
+      return JSON.parse(propsJson);
+    } catch (e) {
+      console.error(`Failed to parse ${componentName} props:`, e);
+      return null;
+    }
+  }
+
+  // Decode Astro's [type, value] encoded primitive. type 0 = scalar, type 1 = array.
+  _astroVal(encoded) {
+    if (!Array.isArray(encoded)) return encoded;
+    const [type, value] = encoded;
+    if (type === 0) return value;
+    if (type === 1) return value.map(v => this._astroVal(v));
+    return value;
   }
 }
