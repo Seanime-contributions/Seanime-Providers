@@ -3,7 +3,7 @@
   "name": "HentaiSaturn",
   "description": "HentaiSaturn is an online streaming provider for subbed/dubbed Hentai in Italian",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/hentaisaturn/manifest.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Pal",
   "type": "onlinestream-provider",
   "language": "typescript",
