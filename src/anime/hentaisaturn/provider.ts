@@ -161,7 +161,7 @@ class Provider {
 
         const html = await _makeRequest(episode.url);
         const $ = LoadDoc(html);
-        const episodeServerUrl = $('a[href*="watch"]').attr("href") + "&s=alt" || "";
+        const episodeServerUrl = ($('a[href*="watch"]').attr("href") || "") + "&s=alt";
         const episodeServerHtml = await _makeRequest(episodeServerUrl);
 
         const videoSources: VideoSource[] = [];
