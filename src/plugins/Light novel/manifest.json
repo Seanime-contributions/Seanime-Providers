@@ -1,7 +1,7 @@
 {
   "id": "LN-reader",
   "name": "Light Novel Reader",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/Light%20novel/manifest.json",
   "description": "A simple plugin for reading Light Novels inside Seanime.",
   "author": "Pal",
