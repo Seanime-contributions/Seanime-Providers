@@ -12,6 +12,18 @@
     "website": ""
   },  
   {
+    "id": "atsumaru",
+    "name": "Atsumaru",
+    "description": "Atsumaru is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/atsumaru/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/atsumaru.ico",
+    "website": ""
+  }, 
+  {
     "id": "animesamamanga",
     "name": "AnimeSama (Manga)",
     "description": "AnimeSama is a manga provider for Seanime",
@@ -208,7 +220,7 @@
     "name": "MangaFreak",
     "description": "MangaFreak is a manga provider for Seanime",
     "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/mangafreak/manifest.json",
-    "author": "pal",
+    "author": "Pal",
     "type": "manga-provider",
     "language": "javascript",
     "lang": "en",
@@ -220,7 +232,7 @@
     "name": "Scanita",
     "description": "Scanita is a manga provider for Seanime",
     "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/scanita/manifest.json",
-    "author": "pal",
+    "author": "Pal",
     "type": "manga-provider",
     "language": "javascript",
     "lang": "it",
