@@ -336,6 +336,18 @@
     "website": ""
   },
   {
+    "id": "mynimekumanga",
+    "name": "MyNimeKu (Manga)",
+    "description": "MyNimeKu is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mynimekumanga/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "id",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mynimeku.jpg",
+    "website": ""
+  },
+  {
     "id": "komikcast",
     "name": "KomikCast",
     "description": "KomikCast is a manga provider for Seanime",
