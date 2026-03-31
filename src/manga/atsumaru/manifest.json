@@ -1,0 +1,13 @@
+{
+  "id": "atsumaru",
+  "name": "Atsumaru",
+  "description": "Atsumaru is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/atsumaru/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/atsumaru.ico",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/atsumaru/provider.js"
+}
