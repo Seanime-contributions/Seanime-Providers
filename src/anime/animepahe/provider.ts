@@ -11,7 +11,7 @@ type AnimeData = {
 
 class Provider {
 
-    api = "https://animepahe.si"
+    api = "https://animepahe.com"
     headers = { Referer: "https://kwik.cx" }
 
     getSettings(): Settings {
