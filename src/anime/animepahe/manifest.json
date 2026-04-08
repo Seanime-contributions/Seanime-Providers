@@ -1,7 +1,7 @@
 {
   "id": "animepahe",
   "name": "Animepahe",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/anime/animepahe/manifest.json",
   "language": "typescript",
   "type": "onlinestream-provider",
