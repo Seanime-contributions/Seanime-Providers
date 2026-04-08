@@ -11,7 +11,7 @@ type AnimeData = {
 
 class Provider {
 
-    api = "https://animepahe.com"
+    api = "https://animepahe.pw"
     headers = { Referer: "https://kwik.cx" }
 
     getSettings(): Settings {
@@ -159,8 +159,8 @@ class Provider {
 
         const result: EpisodeServer = {
             videoSources: [],
-            headers: this.headers ?? {},
-            server: server, // Dynamically sets to "Kwik" or "Pahe" based on call
+            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+            server: server,
         }
 
         const sourcePromises = $("button[data-src]").map(async (_, el): Promise<VideoSource | null> => {
@@ -182,6 +182,7 @@ class Provider {
                 })
 
                 const src_html = await src_req.text()
+                const kwikEmbedReferer = src_req.url
                 const scripts = src_html.match(/eval\(f.+?\}\)\)/g)
                 if (!scripts) return null
 
@@ -196,25 +197,25 @@ class Provider {
                             const m3u8Url = linkMatch[1]
 
                             if (server === "Pahe") {
-                                // Transform: vault-XX.owocdn.top/stream/PATH/uwu.m3u8 -> vault-XX.kwik.cx/mp4/PATH
                                 const paheUrl = m3u8Url
                                     .replace("owocdn.top", "kwik.cx")
                                     .replace("/stream/", "/mp4/")
                                     .replace("/uwu.m3u8", "");
-                                
+
                                 return {
                                     url: paheUrl,
                                     type: "mp4",
                                     quality: label,
-                                    subtitles: []
+                                    subtitles: [],
+                                    headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
                                 }
                             } else {
-                                // Default Kwik logic (m3u8)
                                 return {
                                     url: m3u8Url,
                                     type: "m3u8",
                                     quality: label,
-                                    subtitles: []
+                                    subtitles: [],
+                                    headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
                                 }
                             }
                         }
