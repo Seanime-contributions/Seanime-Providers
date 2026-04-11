@@ -7,7 +7,7 @@
   "type": "onlinestream-provider",
   "description": "AllManga (Anime) streaming provider for Seanime",
   "author": "Pal",
-  "icon": "https://raw.githubusercontent.com/Pal-droid/seanime-providers/refs/heads/main/allmanga.png",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/seanime-providers/refs/heads/main/public/allmanga.png",
   "website": "",
   "lang": "en",
   "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/anime/allmanga/provider.js"
