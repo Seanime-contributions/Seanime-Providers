@@ -198,7 +198,6 @@ class Provider {
 
                             if (server === "Pahe") {
                                 const paheUrl = m3u8Url
-                                    .replace("owocdn.top", "kwik.cx")
                                     .replace("/stream/", "/mp4/")
                                     .replace("/uwu.m3u8", "");
 
