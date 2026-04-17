@@ -168,6 +168,18 @@
     "website": ""
   },
   {
+    "id": "animetoast",
+    "name": "AnimeToast",
+    "description": "AnimeToast is an online streaming provider for german anime.",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animetoast/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "typescript",
+    "lang": "de",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animetoast.png",
+    "website": ""
+  },
+  {
     "id": "animeheaven",
     "name": "AnimeHeaven",
     "description": "AnimeHeaven is an online streaming provider for english sub anime",
