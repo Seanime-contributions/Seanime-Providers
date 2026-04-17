@@ -360,6 +360,18 @@
     "website": ""
   },
   {
+    "id": "account-switcher",
+    "name": "Account Switcher",
+    "description": "Allows you to switch between multiple AniList accounts swiftly.",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/acc-switcher-al/manifest.json",
+    "author": "FracturedSora & Pal",
+    "type": "plugin",
+    "language": "typescript",
+    "lang": "MULTI",
+    "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/anilist.ico",
+    "website": ""
+  },
+  {
     "id": "komiku",
     "name": "Komiku",
     "description": "Komiku is a manga provider for Seanime",
