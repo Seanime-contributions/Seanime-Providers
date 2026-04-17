@@ -1,0 +1,25 @@
+{
+  "id": "account-switcher",
+  "name": "Account Switcher",
+  "version": "1.0.0",
+  "manifestURI": "https://raw.githubusercontent.com/FracturedSora/Seanime-Account-Switcher/refs/heads/main/AccountSwitcher.json",
+  "language": "typescript",
+  "type": "plugin",
+  "description": "Allows you to switch between multiple AniList accounts swiftly",
+  "author": "FracturedSora & Pal",
+  "icon": "https://anilist.co/img/icons/android-chrome-512x512.png",
+  "website": "",
+  "lang": "multi",
+  "payloadURI": "https://raw.githubusercontent.com/FracturedSora/Seanime-Account-Switcher/refs/heads/main/AccountSwitcher.js",
+  "plugin": {
+    "version": "1",
+    "permissions": {
+      "scopes": ["storage"],
+      "allow": {
+              "networkAccess": {
+                "allowedDomains": ["127.0.0.1"]
+              }
+      }
+    }
+  }
+}
