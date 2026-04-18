@@ -47,3 +47,25 @@
 .ext-list-wrap::-webkit-scrollbar       { width: 4px; }
 .ext-list-wrap::-webkit-scrollbar-track { background: transparent; }
 .ext-list-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+/* ── external source dropdown ────────────────────────────────────────────── */
+
+.ext-source-trigger {
+    transition: border-color .15s, background .15s;
+}
+.ext-source-trigger:hover {
+    border-color: rgba(255,255,255,.2) !important;
+    background: rgba(255,255,255,.06) !important;
+}
+.ext-source-trigger:focus-visible {
+    outline: 2px solid rgba(99,130,255,.5);
+    outline-offset: 2px;
+}
+
+.ext-source-dropdown {
+    animation: ext-fade-in .12s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.ext-source-option {
+    transition: background .1s;
+}
