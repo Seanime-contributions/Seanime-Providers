@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/github/last-commit/Pal-droid/Seanime-Providers?logo=git&logoColor=white&labelColor=2d3748&color=805ad5&style=for-the-badge" />
   <img src="https://img.shields.io/github/license/Pal-droid/Seanime-Providers?style=for-the-badge" />
-  <img src="https://seanime-contributions.github.io/Seanime-Providers/&label=Marketplace&logoColor=white&color=2ea44f&style=for-the-badge" />
+  <img src="https://img.shields.io/website?url=https://seanime-contributions.github.io/Seanime-Providers/&label=Marketplace&logoColor=white&color=2ea44f&style=for-the-badge" />
 </p>
 
 <p align="center">
