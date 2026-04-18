@@ -1,0 +1,27 @@
+{
+  "id": "External Extensions",
+  "name": "External Extensions Bridge",
+  "version": "1.0.0",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/external-extensions/manifest.json",
+  "description": "A plugin for integrating external extensions of other applications.",
+  "author": "Pal",
+  "icon": "",
+  "language": "javascript",
+  "type": "plugin",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/external-extensions/provider.js",
+  "lang": "MULTI",
+  "plugin": {
+    "version": "1",
+    "permissions": {
+      "scopes": [],
+      "allow": {
+        "unsafeFlags": [
+          {
+            "flag": "dom-script-manipulation",
+            "reason": "Allows the plugin to inject and execute javascript into the UI"
+          }
+        ]
+      }
+    }
+  }
+}
