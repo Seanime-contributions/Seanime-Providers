@@ -1,0 +1,57 @@
+<div id="ext-bridge-overlay" class="ext-overlay-enter" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;">
+
+    <div class="ext-modal-enter" style="position:relative;background:var(--background,#13161c);border-radius:14px;border:0.5px solid rgba(255,255,255,.07);padding:24px;width:480px;max-width:calc(100vw - 32px);display:grid;gap:16px;">
+
+        <!-- close × -->
+        <button class="ext-btn-ghost ext-modal-close" style="position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:50%;border:0.5px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:inherit;opacity:.4;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+            </svg>
+        </button>
+
+        <!-- icon -->
+        <div style="width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(140,165,255,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+        </div>
+
+        <!-- info -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+                <p style="margin:0;font-size:15px;font-weight:600;">Add extension manifest</p>
+            </div>
+            <p style="margin:0;font-size:13px;opacity:.45;line-height:1.55;">
+                Enter the URL of a Tachiyomi-compatible manifest JSON. You can then browse and install extensions from it.
+            </p>
+            <div class="ext-add-badges" style="display:flex;gap:6px;flex-wrap:wrap;">
+                <!-- badges injected by app.js -->
+            </div>
+        </div>
+
+        <!-- input -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+            <p style="margin:0;font-size:12px;font-weight:500;opacity:.4;">Manifest URL</p>
+            <input
+                class="ext-add-input"
+                type="text"
+                placeholder="https://raw.githubusercontent.com/example/index.json"
+                style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;font-size:13px;color:inherit;outline:none;"
+            />
+            <div class="ext-add-status" style="font-size:12px;color:#e05555;min-height:16px;"></div>
+        </div>
+
+        <!-- actions -->
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button class="ext-btn-ghost ext-add-cancel" style="background:transparent;border:0.5px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 16px;font-size:13px;color:inherit;cursor:pointer;opacity:.7;">
+                Cancel
+            </button>
+            <button class="ext-add-next" style="background:rgba(99,130,255,.15);border:0.5px solid rgba(99,130,255,.3);border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;color:rgba(140,165,255,.95);cursor:pointer;">
+                Browse extensions
+            </button>
+        </div>
+
+    </div>
+</div>
