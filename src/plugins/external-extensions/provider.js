@@ -12,27 +12,25 @@ function init() {
     var BASE = "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/plugins/external-extensions/";
 
     var ASSETS = {
-        css:        BASE + "global.css",
-        appJs:      BASE + "app.js",
+        css:           BASE + "global.css",
+        appJs:         BASE + "app.js",
+        chapterListJs: BASE + "chapter-list.js",
         components: [
             "installed-card",
             "add-modal",
-            "picker-modal"
+            "picker-modal",
+            "ext-source-dropdown"
         ]
     };
 
-    // ── fetch helpers ─────────────────────────────────────────────────────────
     // raw.githubusercontent.com sends Access-Control-Allow-Origin: *
     // so plain fetch() works fine from any origin.
-
     function fetchText(url) {
         return fetch(url, { cache: "no-cache" }).then(function(r) {
             if (!r.ok) throw new Error("Failed to fetch " + url + " (" + r.status + ")");
             return r.text();
         });
     }
-
-    // ── inject CSS ────────────────────────────────────────────────────────────
 
     function injectCSS(css) {
         if (document.getElementById("ext-bridge-styles")) return;
@@ -42,19 +40,15 @@ function init() {
         document.head.appendChild(el);
     }
 
-    // ── parse & cache component templates ────────────────────────────────────
     // Components are stored as HTML strings in window.__extComponents so
-    // app.js can call window.__extComponents["installed-card"]() to get a
-    // fresh DocumentFragment clone each time.
-
+    // app.js / chapter-list.js can call window.__extComponents["name"]()
+    // to get a fresh DocumentFragment clone each time.
     function registerComponent(name, html) {
         var parser = new DOMParser();
         var doc = parser.parseFromString(html, "text/html");
-        // Grab everything inside <body> as the template
         var tpl = doc.body;
         window.__extComponents = window.__extComponents || {};
         window.__extComponents[name] = function() {
-            // Return a cloned DocumentFragment so callers get a fresh DOM tree
             var frag = document.createDocumentFragment();
             Array.from(tpl.childNodes).forEach(function(n) {
                 frag.appendChild(n.cloneNode(true));
@@ -63,8 +57,17 @@ function init() {
         };
     }
 
-    // ── boot sequence ─────────────────────────────────────────────────────────
+    function runScript(code) {
+        // eslint-disable-next-line no-new-func
+        (new Function(code))();
+    }
 
+    // Boot sequence:
+    // 1. Fetch CSS + all component HTML files in parallel.
+    // 2. Once both are ready, fetch and run app.js (extensions page logic).
+    // 3. Then fetch and run chapter-list.js (chapter list UI hijack).
+    //    chapter-list.js runs after app.js so __extComponents is guaranteed
+    //    to be populated when chapter-list.js calls stamp().
     var componentFetches = ASSETS.components.map(function(name) {
         return fetchText(BASE + "components/" + name + ".html").then(function(html) {
             registerComponent(name, html);
@@ -79,15 +82,17 @@ function init() {
         return fetchText(ASSETS.appJs);
     })
     .then(function(appCode) {
-        // eslint-disable-next-line no-new-func
-        (new Function(appCode))();
+        runScript(appCode);
+        fetchText(ASSETS.chapterListJs).then(runScript).catch(function(err) {
+            console.error("[ext-bridge] chapter-list.js failed:", err);
+        });
     })
     .catch(function(err) {
         console.error("[ext-bridge] Boot failed:", err);
     });
 
 })();
-`;
+\`;
 
             await script.setText(bootstrap);
             const body = await ctx.dom.queryOne("body");
