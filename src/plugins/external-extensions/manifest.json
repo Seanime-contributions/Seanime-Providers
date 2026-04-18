@@ -1,5 +1,5 @@
 {
-  "id": "External Extensions",
+  "id": "external-extensions",
   "name": "External Extensions Bridge",
   "version": "1.0.0",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/external-extensions/manifest.json",
