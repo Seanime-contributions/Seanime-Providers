@@ -1,0 +1,27 @@
+<div class="ext-source-wrap" style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0;">
+
+    <span style="font-size:12px;font-weight:500;opacity:.45;white-space:nowrap;">External Source</span>
+
+    <div class="ext-source-select-wrap" style="position:relative;display:inline-flex;align-items:center;">
+
+        <button
+            type="button"
+            class="ext-source-trigger"
+            style="display:inline-flex;align-items:center;justify-content:space-between;gap:8px;min-width:160px;height:36px;padding:0 10px;background:var(--paper,rgba(255,255,255,.04));border:1px solid var(--border,rgba(255,255,255,.1));border-radius:12px;font-size:13px;color:inherit;cursor:pointer;white-space:nowrap;outline:none;"
+        >
+            <span class="ext-source-label" style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;">None</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5;">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        <div
+            class="ext-source-dropdown"
+            style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:220px;max-width:320px;background:var(--paper,#13161c);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9999;overflow:hidden;padding:4px;"
+        >
+            <!-- options rendered by chapter-list.js -->
+        </div>
+
+    </div>
+
+</div>
