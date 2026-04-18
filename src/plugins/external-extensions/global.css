@@ -1,0 +1,49 @@
+/* ── animations ──────────────────────────────────────────────────────────── */
+
+@keyframes ext-fade-in {
+    from { opacity: 0; transform: scale(.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ext-fade-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(.97); }
+}
+@keyframes ext-overlay-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ext-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ext-spin         { to   { transform: rotate(360deg); } }
+
+/* ── overlay / modal transitions ────────────────────────────────────────── */
+
+.ext-modal-enter   { animation: ext-fade-in  .18s cubic-bezier(.22,1,.36,1) forwards; }
+.ext-modal-leave   { animation: ext-fade-out .15s ease forwards; }
+.ext-overlay-enter { animation: ext-overlay-in  .18s ease forwards; }
+.ext-overlay-leave { animation: ext-overlay-out .15s ease forwards; }
+
+/* ── interactive states ──────────────────────────────────────────────────── */
+
+.ext-row             { transition: background .1s, border-color .1s; }
+.ext-row:hover       { background: rgba(255,255,255,.045) !important; }
+
+.ext-btn-ghost             { transition: background .1s, opacity .1s; }
+.ext-btn-ghost:hover       { background: rgba(255,255,255,.07) !important; opacity: 1 !important; }
+
+.ext-installed-card       { transition: border-color .15s; }
+.ext-installed-card:hover { border-color: rgba(255,255,255,.14) !important; }
+
+/* ── utility ─────────────────────────────────────────────────────────────── */
+
+.ext-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,.15);
+    border-top-color: rgba(140,165,255,.7);
+    border-radius: 50%;
+    animation: ext-spin .7s linear infinite;
+    flex-shrink: 0;
+}
+
+/* scrollbar styling inside list */
+.ext-list-wrap::-webkit-scrollbar       { width: 4px; }
+.ext-list-wrap::-webkit-scrollbar-track { background: transparent; }
+.ext-list-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
