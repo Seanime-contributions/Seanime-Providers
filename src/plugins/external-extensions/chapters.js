@@ -68,6 +68,14 @@
         }
     }
 
+    function closest(el, selector) {
+        while (el && el !== document.documentElement) {
+            if (el.matches && el.matches(selector)) return el;
+            el = el.parentElement;
+        }
+        return null;
+    }
+
     function fetchText(url) {
         return fetch(url, { cache: "no-cache" }).then(function(r) {
             if (!r.ok) throw new Error("HTTP " + r.status + " for " + url);
@@ -151,6 +159,35 @@
             });
     }
 
+    function needsPrefetch() {
+        var ext = getActive();
+        if (!ext) return false;
+        var key = cacheKey(ensureManifestUrl(Object.assign({}, ext)));
+        return !(cache.key === key && cache.translated);
+    }
+
+    function attachRowSpinner(rowEl) {
+        if (!rowEl || rowEl.nodeType !== 1) return function() {};
+        if (rowEl.getAttribute("data-ext-row-loading") === "true") return function() {};
+
+        var actionCell = rowEl.querySelector('td[data-action-col="true"]') || rowEl.lastElementChild;
+        if (!actionCell) return function() {};
+
+        var existing = actionCell.querySelector(".ext-row-spinner");
+        if (existing) existing.remove();
+
+        var spinner = document.createElement("span");
+        spinner.className = "ext-spinner ext-row-spinner";
+        spinner.style.cssText = "margin-left:8px;";
+        actionCell.appendChild(spinner);
+        rowEl.setAttribute("data-ext-row-loading", "true");
+
+        return function detach() {
+            rowEl.removeAttribute("data-ext-row-loading");
+            if (spinner && spinner.parentNode) spinner.remove();
+        };
+    }
+
     // ── public API ───────────────────────────────────────────────────────────
 
     window.__extBridge = window.__extBridge || {};
@@ -166,6 +203,28 @@
             console.error("[ext-bridge] Prefetch failed:", err);
         });
     });
+
+    // React to chapter selection (clicks inside the chapter list container).
+    // If the extension hasn't been translated yet, show a row spinner and prefetch.
+    document.addEventListener("click", function(e) {
+        try {
+            if (!needsPrefetch()) return;
+            var container = closest(e.target, '[data-chapter-list-bulk-actions-container="true"]');
+            if (!container) return;
+
+            var row = closest(e.target, "tr.UI-DataGrid__tr");
+            if (!row) return;
+
+            var detach = attachRowSpinner(row);
+            prefetchActiveExtension().catch(function(err) {
+                console.error("[ext-bridge] Prefetch failed:", err);
+            }).finally(function() {
+                detach();
+            });
+        } catch (_) {
+            // ignore
+        }
+    }, true);
 
     // If the user already has an active source in session, prefetch on load.
     if (getActive()) {
