@@ -107,6 +107,39 @@
 
     // ── build & wire the dropdown ─────────────────────────────────────────────
 
+    function ensureChapterListOverlay() {
+        var container = document.querySelector('[data-chapter-list-bulk-actions-container="true"]');
+        if (!container) return null;
+        container.style.position = container.style.position || "relative";
+
+        var existing = container.querySelector('.ext-chapterlist-overlay');
+        if (existing) return existing;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ext-chapterlist-overlay';
+        overlay.style.cssText = 'display:none;position:absolute;inset:0;border-radius:16px;'
+            + 'background:rgba(0,0,0,.18);backdrop-filter:blur(1px);z-index:50;'
+            + 'align-items:center;justify-content:center;';
+
+        var spinner = document.createElement('span');
+        spinner.className = 'ext-spinner';
+        spinner.style.cssText = 'width:22px;height:22px;border-width:3px;';
+        overlay.appendChild(spinner);
+        container.appendChild(overlay);
+        return overlay;
+    }
+
+    function setChapterListLoading(on) {
+        var overlay = ensureChapterListOverlay();
+        if (!overlay) return;
+        overlay.style.display = on ? 'flex' : 'none';
+    }
+
+    // Global listeners (not tied to dropdown injection)
+    document.addEventListener('ext:chaptersLoading', function() { setChapterListLoading(true); });
+    document.addEventListener('ext:chaptersLoaded', function() { setChapterListLoading(false); });
+    document.addEventListener('ext:bridgeError', function() { setChapterListLoading(false); });
+
     function buildDropdown(toolbar) {
         var installed = getInstalled();
         var active    = getActive();
@@ -131,6 +164,9 @@
         document.addEventListener("ext:chaptersLoading", function() { setLoading(true); });
         document.addEventListener("ext:chaptersLoaded",  function() { setLoading(false); });
         document.addEventListener("ext:bridgeError",     function() { setLoading(false); });
+
+        // If prefetch started before the dropdown was injected, reflect it.
+        if (window.__extBridgeLoading) setLoading(true);
 
         // ── populate options ──────────────────────────────────────────────────
 

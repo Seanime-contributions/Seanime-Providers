@@ -15,6 +15,10 @@
         return window.__extActiveSource || null;
     }
 
+    // Global loading flag so chapter-list.js can show a spinner even if
+    // prefetch starts before the dropdown is injected.
+    window.__extBridgeLoading = window.__extBridgeLoading || false;
+
     function extIdFromPkg(pkg) {
         if (!pkg) return "";
         var parts = String(pkg).split(".");
@@ -286,6 +290,7 @@
         var ktFile = guessMainKtFile(ext);
         var url = baseDir + ktFile;
 
+        window.__extBridgeLoading = true;
         dispatch("ext:chaptersLoading", { ext: ext, url: url });
 
         return fetchText(url)
@@ -302,6 +307,7 @@
             })
             .finally(function() {
                 dispatch("ext:chaptersLoaded", { ext: ext });
+                window.__extBridgeLoading = false;
             });
     }
 
