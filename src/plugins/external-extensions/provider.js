@@ -92,7 +92,8 @@ function init() {
     });
 
 })();
-\`;
+
+`;
 
             await script.setText(bootstrap);
             const body = await ctx.dom.queryOne("body");
