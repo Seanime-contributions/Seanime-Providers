@@ -86,11 +86,157 @@
     // ── Kotlin -> JS translation (placeholder) ───────────────────────────────
 
     function translateKotlinToJs(ktSource) {
-        // This will be replaced with real regex-based translation rules.
-        // For now, keep the raw source and expose it for debugging.
+        var src = String(ktSource || "");
+
+        function m(re) {
+            var mm = src.match(re);
+            return mm ? mm[1] : "";
+        }
+
+        function unescapeKotlinString(s) {
+            return String(s || "")
+                .replace(/\\n/g, "\n")
+                .replace(/\\t/g, "\t")
+                .replace(/\\r/g, "\r")
+                .replace(/\\\\/g, "\\")
+                .replace(/\\\"/g, '"');
+        }
+
+        var name = unescapeKotlinString(
+            m(/override\s+val\s+name\s*:\s*String\s*=\s*"([^"]+)"/)
+        );
+        var lang = unescapeKotlinString(
+            m(/override\s+val\s+lang\s*:\s*String\s*=\s*"([^"]+)"/)
+        );
+        var baseUrl = unescapeKotlinString(
+            m(/override\s+val\s+baseUrl\s*:\s*String\s*=\s*"([^"]+)"/)
+        );
+
+        var chapterListSelector = unescapeKotlinString(
+            m(/override\s+fun\s+chapterListSelector\s*\(\s*\)\s*:\s*String\s*=\s*"([^"]+)"/)
+        );
+        var pageImageSelector = unescapeKotlinString(
+            m(/document\.select\(\s*"([^"]+)"\s*\)\.forEachIndexed\s*\{/)
+        );
+
+        var dateFormat = unescapeKotlinString(
+            m(/SimpleDateFormat\(\s*"([^"]+)"\s*,\s*Locale\.[A-Z_]+\s*\)/)
+        );
+        if (!dateFormat) dateFormat = "yyyy/MM/dd";
+
+        function parseDate(str) {
+            var s = String(str || "").trim();
+            if (!s) return 0;
+
+            if (dateFormat === "yyyy/MM/dd") {
+                var mm = s.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+                if (!mm) return 0;
+                var y = parseInt(mm[1], 10);
+                var mo = parseInt(mm[2], 10) - 1;
+                var d = parseInt(mm[3], 10);
+                var dt = new Date(Date.UTC(y, mo, d, 0, 0, 0));
+                return dt.getTime();
+            }
+            var dt2 = new Date(s);
+            return isNaN(dt2.getTime()) ? 0 : dt2.getTime();
+        }
+
+        function toAbsUrl(u) {
+            try { return new URL(u, baseUrl).toString(); } catch (_) { return u; }
+        }
+
+        function stripDomain(u) {
+            try {
+                var url = new URL(u, baseUrl);
+                return url.pathname + (url.search || "") + (url.hash || "");
+            } catch (_) {
+                return u;
+            }
+        }
+
+        function fetchDocument(url) {
+            return fetch(url, { cache: "no-cache" })
+                .then(function(r) {
+                    if (!r.ok) throw new Error("HTTP " + r.status);
+                    return r.text();
+                })
+                .then(function(html) {
+                    var p = new DOMParser();
+                    return p.parseFromString(html, "text/html");
+                });
+        }
+
+        function cssSelectAll(doc, selector) {
+            if (!doc || !selector) return [];
+            try {
+                if (selector.includes(":has(")) {
+                    var safe = selector.replace(/:has\([^\)]*\)/g, "").replace(/\s+/g, " ").trim();
+                    if (!safe) return [];
+                    return Array.from(doc.querySelectorAll(safe)).filter(function(el) {
+                        try {
+                            return el.querySelector("a") != null;
+                        } catch (_) {
+                            return true;
+                        }
+                    });
+                }
+                return Array.from(doc.querySelectorAll(selector));
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function parseChaptersFromDoc(doc) {
+            var rows = cssSelectAll(doc, chapterListSelector);
+            var chapters = rows.map(function(row) {
+                var nameEl = row.querySelector("td");
+                var a = row.querySelector("a");
+                var dateTd = row.querySelector("td:nth-child(2)");
+                var chName = nameEl ? nameEl.textContent.trim() : (a ? a.textContent.trim() : "");
+                var href = a ? a.getAttribute("href") : "";
+                var abs = href ? toAbsUrl(href) : "";
+
+                return {
+                    name: chName,
+                    url: stripDomain(abs),
+                    urlAbsolute: abs,
+                    date_upload: parseDate(dateTd ? dateTd.textContent : ""),
+                };
+            });
+
+            return chapters.filter(function(c) { return !!c.urlAbsolute; }).reverse();
+        }
+
+        function getChapters(mangaUrl) {
+            var url = toAbsUrl(mangaUrl);
+            return fetchDocument(url).then(parseChaptersFromDoc);
+        }
+
+        function getPages(chapterUrl) {
+            var url = toAbsUrl(chapterUrl);
+            return fetchDocument(url).then(function(doc) {
+                var sel = pageImageSelector || "img#gohere[src]";
+                var imgs = cssSelectAll(doc, sel);
+                return imgs.map(function(img, idx) {
+                    var srcAttr = img.getAttribute("abs:src") || img.getAttribute("src") || "";
+                    var abs = toAbsUrl(srcAttr);
+                    return { index: idx, url: abs };
+                }).filter(function(p) { return !!p.url; });
+            });
+        }
+
         return {
-            kind: "kotlin_raw",
-            source: ktSource,
+            kind: "tachiyomi_parsed_http_source",
+            name: name,
+            lang: lang,
+            baseUrl: baseUrl,
+            selectors: {
+                chapterListSelector: chapterListSelector,
+                pageImageSelector: pageImageSelector,
+            },
+            getChapters: getChapters,
+            getPages: getPages,
+            raw: src,
         };
     }
 
