@@ -138,6 +138,8 @@
     // Global listeners (not tied to dropdown injection)
     document.addEventListener('ext:chaptersLoading', function() { setChapterListLoading(true); });
     document.addEventListener('ext:chaptersLoaded', function() { setChapterListLoading(false); });
+    document.addEventListener('ext:chaptersFetchLoading', function() { setChapterListLoading(true); });
+    document.addEventListener('ext:chaptersFetchLoaded', function() { setChapterListLoading(false); });
     document.addEventListener('ext:bridgeError', function() { setChapterListLoading(false); });
 
     function buildDropdown(toolbar) {
@@ -283,18 +285,46 @@
     }
 
     // ── MutationObserver ──────────────────────────────────────────────────────
-    // Watch the whole document for subtree changes. When the chapter list
-    // mounts (or re-mounts after a navigation), re-attempt injection.
-    // Debounced to avoid hammering on rapid DOM mutations.
+    // Watch for DOM changes to detect when the chapter list mounts.
+    // Optimized to reduce FPS impact:
+    // - Increased debounce time to 250ms
+    // - Disconnect after successful injection
+    // - Try to observe a more specific container first
 
     var injectTimer = null;
+    var observer = null;
 
-    var observer = new MutationObserver(function() {
-        clearTimeout(injectTimer);
-        injectTimer = setTimeout(tryInject, 80);
-    });
+    function startObserver() {
+        if (observer) observer.disconnect();
 
-    observer.observe(document.body, { childList: true, subtree: true });
+        // Try to find a more specific container to observe
+        // Common app containers in SPA frameworks
+        var target = document.querySelector("#root") || 
+                     document.querySelector("#app") || 
+                     document.querySelector("main") ||
+                     document.body;
+
+        var config = { childList: true, subtree: true };
+        // If observing body, we need subtree; for specific containers, childList may suffice
+        if (target !== document.body) {
+            config = { childList: true, subtree: false };
+        }
+
+        observer = new MutationObserver(function() {
+            clearTimeout(injectTimer);
+            injectTimer = setTimeout(function() {
+                if (tryInject()) {
+                    // Successfully injected, disconnect observer to save resources
+                    observer.disconnect();
+                    observer = null;
+                }
+            }, 250);
+        });
+
+        observer.observe(target, config);
+    }
+
+    startObserver();
 
     // Also attempt immediately in case the page is already loaded
     tryInject();

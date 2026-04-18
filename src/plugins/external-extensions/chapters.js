@@ -340,6 +340,160 @@
         };
     }
 
+    // ── chapter list replacement ───────────────────────────────────────────────
+
+    function getMangaUrlFromPage() {
+        // Try to extract manga URL from the current page.
+        // This is a best-effort approach - the exact location depends on Seanime's routing.
+        try {
+            var path = window.location.pathname || "";
+            // Common pattern: /manga/{id} or /anime/{id}/chapters
+            var match = path.match(/\/(?:manga|anime)\/([^\/]+)/);
+            if (match && match[1]) {
+                // Return the slug/id - the extension will construct the full URL
+                return match[1];
+            }
+        } catch (_) {
+            // ignore
+        }
+        return null;
+    }
+
+    function replaceChapterList(chapters) {
+        var tbody = document.querySelector(".UI-DataGrid__tableBody");
+        if (!tbody) {
+            console.warn("[ext-bridge] Chapter table body not found");
+            return;
+        }
+
+        // Clear existing rows
+        tbody.innerHTML = "";
+
+        chapters.forEach(function(ch) {
+            var tr = document.createElement("tr");
+            tr.className = "UI-DataGrid__tr hover:bg-[--subtle] truncate";
+
+            // Checkbox column
+            var tdCheck = document.createElement("td");
+            tdCheck.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+            tdCheck.style.width = "6px";
+            tdCheck.style.maxWidth = "6px";
+            tdCheck.setAttribute("data-is-selection-col", "true");
+            tdCheck.setAttribute("data-action-col", "false");
+
+            var checkboxWrap = document.createElement("div");
+            var checkboxLabel = document.createElement("label");
+            checkboxLabel.className = "UI-Checkbox__container inline-flex gap-2 items-center";
+            var checkbox = document.createElement("button");
+            checkbox.type = "button";
+            checkbox.role = "checkbox";
+            checkbox.setAttribute("aria-checked", "false");
+            checkbox.setAttribute("data-state", "unchecked");
+            checkbox.setAttribute("data-disabled", "false");
+            checkbox.className = "UI-Checkbox__root appearance-none peer block relative overflow-hidden transition shrink-0 text-white rounded-[--radius-md] ring-offset-1 border ring-offset-[--background] border-gray-300 dark:border-gray-700 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--ring] disabled:cursor-not-allowed data-[disabled=true]:opacity-50 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:bg-gray-700 data-[state=unchecked]:hover:bg-gray-100 dark:data-[state=unchecked]:hover:bg-gray-600 data-[state=checked]:bg-brand dark:data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=indeterminate]:bg-[--muted] dark:data-[state=indeterminate]:bg-gray-700 data-[state=indeterminate]:text-white data-[state=indeterminate]:border-transparent data-[error=true]:border-red-500 data-[error=true]:dark:border-red-500 data-[error=true]:data-[state=checked]:border-red-500 data-[error=true]:dark:data-[state=checked]:border-red-500 h-5 w-5";
+            checkbox.setAttribute("data-error", "false");
+            checkbox.setAttribute("aria-readonly", "false");
+            checkbox.setAttribute("data-readonly", "false");
+            var hiddenInput = document.createElement("input");
+            hiddenInput.type = "checkbox";
+            hiddenInput.className = "appearance-none absolute bottom-0 border-0 w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap [clip:rect(0px,0px,0px,0px)] [overflow-wrap:normal]";
+            hiddenInput.setAttribute("aria-hidden", "true");
+            hiddenInput.tabIndex = -1;
+            hiddenInput.value = "off";
+            hiddenInput.checked = false;
+            checkboxLabel.appendChild(checkbox);
+            checkboxLabel.appendChild(hiddenInput);
+            checkboxWrap.appendChild(checkboxLabel);
+            tdCheck.appendChild(checkboxWrap);
+            tr.appendChild(tdCheck);
+
+            // Name column
+            var tdName = document.createElement("td");
+            tdName.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+            tdName.style.width = "90px";
+            tdName.style.maxWidth = "9.0072e+15px";
+            tdName.setAttribute("data-is-selection-col", "false");
+            tdName.setAttribute("data-action-col", "false");
+            tdName.textContent = ch.name || "";
+            tr.appendChild(tdName);
+
+            // Number column (placeholder for now)
+            var tdNum = document.createElement("td");
+            tdNum.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+            tdNum.style.width = "20px";
+            tdNum.style.maxWidth = "9.0072e+15px";
+            tdNum.setAttribute("data-is-selection-col", "false");
+            tdNum.setAttribute("data-action-col", "false");
+            tdNum.textContent = "";
+            tr.appendChild(tdNum);
+
+            // Action column
+            var tdAction = document.createElement("td");
+            tdAction.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+            tdAction.style.width = "20px";
+            tdAction.style.maxWidth = "9.0072e+15px";
+            tdAction.setAttribute("data-is-selection-col", "false");
+            tdAction.setAttribute("data-action-col", "true");
+            
+            var actionWrap = document.createElement("div");
+            actionWrap.className = "flex justify-end gap-2 items-center w-full";
+            tdAction.appendChild(actionWrap);
+            tr.appendChild(tdAction);
+
+            tbody.appendChild(tr);
+        });
+
+        console.log("[ext-bridge] Replaced chapter list with", chapters.length, "chapters");
+    }
+
+    function fetchAndReplaceChapters() {
+        var ext = getActive();
+        if (!ext || !cache.translated) {
+            console.log("[ext-bridge] No active extension or not translated yet");
+            return Promise.resolve(null);
+        }
+
+        var translated = cache.translated;
+        if (!translated.getChapters) {
+            console.warn("[ext-bridge] Translated extension has no getChapters method");
+            return Promise.resolve(null);
+        }
+
+        var mangaSlug = getMangaUrlFromPage();
+        if (!mangaSlug) {
+            console.warn("[ext-bridge] Could not determine manga URL from page");
+            return Promise.resolve(null);
+        }
+
+        // Construct the manga URL based on the extension's baseUrl
+        var mangaUrl;
+        try {
+            mangaUrl = new URL(mangaSlug, translated.baseUrl).toString();
+        } catch (_) {
+            mangaUrl = translated.baseUrl + "/" + mangaSlug.replace(/^\//, "");
+        }
+
+        console.log("[ext-bridge] Fetching chapters from:", mangaUrl);
+        window.__extBridgeLoading = true;
+        dispatch("ext:chaptersFetchLoading", { ext: ext, url: mangaUrl });
+
+        return translated.getChapters(mangaUrl)
+            .then(function(chapters) {
+                console.log("[ext-bridge] Fetched", chapters.length, "chapters");
+                replaceChapterList(chapters);
+                dispatch("ext:chaptersFetchLoaded", { ext: ext, chapters: chapters });
+                return chapters;
+            })
+            .catch(function(err) {
+                console.error("[ext-bridge] Failed to fetch chapters:", err);
+                dispatch("ext:bridgeError", { ext: ext, error: String(err && err.message || err) });
+                throw err;
+            })
+            .finally(function() {
+                window.__extBridgeLoading = false;
+            });
+    }
+
     // ── public API ───────────────────────────────────────────────────────────
 
     window.__extBridge = window.__extBridge || {};
@@ -347,13 +501,23 @@
     window.__extBridge.getActiveExtension = getActive;
     window.__extBridge.prefetchActiveExtension = prefetchActiveExtension;
     window.__extBridge.getCache = function() { return cache; };
+    window.__extBridge.fetchAndReplaceChapters = fetchAndReplaceChapters;
 
     // React to dropdown selection
     document.addEventListener("ext:sourceChanged", function() {
         // Prefetch immediately so the UI can show a spinner and we fail fast.
-        prefetchActiveExtension().catch(function(err) {
-            console.error("[ext-bridge] Prefetch failed:", err);
-        });
+        prefetchActiveExtension()
+            .then(function(translated) {
+                if (translated) {
+                    // After translation is done, fetch and replace chapters
+                    fetchAndReplaceChapters().catch(function(err) {
+                        console.error("[ext-bridge] Chapter fetch failed:", err);
+                    });
+                }
+            })
+            .catch(function(err) {
+                console.error("[ext-bridge] Prefetch failed:", err);
+            });
     });
 
     // React to chapter selection (clicks inside the chapter list container).
