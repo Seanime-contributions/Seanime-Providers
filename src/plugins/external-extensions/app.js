@@ -32,10 +32,10 @@
     function isInstalled(pkg) {
         return getInstalled().some(function(e) { return e.pkg === pkg; });
     }
-    function installExt(ext) {
+    function installExt(ext, manifestUrl) {
         var list = getInstalled();
         if (!list.some(function(e) { return e.pkg === ext.pkg; })) {
-            list.push(ext);
+            list.push(Object.assign({}, ext, { manifestUrl: manifestUrl || "" }));
             saveInstalled(list);
         }
     }
@@ -268,7 +268,7 @@
             Object.keys(selectedPkgs).forEach(function(pkg) {
                 if (!selectedPkgs[pkg]) return;
                 var ext = allExts.find(function(e) { return e.pkg === pkg; });
-                if (ext) installExt(ext);
+                if (ext) installExt(ext, manifestUrl);
             });
             doCloseWithEsc();
             onDone();
