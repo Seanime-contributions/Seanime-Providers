@@ -15,6 +15,7 @@ function init() {
         css:           BASE + "global.css",
         appJs:         BASE + "app.js",
         chapterListJs: BASE + "chapter-list.js",
+        chaptersJs:    BASE + "chapters.js",
         components: [
             "installed-card",
             "add-modal",
@@ -86,13 +87,18 @@ function init() {
         fetchText(ASSETS.chapterListJs).then(runScript).catch(function(err) {
             console.error("[ext-bridge] chapter-list.js failed:", err);
         });
+
+        fetchText(ASSETS.chaptersJs).then(runScript).catch(function(err) {
+            console.error("[ext-bridge] chapters.js failed:", err);
+        });
     })
     .catch(function(err) {
         console.error("[ext-bridge] Boot failed:", err);
     });
 
 })();
-\`;
+
+`;
 
             await script.setText(bootstrap);
             const body = await ctx.dom.queryOne("body");

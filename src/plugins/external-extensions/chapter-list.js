@@ -8,11 +8,35 @@
     var STORAGE_KEY    = "seanime_ext_bridge_installed";
     var INJECTED_ATTR  = "data-ext-source-injected";
     var ACTIVE_KEY     = "ext_active_source";
+    var DEFAULT_MANIFEST_URL = "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json";
 
     // ── storage ───────────────────────────────────────────────────────────────
 
     function getInstalled() {
-        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+        try {
+            var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            if (!Array.isArray(list)) return [];
+            // Ensure manifestUrl is always present for downstream logic.
+            var dirty = false;
+            list = list.map(function(e) {
+                if (!e || typeof e !== "object") return e;
+                if (!("manifestUrl" in e)) {
+                    dirty = true;
+                    return Object.assign({}, e, { manifestUrl: DEFAULT_MANIFEST_URL });
+                }
+                if (!e.manifestUrl) {
+                    dirty = true;
+                    return Object.assign({}, e, { manifestUrl: DEFAULT_MANIFEST_URL });
+                }
+                return e;
+            });
+            if (dirty) {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (_) {}
+            }
+            return list;
+        } catch {
+            return [];
+        }
     }
 
     function getActive() {
@@ -22,6 +46,7 @@
     function setActive(ext) {
         // null means "None"
         if (ext) {
+            if (!ext.manifestUrl) ext.manifestUrl = DEFAULT_MANIFEST_URL;
             sessionStorage.setItem(ACTIVE_KEY, JSON.stringify(ext));
         } else {
             sessionStorage.removeItem(ACTIVE_KEY);
@@ -93,6 +118,20 @@
         var labelEl  = root.qs(".ext-source-label");
         var dropdown = root.qs(".ext-source-dropdown");
 
+        var spinner = document.createElement("span");
+        spinner.className = "ext-spinner";
+        spinner.style.cssText = "margin-left:6px;display:none;";
+        // Append spinner inside the trigger button
+        trigger.appendChild(spinner);
+
+        function setLoading(on) {
+            spinner.style.display = on ? "inline-block" : "none";
+        }
+
+        document.addEventListener("ext:chaptersLoading", function() { setLoading(true); });
+        document.addEventListener("ext:chaptersLoaded",  function() { setLoading(false); });
+        document.addEventListener("ext:bridgeError",     function() { setLoading(false); });
+
         // ── populate options ──────────────────────────────────────────────────
 
         function populateOptions() {
@@ -107,6 +146,8 @@
                 labelEl.style.opacity = ".5";
                 closeDropdown();
                 populateOptions();
+
+                document.dispatchEvent(new CustomEvent("ext:sourceChanged", { detail: null }));
             });
             dropdown.appendChild(noneOpt);
 
