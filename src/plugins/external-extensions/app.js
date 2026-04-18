@@ -13,11 +13,11 @@
         if (!c) throw new Error("[ext-bridge] Component not loaded: " + name);
         var wrap = document.createElement("div");
         wrap.appendChild(c());
-        // Unwrap single-root components so callers get the root element directly,
-        // but still expose qs() for querying named slots.
         var root = wrap.firstElementChild;
-        root.qs = function(sel) { return wrap.querySelector(sel); };
-        root.qsa = function(sel) { return wrap.querySelectorAll(sel); };
+        // qs/qsa query from root itself so they still work after
+        // root is moved into the live document via appendChild.
+        root.qs  = function(sel) { return root.querySelector(sel); };
+        root.qsa = function(sel) { return root.querySelectorAll(sel); };
         return root;
     }
 
