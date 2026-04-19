@@ -69,3 +69,342 @@
 .ext-source-option {
     transition: background .1s;
 }
+
+/* ── chapter list overlay ─────────────────────────────────────────────────── */
+
+.ext-chapterlist-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: rgba(0,0,0,.18);
+    backdrop-filter: blur(1px);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+}
+
+.ext-chapterlist-overlay-spinner {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+}
+
+.ext-chapterlist-overlay-label {
+    margin: 0;
+    font-size: 12px;
+    opacity: .6;
+    color: #fff;
+}
+
+.ext-chapterlist-overlay-heavy {
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(2px);
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ext-chapterlist-overlay-heavy .ext-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+/* ── dropdown option styles ───────────────────────────────────────────────── */
+
+.ext-source-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.ext-source-option-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ext-source-option-selected {
+    background: rgba(99,130,255,.12);
+    color: rgba(140,165,255,.95);
+}
+
+.ext-source-option:hover:not(.ext-source-option-selected) {
+    background: rgba(255,255,255,.05);
+}
+
+.ext-source-divider {
+    height: 0.5px;
+    background: rgba(255,255,255,.07);
+    margin: 4px 2px;
+}
+
+.ext-source-empty {
+    padding: 8px 10px;
+    font-size: 12px;
+    opacity: .3;
+}
+
+/* ── dropdown spinner ─────────────────────────────────────────────────────── */
+
+.ext-dropdown-spinner {
+    margin-left: 6px;
+    display: none;
+}
+
+/* ── row spinner ──────────────────────────────────────────────────────────── */
+
+.ext-row-spinner {
+    margin-left: 8px;
+}
+
+/* ── chapter row styles ────────────────────────────────────────────────────── */
+
+.ext-chapter-row-td {
+    width: 6px;
+    max-width: 6px;
+}
+
+.ext-chapter-row-name {
+    width: 90px;
+    max-width: 9007199254740991px;
+}
+
+.ext-chapter-row-num {
+    width: 20px;
+    max-width: 9007199254740991px;
+}
+
+.ext-chapter-row-action {
+    width: 20px;
+    max-width: 9007199254740991px;
+}
+
+.ext-chapter-read-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 0.5px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    color: rgba(255,255,255,.6);
+    transition: background .1s, opacity .1s, border-color .1s;
+    flex: none;
+    height: 32px;
+    width: 32px;
+    opacity: 0.5;
+}
+
+.ext-chapter-read-btn:hover {
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.2);
+    opacity: 1;
+}
+
+.ext-chapter-empty-cell {
+    padding: 24px;
+    text-align: center;
+    opacity: .4;
+    font-size: 13px;
+}
+
+.ext-chapter-error-cell {
+    padding: 20px;
+    text-align: center;
+    color: rgba(220,100,100,.8);
+    font-size: 12px;
+}
+
+/* ── badge styles ─────────────────────────────────────────────────────────── */
+
+.ext-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 0.5px solid;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    border-color: rgba(255,255,255,.12);
+    color: rgba(255,255,255,.45);
+}
+
+.ext-badge-installed {
+    border-color: rgba(50,180,100,.25);
+    color: rgba(80,200,120,.8);
+    background: rgba(50,180,100,.08);
+}
+
+.ext-badge-nsfw {
+    border-color: rgba(220,100,100,.25);
+    color: rgba(240,120,120,.8);
+    background: rgba(220,100,100,.08);
+}
+
+/* ── icon styles ─────────────────────────────────────────────────────────── */
+
+.ext-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.05);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 0.5px solid rgba(255,255,255,.07);
+}
+
+.ext-icon-img {
+    object-fit: contain;
+}
+
+/* ── extension row styles ─────────────────────────────────────────────────── */
+
+.ext-extension-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    border: 0.5px solid rgba(255,255,255,.06);
+    background: rgba(255,255,255,.015);
+    cursor: pointer;
+    transition: background .1s, border-color .1s;
+}
+
+.ext-extension-row:hover {
+    background: rgba(255,255,255,.045) !important;
+}
+
+.ext-extension-row-selected {
+    border-color: rgba(99,130,255,.4);
+    background: rgba(99,130,255,.07);
+    cursor: default;
+}
+
+.ext-extension-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ext-extension-info-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ext-extension-info-meta {
+    margin: 2px 0 0;
+    font-size: 11px;
+    opacity: .35;
+}
+
+.ext-extension-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── checkbox styles ─────────────────────────────────────────────────────── */
+
+.ext-checkbox {
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+    border: 1.5px solid rgba(255,255,255,.2);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color .1s, background .1s;
+}
+
+.ext-checkbox-selected {
+    border-color: rgba(99,130,255,.9);
+    background: rgba(99,130,255,.45);
+}
+
+/* ── empty message styles ──────────────────────────────────────────────────── */
+
+.ext-empty-message {
+    text-align: center;
+    opacity: .3;
+    font-size: 13px;
+    padding: 32px 0;
+}
+
+/* ── section styles ──────────────────────────────────────────────────────── */
+
+.ext-section {
+    margin-top: 16px;
+}
+
+.ext-card {
+    border-radius: 12px;
+    border: 0.5px solid rgba(255,255,255,.07);
+    padding: 16px;
+}
+
+.ext-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ext-card-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: .8;
+}
+
+.ext-list-wrap {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.015);
+    border: 0.5px solid rgba(255,255,255,.05);
+}
+
+/* ── add button styles ──────────────────────────────────────────────────────── */
+
+.ext-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(99,130,255,.1);
+    border: 0.5px solid rgba(99,130,255,.25);
+    border-radius: 7px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(140,165,255,.9);
+    cursor: pointer;
+}
+
+/* ── grid layout ───────────────────────────────────────────────────────────── */
+
+.ext-installed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+    gap: 10px;
+}

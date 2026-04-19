@@ -334,8 +334,9 @@
             // Pattern A: addPathSegments("...query...")
             // e.g.  url.addPathSegments("Find/$query")
             //       url.addPathSegments("search?q=$query")
+            // Matches both $query and ${query} interpolation
             var pathSegMatch = searchFuncBody.match(
-                /addPathSegments\s*\(\s*"([^"]*\$\{?query\}?[^"]*)"\s*\)/
+                /addPathSegments\s*\(\s*"([^"]*?\$[{]?query[}]?[^"]*?)"\s*\)/
             );
             if (pathSegMatch) {
                 // Extract the literal prefix before the $query interpolation
@@ -357,7 +358,7 @@
             if (!searchStrategy) {
                 // Pattern C: direct string interpolation in GET("$baseUrl/path/$query")
                 var directMatch = searchFuncBody.match(
-                    /GET\s*\(\s*"\$baseUrl\/([^"]*\$\{?query\}?[^"]*)"\s*[,)]/
+                    /GET\s*\(\s*"\$baseUrl\/([^"]*?\$[{]?query[}]?[^"]*?)"\s*[,)]/
                 );
                 if (directMatch) {
                     searchStrategy = { type: "path", template: directMatch[1] };
@@ -721,16 +722,11 @@
             if (container) {
                 container.style.position = container.style.position || "relative";
                 overlay = document.createElement("div");
-                overlay.className = "ext-chapterlist-overlay";
-                overlay.style.cssText = "display:none;position:absolute;inset:0;border-radius:16px;"
-                    + "background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:50;"
-                    + "align-items:center;justify-content:center;flex-direction:column;gap:10px;";
+                overlay.className = "ext-chapterlist-overlay ext-chapterlist-overlay-heavy";
                 var spinner = document.createElement("span");
                 spinner.className = "ext-spinner";
-                spinner.style.cssText = "width:24px;height:24px;border-width:3px;";
                 var label = document.createElement("p");
                 label.className = "ext-chapterlist-overlay-label";
-                label.style.cssText = "margin:0;font-size:12px;opacity:.6;color:#fff;";
                 label.textContent = "Loading chapters…";
                 overlay.appendChild(spinner);
                 overlay.appendChild(label);
@@ -755,8 +751,7 @@
 
         // Checkbox cell
         var tdChk = document.createElement("td");
-        tdChk.className = tdClass;
-        tdChk.style.cssText = "width:6px;max-width:6px;";
+        tdChk.className = tdClass + " ext-chapter-row-td";
         tdChk.setAttribute("data-is-selection-col", "true");
         tdChk.setAttribute("data-action-col", "false");
         tdChk.setAttribute("data-row-selected", "false");
@@ -780,21 +775,17 @@
 
         // Name cell
         var tdName = document.createElement("td");
-        tdName.className = tdClass;
-        tdName.style.cssText = "width:90px;max-width:9007199254740991px;";
+        tdName.className = tdClass + " ext-chapter-row-name";
         tdName.setAttribute("data-is-selection-col", "false");
         tdName.setAttribute("data-action-col", "false");
-        tdName.setAttribute("data-row-selected", "false");
-        tdName.textContent = ch.name || "Chapter";
+        tdName.textContent = ch.name || "";
         tr.appendChild(tdName);
 
         // Number cell (empty for external chapters)
         var tdNum = document.createElement("td");
-        tdNum.className = tdClass;
-        tdNum.style.cssText = "width:20px;max-width:9007199254740991px;";
+        tdNum.className = tdClass + " ext-chapter-row-num";
         tdNum.setAttribute("data-is-selection-col", "false");
         tdNum.setAttribute("data-action-col", "false");
-        tdNum.setAttribute("data-row-selected", "false");
         // Try to parse a number from the chapter name
         var numMatch = (ch.name || "").match(/[\d]+(?:\.\d+)?/);
         tdNum.textContent = numMatch ? numMatch[0] : "";
@@ -802,8 +793,7 @@
 
         // Action cell — read button linking to chapter URL
         var tdAction = document.createElement("td");
-        tdAction.className = tdClass;
-        tdAction.style.cssText = "width:20px;max-width:9007199254740991px;";
+        tdAction.className = tdClass + " ext-chapter-row-action";
         tdAction.setAttribute("data-is-selection-col", "false");
         tdAction.setAttribute("data-action-col", "true");
         tdAction.setAttribute("data-row-selected", "false");
@@ -813,19 +803,12 @@
             var readBtn = document.createElement("a");
             readBtn.href = ch.url;
             readBtn.target = "_blank";
-            readBtn.rel = "noopener noreferrer";
-            readBtn.title = "Read on source";
-            readBtn.className = "UI-Button_root whitespace-nowrap font-semibold rounded-lg "
-                + "inline-flex items-center transition ease-in text-center justify-center "
-                + "shadow-none text-[--gray] border border-transparent bg-transparent "
-                + "hover:bg-gray-100 dark:hover:bg-opacity-10 UI-IconButton_root p-0 "
-                + "flex-none text-xl h-8 w-8 opacity-50 hover:opacity-100";
+            readBtn.className = "ext-chapter-read-btn";
             readBtn.innerHTML = '<svg stroke="currentColor" fill="none" stroke-width="2" '
                 + 'viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" '
                 + 'height="1em" width="1em">'
-                + '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
-                + '<polyline points="15 3 21 3 21 9"/>'
-                + '<line x1="10" y1="14" x2="21" y2="3"/>'
+                + '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>'
+                + '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>'
                 + '</svg>';
             actWrap.appendChild(readBtn);
         }
@@ -848,7 +831,7 @@
             var emptyRow = document.createElement("tr");
             var emptyCell = document.createElement("td");
             emptyCell.colSpan = 4;
-            emptyCell.style.cssText = "padding:24px;text-align:center;opacity:.4;font-size:13px;";
+            emptyCell.className = "ext-chapter-empty-cell";
             emptyCell.textContent = "No chapters found from external source.";
             emptyRow.appendChild(emptyCell);
             tbody.appendChild(emptyRow);
@@ -944,7 +927,7 @@
                 var errRow = document.createElement("tr");
                 var errCell = document.createElement("td");
                 errCell.colSpan = 4;
-                errCell.style.cssText = "padding:20px;text-align:center;color:rgba(220,100,100,.8);font-size:12px;";
+                errCell.className = "ext-chapter-error-cell";
                 errCell.textContent = "External source error: " + (err.message || err);
                 errRow.appendChild(errCell);
                 tbody.appendChild(errRow);

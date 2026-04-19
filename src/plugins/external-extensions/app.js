@@ -58,10 +58,11 @@
         catch(e) { return lang; }
     }
 
-    function makeBadge(text, style) {
+    function makeBadge(text, variant) {
         var b = document.createElement("span");
-        b.style.cssText = "display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;border:0.5px solid;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;"
-            + (style || "border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.45);");
+        b.className = "ext-badge";
+        if (variant === "installed") b.className += " ext-badge-installed";
+        if (variant === "nsfw") b.className += " ext-badge-nsfw";
         b.textContent = text;
         return b;
     }
@@ -75,7 +76,7 @@
             img.height = 28;
             img.loading = "lazy";
             img.decoding = "async";
-            img.style.cssText = "object-fit:contain;";
+            img.className = "ext-icon-img";
             wrap.appendChild(img);
         } else {
             wrap.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>';
@@ -111,10 +112,10 @@
 
         var badges = card.qs(".ext-card-badges");
         badges.appendChild(makeBadge(ext.version || "?"));
-        badges.appendChild(makeBadge("Tachiyomi", "border-color:rgba(100,160,255,.25);color:rgba(140,175,255,.85);"));
+        badges.appendChild(makeBadge("Tachiyomi"));
         badges.appendChild(makeBadge(lang));
         if (ext.nsfw) {
-            badges.appendChild(makeBadge("18+", "border-color:rgba(210,50,50,.3);color:#e05555;background:rgba(210,50,50,.1);"));
+            badges.appendChild(makeBadge("18+", "nsfw"));
         }
 
         card.qs(".ext-card-remove").onclick = function() {
@@ -171,14 +172,11 @@
             var selected  = !!selectedPkgs[ext.pkg];
 
             var row = document.createElement("div");
-            row.className = "ext-row";
-            row.style.cssText = "display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;border:0.5px solid "
-                + (selected ? "rgba(99,130,255,.4)"     : "rgba(255,255,255,.06)")
-                + ";background:" + (selected ? "rgba(99,130,255,.07)" : "rgba(255,255,255,.015)")
-                + ";cursor:" + (installed ? "default" : "pointer") + ";";
+            row.className = "ext-extension-row" + (selected ? " ext-extension-row-selected" : "");
+            if (installed) row.style.cursor = "default";
 
             var iconWrap = document.createElement("div");
-            iconWrap.style.cssText = "width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.05);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border:0.5px solid rgba(255,255,255,.07);";
+            iconWrap.className = "ext-icon-wrap";
             if (icon) {
                 var img = document.createElement("img");
                 img.src      = icon;
@@ -186,34 +184,30 @@
                 img.height   = 20;
                 img.loading  = "lazy";
                 img.decoding = "async";
-                img.style.cssText = "object-fit:contain;";
+                img.className = "ext-icon-img";
                 iconWrap.appendChild(img);
             } else {
                 iconWrap.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>';
             }
 
             var info = document.createElement("div");
-            info.style.cssText = "flex:1;min-width:0;";
-            info.innerHTML = '<p style="margin:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>'
-                           + '<p style="margin:2px 0 0;font-size:11px;opacity:.35;"></p>';
+            info.className = "ext-extension-info";
+            info.innerHTML = '<p class="ext-extension-info-title"></p><p class="ext-extension-info-meta"></p>';
             info.children[0].textContent = ext.name;
             info.children[1].textContent = langLabel(ext.lang) + " \u00b7 v" + (ext.version || "?");
 
             var rightSide = document.createElement("div");
-            rightSide.style.cssText = "flex-shrink:0;display:flex;align-items:center;gap:6px;";
+            rightSide.className = "ext-extension-right";
 
             if (ext.nsfw) {
-                rightSide.appendChild(makeBadge("18+", "border-color:rgba(210,50,50,.3);color:#e05555;background:rgba(210,50,50,.1);"));
+                rightSide.appendChild(makeBadge("18+", "nsfw"));
             }
 
             if (installed) {
-                rightSide.appendChild(makeBadge("Installed", "border-color:rgba(50,180,100,.25);color:rgba(80,200,120,.8);background:rgba(50,180,100,.08);"));
+                rightSide.appendChild(makeBadge("Installed", "installed"));
             } else {
                 var checkbox = document.createElement("div");
-                checkbox.style.cssText = "width:17px;height:17px;border-radius:5px;border:1.5px solid "
-                    + (selected ? "rgba(99,130,255,.9)" : "rgba(255,255,255,.2)")
-                    + ";background:" + (selected ? "rgba(99,130,255,.45)" : "transparent")
-                    + ";display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .1s,background .1s;";
+                checkbox.className = "ext-checkbox" + (selected ? " ext-checkbox-selected" : "");
                 if (selected) {
                     checkbox.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg>';
                 }
@@ -247,7 +241,7 @@
             var frag = document.createDocumentFragment();
             if (filtered.length === 0) {
                 var empty = document.createElement("p");
-                empty.style.cssText = "text-align:center;opacity:.3;font-size:13px;padding:32px 0;";
+                empty.className = "ext-empty-message";
                 empty.textContent = "No extensions match your search.";
                 frag.appendChild(empty);
             } else {
@@ -337,22 +331,21 @@
 
         var section = document.createElement("div");
         section.id = "ext-bridge-section";
-        section.style.cssText = "margin-top:16px;";
+        section.className = "ext-section";
 
         var card = document.createElement("div");
-        card.style.cssText = "border-radius:12px;border:0.5px solid rgba(255,255,255,.07);padding:16px;";
+        card.className = "ext-card";
 
         var topRow = document.createElement("div");
-        topRow.style.cssText = "display:flex;justify-content:space-between;align-items:center;"
-            + (installed.length > 0 ? "margin-bottom:16px;" : "");
+        topRow.className = "ext-card-header";
+        if (installed.length === 0) topRow.style.marginBottom = "0";
 
         var heading = document.createElement("h3");
-        heading.style.cssText = "margin:0;font-size:15px;font-weight:600;";
+        heading.className = "ext-card-title";
         heading.textContent = "External extensions";
 
         var addBtn = document.createElement("button");
-        addBtn.className = "ext-btn-ghost";
-        addBtn.style.cssText = "display:inline-flex;align-items:center;gap:5px;background:rgba(99,130,255,.1);border:0.5px solid rgba(99,130,255,.25);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:600;color:rgba(140,165,255,.9);cursor:pointer;";
+        addBtn.className = "ext-btn-ghost ext-add-btn";
         addBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add extension';
 
         topRow.appendChild(heading);
@@ -361,12 +354,13 @@
 
         if (installed.length === 0) {
             var empty = document.createElement("p");
-            empty.style.cssText = "margin:10px 0 0;font-size:13px;opacity:.3;line-height:1.5;";
+            empty.className = "ext-empty-message";
+            empty.style.marginTop = "10px";
             empty.textContent = "No external extensions installed yet. Click \u201cAdd extension\u201d to browse a Tachiyomi manifest.";
             card.appendChild(empty);
         } else {
             var grid = document.createElement("div");
-            grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;";
+            grid.className = "ext-installed-grid";
 
             var frag = document.createDocumentFragment();
             installed.forEach(function(ext) {

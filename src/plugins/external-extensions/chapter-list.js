@@ -77,15 +77,11 @@
 
     function makeOption(label, value, isSelected) {
         var el = document.createElement("div");
-        el.className = "ext-source-option";
+        el.className = "ext-source-option" + (isSelected ? " ext-source-option-selected" : "");
         el.dataset.value = value === null ? "__none__" : value;
-        el.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;"
-            + "padding:8px 10px;border-radius:8px;font-size:13px;cursor:pointer;"
-            + "transition:background .1s;"
-            + (isSelected ? "background:rgba(99,130,255,.12);color:rgba(140,165,255,.95);" : "");
 
         var labelEl = document.createElement("span");
-        labelEl.style.cssText = "flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;";
+        labelEl.className = "ext-source-option-label";
         labelEl.textContent = label;
         el.appendChild(labelEl);
 
@@ -95,12 +91,6 @@
             el.appendChild(check);
         }
 
-        el.addEventListener("mouseenter", function() {
-            if (!isSelected) el.style.background = "rgba(255,255,255,.05)";
-        });
-        el.addEventListener("mouseleave", function() {
-            if (!isSelected) el.style.background = "";
-        });
 
         return el;
     }
@@ -117,13 +107,9 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'ext-chapterlist-overlay';
-        overlay.style.cssText = 'display:none;position:absolute;inset:0;border-radius:16px;'
-            + 'background:rgba(0,0,0,.18);backdrop-filter:blur(1px);z-index:50;'
-            + 'align-items:center;justify-content:center;';
 
         var spinner = document.createElement('span');
-        spinner.className = 'ext-spinner';
-        spinner.style.cssText = 'width:22px;height:22px;border-width:3px;';
+        spinner.className = 'ext-spinner ext-chapterlist-overlay-spinner';
         overlay.appendChild(spinner);
         container.appendChild(overlay);
         return overlay;
@@ -154,9 +140,7 @@
         var dropdown = root.qs(".ext-source-dropdown");
 
         var spinner = document.createElement("span");
-        spinner.className = "ext-spinner";
-        spinner.style.cssText = "margin-left:6px;display:none;";
-        // Append spinner inside the trigger button
+        spinner.className = "ext-spinner ext-dropdown-spinner";
         trigger.appendChild(spinner);
 
         function setLoading(on) {
@@ -191,7 +175,7 @@
 
             if (installed.length === 0) {
                 var empty = document.createElement("div");
-                empty.style.cssText = "padding:8px 10px;font-size:12px;opacity:.3;";
+                empty.className = "ext-source-empty";
                 empty.textContent = "No extensions installed";
                 dropdown.appendChild(empty);
                 return;
@@ -199,7 +183,7 @@
 
             // Divider
             var divider = document.createElement("div");
-            divider.style.cssText = "height:0.5px;background:rgba(255,255,255,.07);margin:4px 2px;";
+                divider.className = "ext-source-divider";
             dropdown.appendChild(divider);
 
             installed.forEach(function(ext) {
