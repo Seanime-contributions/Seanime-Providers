@@ -100,6 +100,16 @@
             .replace(/\\"/g, '"');
     }
 
+    // Convert jQuery-style selectors to CSS selectors
+    // e.g. td:eq(0) → td:nth-child(1), td:eq(1) → td:nth-child(2)
+    function jqueryToCssSelector(selector) {
+        if (!selector) return selector;
+        return selector.replace(/:eq\((\d+)\)/g, function(match, index) {
+            // jQuery :eq() is 0-indexed, CSS :nth-child() is 1-indexed
+            return ":nth-child(" + (parseInt(index, 10) + 1) + ")";
+        });
+    }
+
     // Find the first node of a given type
     function firstOfType(node, type) {
         if (node.type === type) return node;
@@ -248,10 +258,10 @@
                 || "";
         }
 
-        var chapterListSelector = sel("chapterListSelector");
-        var pageImageSelector   = sel("pageImageSelector");
-        var popularMangaSelector = sel("popularMangaSelector");
-        var searchMangaSelector  = sel("searchMangaSelector") || popularMangaSelector;
+        var chapterListSelector = jqueryToCssSelector(sel("chapterListSelector"));
+        var pageImageSelector   = jqueryToCssSelector(sel("pageImageSelector"));
+        var popularMangaSelector = jqueryToCssSelector(sel("popularMangaSelector"));
+        var searchMangaSelector  = jqueryToCssSelector(sel("searchMangaSelector")) || popularMangaSelector;
 
         // Extract the link selector used in searchMangaFromElement / mangaFromElement
         // e.g. mangaFromElement(element, "h3 a, h5 a") → we want "h3 a, h5 a"
@@ -302,6 +312,7 @@
                 }
             }
         }
+        searchMangaLinkSelector = jqueryToCssSelector(searchMangaLinkSelector);
 
         // ── Search URL strategy ───────────────────────────────────────────────
         // We extract enough metadata from searchMangaRequest to replicate it
@@ -386,9 +397,9 @@
         if (chapterFunNodes.length > 0) {
             var body = chapterFunNodes[0].text || "";
             var hrefMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.attr\(["']href["']\)/);
-            if (hrefMatch) chapterUrlSelector = hrefMatch[1];
+            if (hrefMatch) chapterUrlSelector = jqueryToCssSelector(hrefMatch[1]);
             var nameMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.text\(\)/);
-            if (nameMatch) chapterNameSelector = nameMatch[1];
+            if (nameMatch) chapterNameSelector = jqueryToCssSelector(nameMatch[1]);
         }
 
         // Page image: look for pageListParse
@@ -399,7 +410,7 @@
         if (pageListNodes.length > 0 && !pageImageSelector) {
             var body2 = pageListNodes[0].text || "";
             var imgMatch = body2.match(/\.select\("([^"]+)"\)/);
-            if (imgMatch) pageImageSelector = imgMatch[1];
+            if (imgMatch) pageImageSelector = jqueryToCssSelector(imgMatch[1]);
         }
 
         // Date format
