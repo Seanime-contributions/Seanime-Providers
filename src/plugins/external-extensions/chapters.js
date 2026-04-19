@@ -342,6 +342,7 @@
         }
 
         if (searchFuncBody) {
+            console.log("[ext-bridge] searchMangaRequest body:", searchFuncBody);
             // Pattern A: addPathSegments("...query...")
             // e.g.  url.addPathSegments("Find/$query")
             //       url.addPathSegments("search?q=$query")
@@ -353,6 +354,7 @@
                 // Extract the literal prefix before the $query interpolation
                 // e.g. "Find/$query" → prefix = "Find/"
                 var segTemplate = pathSegMatch[1];
+                console.log("[ext-bridge] Pattern A matched, template:", segTemplate);
                 searchStrategy = { type: "path", template: segTemplate };
             }
 
@@ -362,6 +364,7 @@
                     /addQueryParameter\s*\(\s*["']([^"']+)["']\s*,\s*(?:query|encodedQuery|searchQuery)\b/
                 );
                 if (qpMatch) {
+                    console.log("[ext-bridge] Pattern B matched, paramName:", qpMatch[1]);
                     searchStrategy = { type: "param", paramName: qpMatch[1] };
                 }
             }
@@ -372,6 +375,7 @@
                     /GET\s*\(\s*"\$baseUrl\/([^"]*?\$[{]?query[}]?[^"]*?)"\s*[,)]/
                 );
                 if (directMatch) {
+                    console.log("[ext-bridge] Pattern C matched, template:", directMatch[1]);
                     searchStrategy = { type: "path", template: directMatch[1] };
                 }
             }
