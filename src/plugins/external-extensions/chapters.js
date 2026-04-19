@@ -253,25 +253,125 @@
         var popularMangaSelector = sel("popularMangaSelector");
         var searchMangaSelector  = sel("searchMangaSelector") || popularMangaSelector;
 
-        // Search URL patterns
-        var searchPath = extractFunString(root, "searchMangaRequest")
-            || extractValString(root, "searchPage")
-            || "";
-
-        // Detect if site uses search via GET params vs path segments
-        // Look for buildUrl / encodeURIComponent hints
-        var searchParamName = "q"; // common default
-        var queryParamMatch = (ktSource.match(/"[?&]([a-z_]+)=.*query/i) || [])[1];
-        if (queryParamMatch) searchParamName = queryParamMatch;
-
-        // Try to extract search URL template from searchMangaRequest function
-        var searchUrlTemplate = "";
-        var searchFuncMatch = ktSource.match(/fun\s+searchMangaRequest[\s\S]{0,800}?GET\s*\(\s*"([^"]+)"/);
-        if (!searchFuncMatch) {
-            searchFuncMatch = ktSource.match(/GET\s*\(\s*"([^"$]+\$\{?query[^"]*)"/)
-                || ktSource.match(/url\.addQueryParameter\(["']([^"']+)["']/);
+        // Extract the link selector used in searchMangaFromElement / mangaFromElement
+        // e.g. mangaFromElement(element, "h3 a, h5 a") → we want "h3 a, h5 a"
+        var searchMangaLinkSelector = "";
+        var searchFromElNodes = walkNodes(root, function (n) {
+            return n.type === "function_declaration"
+                && (firstOfType(n, "simple_identifier") || {}).text === "searchMangaFromElement";
+        });
+        if (searchFromElNodes.length > 0) {
+            // Look for string literals that look like CSS selectors (contain spaces or commas)
+            var sfStrings = allOfType(searchFromElNodes[0], "string_literal");
+            for (var si = 0; si < sfStrings.length; si++) {
+                var sv = extractStringValue(sfStrings[si]);
+                // Heuristic: if it contains "a" and looks like a selector
+                if (sv && /\ba\b/.test(sv) && (sv.includes(" ") || sv.includes(","))) {
+                    searchMangaLinkSelector = sv;
+                    break;
+                }
+            }
         }
-        if (searchFuncMatch) searchUrlTemplate = searchFuncMatch[1];
+        // Also check mangaFromElement helper which is often called with a urlSelector arg
+        if (!searchMangaLinkSelector) {
+            var mangaFromElNodes = walkNodes(root, function (n) {
+                return n.type === "function_declaration"
+                    && (firstOfType(n, "simple_identifier") || {}).text === "mangaFromElement";
+            });
+            if (mangaFromElNodes.length > 0) {
+                // The urlSelector parameter is typically used as-is for the link
+                var params = walkNodes(mangaFromElNodes[0], function (n) {
+                    return n.type === "parameter";
+                });
+                // The last parameter is usually urlSelector
+                if (params.length > 1) {
+                    var lastParam = params[params.length - 1];
+                    searchMangaLinkSelector = (firstOfType(lastParam, "simple_identifier") || {}).text || "";
+                    // This gives us the param name, not the value — we need callsite analysis
+                    // Look for the call in searchMangaFromElement body
+                    if (searchFromElNodes.length > 0) {
+                        var callStrings = allOfType(searchFromElNodes[0], "string_literal");
+                        for (var csi = 0; csi < callStrings.length; csi++) {
+                            var csv2 = extractStringValue(callStrings[csi]);
+                            if (csv2 && /\ba\b/.test(csv2)) {
+                                searchMangaLinkSelector = csv2;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Search URL strategy ───────────────────────────────────────────────
+        // We extract enough metadata from searchMangaRequest to replicate it
+        // in JS. There are two dominant patterns in Tachiyomi extensions:
+        //
+        //  A) Path-segment style:
+        //       url.addPathSegments("Find/$query")
+        //     → baseUrl/Find/{query}
+        //
+        //  B) Query-parameter style:
+        //       url.addQueryParameter("s", query)
+        //     → baseUrl/?s={query}
+        //
+        // We walk the searchMangaRequest function body as text (not AST here,
+        // since the string arguments are what matter) and look for both patterns.
+
+        var searchStrategy = null; // { type: "path"|"param", value: string }
+
+        // Isolate the searchMangaRequest function body
+        var searchFuncBody = "";
+        var searchFunNodes = walkNodes(root, function (n) {
+            return n.type === "function_declaration"
+                && (firstOfType(n, "simple_identifier") || {}).text === "searchMangaRequest";
+        });
+        if (searchFunNodes.length > 0) {
+            searchFuncBody = searchFunNodes[0].text || "";
+        }
+
+        if (searchFuncBody) {
+            // Pattern A: addPathSegments("...query...")
+            // e.g.  url.addPathSegments("Find/$query")
+            //       url.addPathSegments("search?q=$query")
+            var pathSegMatch = searchFuncBody.match(
+                /addPathSegments\s*\(\s*"([^"]*\$\{?query\}?[^"]*)"\s*\)/
+            );
+            if (pathSegMatch) {
+                // Extract the literal prefix before the $query interpolation
+                // e.g. "Find/$query" → prefix = "Find/"
+                var segTemplate = pathSegMatch[1];
+                searchStrategy = { type: "path", template: segTemplate };
+            }
+
+            if (!searchStrategy) {
+                // Pattern B: addQueryParameter("key", query)
+                var qpMatch = searchFuncBody.match(
+                    /addQueryParameter\s*\(\s*["']([^"']+)["']\s*,\s*(?:query|encodedQuery|searchQuery)\b/
+                );
+                if (qpMatch) {
+                    searchStrategy = { type: "param", paramName: qpMatch[1] };
+                }
+            }
+
+            if (!searchStrategy) {
+                // Pattern C: direct string interpolation in GET("$baseUrl/path/$query")
+                var directMatch = searchFuncBody.match(
+                    /GET\s*\(\s*"\$baseUrl\/([^"]*\$\{?query\}?[^"]*)"\s*[,)]/
+                );
+                if (directMatch) {
+                    searchStrategy = { type: "path", template: directMatch[1] };
+                }
+            }
+        }
+
+        // Fallback: if the extension has a searchMangaSelector but we still
+        // couldn't figure out the URL, mark it as unknown so we skip search
+        // and go straight to the popular/latest page approach.
+        if (!searchStrategy) {
+            console.warn("[ext-bridge] Could not determine search URL strategy from searchMangaRequest");
+            searchStrategy = { type: "unknown" };
+        }
 
         // Chapter URL / name selectors
         var chapterUrlSelector  = extractFunString(root, "chapterFromElement") || "a";
@@ -321,12 +421,9 @@
                 chapterName: chapterNameSelector,
                 pageImages: pageImageSelector,
                 searchManga: searchMangaSelector,
+                searchMangaLink: searchMangaLinkSelector,
             },
-            search: {
-                urlTemplate: searchUrlTemplate,
-                paramName: searchParamName,
-                path: searchPath,
-            },
+            searchStrategy: searchStrategy,
             dateFormat: dateFormat,
             headers: headers,
         };
@@ -423,19 +520,28 @@
 
     function buildSearchUrl(recipe, query) {
         var base = recipe.baseUrl.replace(/\/$/, "");
-        var tpl  = recipe.search.urlTemplate || "";
+        var strategy = recipe.searchStrategy || { type: "unknown" };
 
-        if (tpl) {
-            // Replace $query or ${query} placeholders
-            var filled = tpl.replace(/\$\{?query\}?/g, encodeURIComponent(query));
-            // If template is already absolute
-            try { new URL(filled); return filled; } catch (_) {}
-            // Otherwise relative to baseUrl
-            return base + (filled.startsWith("/") ? "" : "/") + filled;
+        if (strategy.type === "path") {
+            // Replace Kotlin string interpolation: $query or ${query}
+            // The template is the raw string argument to addPathSegments,
+            // e.g. "Find/$query" → base + "/Find/" + encodeURIComponent(query)
+            var filled = strategy.template
+                .replace(/\$\{?query\}?/g, encodeURIComponent(query))
+                .replace(/\$\{?encodedQuery\}?/g, encodeURIComponent(query))
+                .replace(/\$\{?searchQuery\}?/g, encodeURIComponent(query));
+            // Some templates already include a leading slash, others don't
+            var sep = filled.startsWith("/") ? "" : "/";
+            return base + sep + filled;
         }
-        // Fallback: common search path patterns
-        return base + "/?s=" + encodeURIComponent(query)
-            + "&post_type=wp-manga";
+
+        if (strategy.type === "param") {
+            return base + "/?" + strategy.paramName + "=" + encodeURIComponent(query);
+        }
+
+        // type === "unknown": we can't construct a search URL from the source.
+        // Return null so the caller knows to skip search.
+        return null;
     }
 
     function fetchDocument(url, headers) {
@@ -473,31 +579,53 @@
     }
 
     function searchForManga(recipe, titles) {
-        // Try each title in order, stop at first successful result
+        // If the search strategy is unknown we cannot search — fail fast
+        // so the caller can decide to skip or error cleanly.
+        if (!recipe.searchStrategy || recipe.searchStrategy.type === "unknown") {
+            return Promise.reject(new Error(
+                "Cannot determine search URL for this extension. "
+                + "The searchMangaRequest function uses an unsupported URL-building pattern."
+            ));
+        }
+
+        // Try each title in order, stop at first successful result with a good score
         var tried = [];
         function tryNext(idx) {
             if (idx >= titles.length) {
-                return Promise.reject(new Error("No manga found after trying " + tried.length + " titles"));
+                return Promise.reject(new Error(
+                    "No manga found after searching " + tried.length + " title(s): "
+                    + tried.slice(0, 3).map(function (t) { return '"' + t + '"'; }).join(", ")
+                ));
             }
             var title = titles[idx];
             tried.push(title);
+
             var url = buildSearchUrl(recipe, title);
-            console.log("[ext-bridge] Searching:", url);
+            if (!url) {
+                // Shouldn't happen if strategy check above passed, but guard anyway
+                return Promise.reject(new Error("buildSearchUrl returned null"));
+            }
+
+            console.log("[ext-bridge] Searching (" + (idx + 1) + "/" + titles.length + "):", url);
 
             return fetchDocument(url, recipe.headers).then(function (doc) {
-                var sel = recipe.selectors.searchManga || recipe.selectors.chapterList;
+                var sel = recipe.selectors.searchManga || recipe.selectors.popularManga;
+                if (!sel) throw new Error("No searchMangaSelector in recipe");
+
                 var results = cssSelectSafe(doc, sel);
+                console.log("[ext-bridge] Search results for '" + title + "':", results.length);
 
                 if (results.length === 0) {
-                    console.log("[ext-bridge] No results for:", title);
                     return tryNext(idx + 1);
                 }
 
-                // Find best match
+                // Score every result against all known titles
                 var best = null;
                 var bestScore = -1;
                 results.forEach(function (el) {
-                    var aEl = el.querySelector("a") || (el.tagName === "A" ? el : null);
+                    // Find the link element — try the configured selector first
+                    var linkSel = recipe.selectors.searchMangaLink || "h3 a, h5 a, a";
+                    var aEl = el.querySelector(linkSel) || (el.tagName === "A" ? el : null);
                     if (!aEl) return;
                     var elTitle = (aEl.getAttribute("title") || aEl.textContent || "").trim();
                     var score = 0;
@@ -507,7 +635,8 @@
                     });
                     if (score > bestScore) {
                         bestScore = score;
-                        best = { element: el, url: aEl.href || aEl.getAttribute("href"), title: elTitle, score: score };
+                        var href = aEl.href || aEl.getAttribute("href") || "";
+                        best = { url: href, title: elTitle, score: score };
                     }
                 });
 
@@ -515,12 +644,18 @@
                     console.log("[ext-bridge] Best match:", best.title, "(score " + best.score + ")");
                     return best;
                 }
+
+                // Score too low — try the next title
+                console.log("[ext-bridge] Best score too low (" + bestScore + ") for '" + title + "', trying next title");
                 return tryNext(idx + 1);
+
             }).catch(function (err) {
+                // Network/parse error for this title — try the next one rather than hard-failing
                 console.warn("[ext-bridge] Search error for '" + title + "':", err.message);
                 return tryNext(idx + 1);
             });
         }
+
         return tryNext(0);
     }
 
