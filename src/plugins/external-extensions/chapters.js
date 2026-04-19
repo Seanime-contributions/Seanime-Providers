@@ -480,8 +480,20 @@
         var id   = extIdFromPkg(pkg);
         var lang = langFromPkg(pkg);
         if (!id || !lang) return "";
+        // Extract the class name from the extension name (e.g., "Tachiyomi: MangaPill" -> "MangaPill")
+        var className = "";
+        if (ext.name) {
+            var nameMatch = ext.name.match(/:\s*(.+)/);
+            if (nameMatch) {
+                className = nameMatch[1].trim();
+            } else {
+                className = ext.name.trim();
+            }
+        }
+        // Fallback to title-cased id if no name or no match
+        if (!className) className = titleCase(id);
         return "https://raw.githubusercontent.com/keiyoushi/extensions-source/refs/heads/main/src/"
-            + lang + "/" + id + "/src/" + pkgToPath(pkg) + "/" + titleCase(id) + ".kt";
+            + lang + "/" + id + "/src/" + pkgToPath(pkg) + "/" + className + ".kt";
     }
 
     function fetchText(url) {
