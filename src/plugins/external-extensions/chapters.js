@@ -396,17 +396,10 @@
         });
         if (chapterFunNodes.length > 0) {
             var body = chapterFunNodes[0].text || "";
-            console.log("[ext-bridge] chapterFromElement body:", body);
             var hrefMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.attr\(["']href["']\)/);
-            if (hrefMatch) {
-                console.log("[ext-bridge] Found href selector:", hrefMatch[1], "->", jqueryToCssSelector(hrefMatch[1]));
-                chapterUrlSelector = jqueryToCssSelector(hrefMatch[1]);
-            }
+            if (hrefMatch) chapterUrlSelector = jqueryToCssSelector(hrefMatch[1]);
             var nameMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.text\(\)/);
-            if (nameMatch) {
-                console.log("[ext-bridge] Found name selector:", nameMatch[1], "->", jqueryToCssSelector(nameMatch[1]));
-                chapterNameSelector = jqueryToCssSelector(nameMatch[1]);
-            }
+            if (nameMatch) chapterNameSelector = jqueryToCssSelector(nameMatch[1]);
         }
         // Fallback: if chapterNameSelector is still empty, try a broader pattern
         if (!chapterNameSelector && chapterFunNodes.length > 0) {
@@ -416,13 +409,11 @@
                 var sel = match[1];
                 if (sel && !sel.includes("a")) {
                     // Likely the name selector (not the link selector)
-                    console.log("[ext-bridge] Fallback found selector:", sel, "->", jqueryToCssSelector(sel));
                     chapterNameSelector = jqueryToCssSelector(sel);
                     break;
                 }
             }
         }
-        console.log("[ext-bridge] Final chapterNameSelector:", chapterNameSelector);
 
         // Page image: look for pageListParse
         var pageListNodes = walkNodes(root, function (n) {
@@ -644,7 +635,7 @@
             console.log("[ext-bridge] Searching (" + (idx + 1) + "/" + titles.length + "):", url);
 
             return fetchDocument(url, recipe.headers).then(function (doc) {
-                var sel = recipe.selectors.searchManga || recipe.selectors.popularManga;
+                var sel = jqueryToCssSelector(recipe.selectors.searchManga || recipe.selectors.popularManga || "");
                 if (!sel) throw new Error("No searchMangaSelector in recipe");
 
                 var results = cssSelectSafe(doc, sel);
@@ -659,7 +650,7 @@
                 var bestScore = -1;
                 results.forEach(function (el) {
                     // Find the link element — try the configured selector first
-                    var linkSel = recipe.selectors.searchMangaLink || "h3 a, h5 a, a";
+                    var linkSel = jqueryToCssSelector(recipe.selectors.searchMangaLink || "h3 a, h5 a, a");
                     var aEl = el.querySelector(linkSel) || (el.tagName === "A" ? el : null);
                     if (!aEl) return;
                     var elTitle = (aEl.getAttribute("title") || aEl.textContent || "").trim();
@@ -715,7 +706,7 @@
     function fetchChapters(recipe, mangaUrl) {
         console.log("[ext-bridge] Fetching chapters from:", mangaUrl);
         return fetchDocument(mangaUrl, recipe.headers).then(function (doc) {
-            var sel = recipe.selectors.chapterList;
+            var sel = jqueryToCssSelector(recipe.selectors.chapterList || "");
             if (!sel) throw new Error("No chapterListSelector in recipe");
             var rows = cssSelectSafe(doc, sel);
             console.log("[ext-bridge] Found", rows.length, "chapter rows");
@@ -729,7 +720,7 @@
                 }
 
                 // Name
-                var nameSel = recipe.selectors.chapterName;
+                var nameSel = jqueryToCssSelector(recipe.selectors.chapterName || "");
                 var nameEl  = nameSel ? row.querySelector(nameSel) : null;
                 var name    = (nameEl || aEl || row).textContent.trim();
 
