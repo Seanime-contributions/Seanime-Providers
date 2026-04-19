@@ -546,7 +546,8 @@
     }
 
     function fetchDocument(url, headers) {
-        return fetch(url, { cache: "no-cache", headers: headers || {} })
+        var proxiedUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+        return fetch(proxiedUrl, { cache: "no-cache", headers: headers || {} })
             .then(function (r) {
                 if (!r.ok) throw new Error("HTTP " + r.status + " for " + url);
                 return r.text();
