@@ -637,7 +637,11 @@
                     });
                     if (score > bestScore) {
                         bestScore = score;
-                        var href = aEl.href || aEl.getAttribute("href") || "";
+                        var href = aEl.getAttribute("href") || "";
+                        // Resolve relative URLs against the extension's baseUrl
+                        if (href && !href.startsWith("http")) {
+                            try { href = new URL(href, recipe.baseUrl).toString(); } catch (_) {}
+                        }
                         best = { url: href, title: elTitle, score: score };
                     }
                 });
