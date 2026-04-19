@@ -770,21 +770,28 @@
         if (label) label.textContent = text;
     }
 
-    // Build a single chapter row matching Seanime's existing table structure
+    // Build a single chapter row matching Seanime's existing table structure exactly
     function buildChapterRow(ch) {
         var tr = document.createElement("tr");
         tr.className = "UI-DataGrid__tr hover:bg-[--subtle] truncate";
 
-        var tdClass = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal "
-            + "text-[--foreground] data-[action-col=false]:truncate border-b border-[rgba(255,255,255,0.05)]";
+        var tdBaseClass = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
 
         // Checkbox cell
         var tdChk = document.createElement("td");
-        tdChk.className = tdClass + " ext-chapter-row-td";
-        tdChk.setAttribute("data-is-selection-col", "true");
+        tdChk.className = tdBaseClass;
+        tdChk.setAttribute("data-is-selection-col", "e=>!ef(e.original)&&!ex(e.original)");
         tdChk.setAttribute("data-action-col", "false");
         tdChk.setAttribute("data-row-selected", "false");
+        tdChk.setAttribute("data-editing", "false");
+        tdChk.setAttribute("data-editable", "false");
+        tdChk.setAttribute("data-row-editing", "false");
+        tdChk.style.width = "6px";
+        tdChk.style.maxWidth = "6px";
+
         var chkWrap = document.createElement("div");
+        var chkField = document.createElement("div");
+        chkField.className = "UI-BasicField__field relative space-y-1 w-fit";
         var chkLabel = document.createElement("label");
         chkLabel.className = "UI-Checkbox__container inline-flex gap-2 items-center";
         var chkBtn = document.createElement("button");
@@ -793,54 +800,79 @@
         chkBtn.setAttribute("aria-checked", "false");
         chkBtn.setAttribute("data-state", "unchecked");
         chkBtn.setAttribute("data-disabled", "false");
-        chkBtn.className = "UI-Checkbox__root appearance-none peer block relative overflow-hidden "
-            + "transition shrink-0 text-white rounded-[--radius-md] ring-offset-1 border "
-            + "ring-offset-[--background] border-gray-300 dark:border-gray-700 outline-none "
-            + "h-5 w-5 dark:bg-gray-700";
+        chkBtn.setAttribute("data-error", "false");
+        chkBtn.setAttribute("aria-readonly", "false");
+        chkBtn.setAttribute("data-readonly", "false");
+        chkBtn.className = "UI-Checkbox__root appearance-none peer block relative overflow-hidden transition shrink-0 text-white rounded-[--radius-md] ring-offset-1 border ring-offset-[--background] border-gray-300 dark:border-gray-700 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--ring] disabled:cursor-not-allowed data-[disabled=true]:opacity-50 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:bg-gray-700 data-[state=unchecked]:hover:bg-gray-100 dark:data-[state=unchecked]:hover:bg-gray-600 data-[state=checked]:bg-brand dark:data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=indeterminate]:bg-[--muted] dark:data-[state=indeterminate]:bg-gray-700 data-[state=indeterminate]:text-white data-[state=indeterminate]:border-transparent data-[error=true]:border-red-500 data-[error=true]:dark:border-red-500 data-[error=true]:data-[state=checked]:border-red-500 data-[error=true]:dark:data-[state=checked]:border-red-500 h-5 w-5";
+        var chkInput = document.createElement("input");
+        chkInput.className = "appearance-none absolute bottom-0 border-0 w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap [clip:rect(0px,0px,0px,0px)] [overflow-wrap:normal]";
+        chkInput.setAttribute("aria-hidden", "true");
+        chkInput.setAttribute("tabindex", "-1");
+        chkInput.type = "checkbox";
+        chkInput.value = "off";
+        chkInput.checked = "";
+
         chkLabel.appendChild(chkBtn);
-        chkWrap.appendChild(chkLabel);
+        chkLabel.appendChild(chkInput);
+        chkField.appendChild(chkLabel);
+        chkWrap.appendChild(chkField);
         tdChk.appendChild(chkWrap);
         tr.appendChild(tdChk);
 
         // Name cell
         var tdName = document.createElement("td");
-        tdName.className = tdClass + " ext-chapter-row-name";
+        tdName.className = tdBaseClass;
         tdName.setAttribute("data-is-selection-col", "false");
         tdName.setAttribute("data-action-col", "false");
+        tdName.setAttribute("data-row-selected", "false");
+        tdName.setAttribute("data-editing", "false");
+        tdName.setAttribute("data-editable", "false");
+        tdName.setAttribute("data-row-editing", "false");
+        tdName.style.width = "90px";
+        tdName.style.maxWidth = "9.0072e+15px";
         tdName.textContent = ch.name || "";
         tr.appendChild(tdName);
 
-        // Number cell (empty for external chapters)
+        // Number cell
         var tdNum = document.createElement("td");
-        tdNum.className = tdClass + " ext-chapter-row-num";
+        tdNum.className = tdBaseClass;
         tdNum.setAttribute("data-is-selection-col", "false");
         tdNum.setAttribute("data-action-col", "false");
+        tdNum.setAttribute("data-row-selected", "false");
+        tdNum.setAttribute("data-editing", "false");
+        tdNum.setAttribute("data-editable", "false");
+        tdNum.setAttribute("data-row-editing", "false");
+        tdNum.style.width = "20px";
+        tdNum.style.maxWidth = "9.0072e+15px";
         // Try to parse a number from the chapter name
         var numMatch = (ch.name || "").match(/[\d]+(?:\.\d+)?/);
         tdNum.textContent = numMatch ? numMatch[0] : "";
         tr.appendChild(tdNum);
 
-        // Action cell — read button linking to chapter URL
+        // Action cell
         var tdAction = document.createElement("td");
-        tdAction.className = tdClass + " ext-chapter-row-action";
+        tdAction.className = tdBaseClass;
         tdAction.setAttribute("data-is-selection-col", "false");
         tdAction.setAttribute("data-action-col", "true");
         tdAction.setAttribute("data-row-selected", "false");
+        tdAction.setAttribute("data-editing", "false");
+        tdAction.setAttribute("data-editable", "false");
+        tdAction.setAttribute("data-row-editing", "false");
+        tdAction.style.width = "20px";
+        tdAction.style.maxWidth = "9.0072e+15px";
+
         var actWrap = document.createElement("div");
         actWrap.className = "flex justify-end gap-2 items-center w-full";
+
         if (ch.url) {
             var readBtn = document.createElement("a");
             readBtn.href = ch.url;
             readBtn.target = "_blank";
-            readBtn.className = "ext-chapter-read-btn";
-            readBtn.innerHTML = '<svg stroke="currentColor" fill="none" stroke-width="2" '
-                + 'viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" '
-                + 'height="1em" width="1em">'
-                + '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>'
-                + '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>'
-                + '</svg>';
+            readBtn.className = "UI-Button_root whitespace-nowrap font-semibold rounded-lg inline-flex items-center transition ease-in text-center justify-center focus-visible:outline-none focus-visible:ring-2 ring-offset-1 ring-offset-[--background] focus-visible:ring-[--ring] disabled:opacity-50 disabled:pointer-events-none shadow-none text-[--gray] border bg-gray-100 border-transparent hover:bg-gray-200 active:bg-gray-300 dark:text-gray-300 dark:bg-opacity-10 dark:hover:bg-opacity-20 UI-IconButton_root p-0 flex-none text-2xl h-10 w-10";
+            readBtn.innerHTML = '<span class="md:inline-block"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M149.688 85.625c-1.234.005-2.465.033-3.72.063-33.913.806-75.48 10.704-127.25 33.718V362.78c60.77-28.82 106.718-37.067 144.22-33.092 33.502 3.55 59.685 16.66 83.562 31.187v-242.97c-23.217-17.744-50.195-30.04-85.97-32-3.52-.192-7.142-.296-10.843-.28zm211.968 0c-3.7-.016-7.322.088-10.844.28-35.773 1.96-62.75 14.256-85.968 32v242.97c23.876-14.527 50.06-27.637 83.562-31.188 37.502-3.974 83.45 4.272 144.22 33.094V119.407c-51.77-23.014-93.337-32.912-127.25-33.72-1.255-.028-2.486-.056-3.72-.06zm5.72 261.78c-1.038-.002-2.074.017-3.095.033-4.808.075-9.43.37-13.905.843-33.932 3.597-59.603 17.976-85.53 34.44v.28c-6.554-1.99-13.02-2.37-19.408-.97-25.566-16.177-51.003-30.202-84.468-33.75-5.595-.592-11.44-.883-17.564-.842-32.04.213-71.833 9.778-124.687 35.937v42.53c60.77-28.823 106.714-37.067 144.218-33.092 18.545 1.965 34.837 6.845 49.75 13.28-4.682 6.064-9.308 13.268-13.875 21.688h117.156c-5.93-8.22-11.798-15.414-17.626-21.56 14.996-6.503 31.39-11.43 50.062-13.408 37.503-3.974 83.448 4.272 144.22 33.094v-42.53c-53.16-26.31-93.115-35.863-125.25-35.97z"></path></svg></span>';
             actWrap.appendChild(readBtn);
         }
+
         tdAction.appendChild(actWrap);
         tr.appendChild(tdAction);
 
@@ -858,9 +890,16 @@
 
         if (chapters.length === 0) {
             var emptyRow = document.createElement("tr");
+            emptyRow.className = "UI-DataGrid__tr hover:bg-[--subtle] truncate";
             var emptyCell = document.createElement("td");
+            emptyCell.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+            emptyCell.setAttribute("data-is-selection-col", "false");
+            emptyCell.setAttribute("data-action-col", "false");
+            emptyCell.setAttribute("data-row-selected", "false");
+            emptyCell.setAttribute("data-editing", "false");
+            emptyCell.setAttribute("data-editable", "false");
+            emptyCell.setAttribute("data-row-editing", "false");
             emptyCell.colSpan = 4;
-            emptyCell.className = "ext-chapter-empty-cell";
             emptyCell.textContent = "No chapters found from external source.";
             emptyRow.appendChild(emptyCell);
             tbody.appendChild(emptyRow);
@@ -954,9 +993,16 @@
             if (tbody) {
                 tbody.innerHTML = "";
                 var errRow = document.createElement("tr");
+                errRow.className = "UI-DataGrid__tr hover:bg-[--subtle] truncate";
                 var errCell = document.createElement("td");
+                errCell.className = "UI-DataGrid__td px-2 py-2 w-full whitespace-nowrap text-base font-normal text-[--foreground] data-[is-selection-col=true]:px-2 data-[is-selection-col=true]:sm:px-0 data-[is-selection-col=true]:text-center data-[action-col=false]:truncate data-[action-col=false]:overflow-ellipsis data-[row-selected=true]:bg-brand-50 dark:data-[row-selected=true]:bg-gray-800 data-[editing=true]:ring-1 data-[editing=true]:ring-[--ring] ring-inset data-[editable=true]:hover:bg-[--subtle] md:data-[editable=true]:focus:ring-2 md:data-[editable=true]:focus:ring-[--slate] focus:outline-none border-b border-[rgba(255,255,255,0.05)]";
+                errCell.setAttribute("data-is-selection-col", "false");
+                errCell.setAttribute("data-action-col", "false");
+                errCell.setAttribute("data-row-selected", "false");
+                errCell.setAttribute("data-editing", "false");
+                errCell.setAttribute("data-editable", "false");
+                errCell.setAttribute("data-row-editing", "false");
                 errCell.colSpan = 4;
-                errCell.className = "ext-chapter-error-cell";
                 errCell.textContent = "External source error: " + (err.message || err);
                 errRow.appendChild(errCell);
                 tbody.appendChild(errRow);
