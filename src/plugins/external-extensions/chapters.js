@@ -396,11 +396,33 @@
         });
         if (chapterFunNodes.length > 0) {
             var body = chapterFunNodes[0].text || "";
+            console.log("[ext-bridge] chapterFromElement body:", body);
             var hrefMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.attr\(["']href["']\)/);
-            if (hrefMatch) chapterUrlSelector = jqueryToCssSelector(hrefMatch[1]);
+            if (hrefMatch) {
+                console.log("[ext-bridge] Found href selector:", hrefMatch[1], "->", jqueryToCssSelector(hrefMatch[1]));
+                chapterUrlSelector = jqueryToCssSelector(hrefMatch[1]);
+            }
             var nameMatch = body.match(/\.select\("([^"]+)"\)[\s\S]{0,100}?\.text\(\)/);
-            if (nameMatch) chapterNameSelector = jqueryToCssSelector(nameMatch[1]);
+            if (nameMatch) {
+                console.log("[ext-bridge] Found name selector:", nameMatch[1], "->", jqueryToCssSelector(nameMatch[1]));
+                chapterNameSelector = jqueryToCssSelector(nameMatch[1]);
+            }
         }
+        // Fallback: if chapterNameSelector is still empty, try a broader pattern
+        if (!chapterNameSelector && chapterFunNodes.length > 0) {
+            var body = chapterFunNodes[0].text || "";
+            var allSelectMatches = body.matchAll(/\.select\("([^"]+)"\)/g);
+            for (var match of allSelectMatches) {
+                var sel = match[1];
+                if (sel && !sel.includes("a")) {
+                    // Likely the name selector (not the link selector)
+                    console.log("[ext-bridge] Fallback found selector:", sel, "->", jqueryToCssSelector(sel));
+                    chapterNameSelector = jqueryToCssSelector(sel);
+                    break;
+                }
+            }
+        }
+        console.log("[ext-bridge] Final chapterNameSelector:", chapterNameSelector);
 
         // Page image: look for pageListParse
         var pageListNodes = walkNodes(root, function (n) {
