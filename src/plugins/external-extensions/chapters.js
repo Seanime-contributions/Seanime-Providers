@@ -251,9 +251,27 @@
         var lang    = extractValString(root, "lang");
 
         // Selectors — check as both val and fun
+        function resolveSelectorAlias(fnName) {
+            var funNodes = walkNodes(root, function (n) {
+                return n.type === "function_declaration"
+                    && (firstOfType(n, "simple_identifier") || {}).text === fnName;
+            });
+            if (funNodes.length === 0) return "";
+            var body = funNodes[0].text || "";
+            var m = body.match(/\=\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)/);
+            if (m && m[1] && m[1] !== fnName) {
+                return extractFunString(root, m[1]) || "";
+            }
+            var m2 = body.match(/return\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)/);
+            if (m2 && m2[1] && m2[1] !== fnName) {
+                return extractFunString(root, m2[1]) || "";
+            }
+            return "";
+        }
         function sel(key) {
             return extractValString(root, key)
                 || extractFunString(root, key)
+                || resolveSelectorAlias(key)
                 || themeDefaults[key]
                 || "";
         }
@@ -955,7 +973,9 @@
         // Check recipe cache first
         var cached = getCachedRecipe(ext);
         var recipePromise;
-        if (cached) {
+        if (cached && cached.selectors
+            && (cached.selectors.searchManga || cached.selectors.popularManga)
+            && cached.selectors.chapterList) {
             console.log("[ext-bridge] Using cached recipe for", ext.pkg);
             activeRecipe = cached;
             recipePromise = Promise.resolve(cached);
