@@ -13,7 +13,15 @@
   "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/anilist-notifications/provider.ts",
   "plugin": {
     "version": "1",
-    "permissions": ["anilist-token", "network"]
+    "permissions": {
+      "scopes": ["anilist-token"],
+      "allow": {
+        "networkAccess": {
+          "allowedDomains": ["anilist.co", "graphql.anilist.co"],
+          "reasoning": "Required to fetch notifications from AniList GraphQL API"
+        }
+      }
+    }
   },
   "isDevelopment": false
 }
