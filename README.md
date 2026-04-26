@@ -62,7 +62,7 @@ Each folder represents a standalone Seanime extension provider.
 4. Paste the **raw GitHub URL** of the desired `manifest.json` file, for example:
 
 ```
-https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/manga/comix/manifest.json
+https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/manga/mangabuddy/manifest.json
 ```
 
 <img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/last_step.jpg"></img>
