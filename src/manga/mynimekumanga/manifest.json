@@ -3,7 +3,7 @@
   "name": "MyNimeKu (Manga)",
   "description": "MyNimeKu is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/mynimekumanga/manifest.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Pal",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mynimeku.jpg",
   "type": "manga-provider",
