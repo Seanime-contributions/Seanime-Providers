@@ -108,7 +108,10 @@ class Provider {
 
         const episodeServer: EpisodeServer = {
             server,
-            headers: {},
+            headers: {
+                'Referer': this.api + '/',
+                'Origin': this.api,
+            },
             videoSources: [
                 {
                     quality: '720p',
