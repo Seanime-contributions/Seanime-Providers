@@ -10,9 +10,7 @@ This file tracks the status of various plugins, extensions, and core fixes.
 ## ⚡ Mid Priority
 - [ ] **Agefans** search improvements
 - [ ] **Anime News** - Minor improvements and add paging.
-- [ ] **Mynimeku** manga-specific extension
 - [ ] **Manganato** - Add mirrors
-- [ ] **Anitube** extension fix
 
 ## 💤 Low Priority / Considering
 - [ ] **WaifuDex** plugin implementation
