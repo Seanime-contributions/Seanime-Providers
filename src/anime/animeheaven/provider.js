@@ -7,7 +7,7 @@ class Provider {
 
   getSettings() {
     return {
-      episodeServers: ["AnimeHeaven"],
+      episodeServers: ["Server 1"],
       supportsDub: false,
     };
   }
@@ -41,44 +41,70 @@ class Provider {
     const res = await fetch(`${this.base}/anime.php?${id}`);
     const html = await res.text();
 
-    const regex = /onclick='gate\("([a-f0-9]+)"\)'.*?>\s*<div class='watch2 bc'>(\d+)<\/div>/gs;
+    // Match the id attribute on each episode link
+    const regex = /onclick='gatea\("([a-f0-9]+)"\)'[^>]*id="[a-f0-9]+"[^>]*href='gate\.php'[\s\S]*?<div class=' watch2 bc'>(\d+)<\/div>/g;
     const episodes = [];
     let match;
 
     while ((match = regex.exec(html)) !== null) {
-      const gateId = match[1];
+      const gateKey = match[1];
       const number = parseInt(match[2]);
 
       episodes.push({
-        id: gateId,
+        id: gateKey,
         title: `Episode ${number}`,
         number,
         url: `${this.base}/gate.php`,
       });
     }
 
+    // Sort ascending since the page lists newest first
+    episodes.sort((a, b) => a.number - b.number);
+
     return episodes;
   }
 
   async findEpisodeServer(episode, _server) {
-    const res = await fetch(episode.url, {
+    const gateKey = episode.id;
+    const animeReferer = `${this.base}/anime.php`;
+
+    const res = await fetch(`${this.base}/gate.php`, {
       headers: {
-        "Cookie": `key=${episode.id}`,
-        "Referer": episode.url.replace("gate.php", `anime.php?`),
+        "Cookie": `key=${gateKey}`,
+        "Referer": animeReferer,
       },
     });
     const html = await res.text();
 
-    const match = html.match(/<source src='(https?:\/\/.*?\.mp4\?[^\']+)'/);
-    if (!match) throw new Error("Video URL not found");
+    // Try to grab the full video URL from a <source> tag
+    let videoUrl = null;
 
-    const videoUrl = match[1];
+    const sourceMatch = html.match(/<source[^>]+src=['"]([^'"]+\.mp4[^'"]*)['"]/i);
+    if (sourceMatch) {
+      videoUrl = sourceMatch[1];
+    }
+
+    // Fallback: grab from the download anchor
+    if (!videoUrl) {
+      const dlMatch = html.match(/href='(https?:\/\/ax\.animeheaven\.me\/video\.mp4\?[^']+)'/);
+      if (dlMatch) videoUrl = dlMatch[1];
+    }
+
+    // Fallback: reconstruct from known pattern using the second token in the page
+    if (!videoUrl) {
+      const tokenMatch = html.match(/video\.mp4\?([a-f0-9]+)&([a-f0-9]+)/);
+      if (tokenMatch) {
+        videoUrl = `https://ax.animeheaven.me/video.mp4?${tokenMatch[1]}&${tokenMatch[2]}`;
+      }
+    }
+
+    if (!videoUrl) throw new Error("Video URL not found in gate.php response");
 
     return {
       server: "AnimeHeaven",
       headers: {
-        "Cookie": `key=${episode.id}`,
-        "Referer": episode.url.replace("gate.php", `anime.php?`),
+        "Referer": "https://animeheaven.me/",
+        "Origin": "https://animeheaven.me",
       },
       videoSources: [
         {
