@@ -32,7 +32,7 @@
     "type": "manga-provider",
     "language": "javascript",
     "lang": "en",
-    "icon": "https://mangadot.net/favicon.ico",
+    "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangadot.ico",
     "website": "https://mangadot.net"
   },
   {
