@@ -12,6 +12,18 @@
     "website": ""
   },  
   {
+    "id": "mangacloud",
+    "name": "MangaCloud",
+    "description": "MangaCloud is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangacloud/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangacloud.svg",
+    "website": "https://mangacloud.org"
+  },
+  {
     "id": "allmangaanime",
     "name": "AllManga (Anime)",
     "description": "AllManga (Anime) is an Anime provider for Seanime",
