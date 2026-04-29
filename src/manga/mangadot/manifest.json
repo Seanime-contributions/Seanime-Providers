@@ -1,0 +1,13 @@
+{
+  "id": "mangadot",
+  "name": "MangaDot",
+  "description": "MangaDot is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangadot/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://mangadot.net/favicon.ico",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangadot/provider.js"
+}

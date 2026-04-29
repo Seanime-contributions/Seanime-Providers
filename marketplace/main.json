@@ -24,6 +24,18 @@
     "website": "https://mangacloud.org"
   },
   {
+    "id": "mangadot",
+    "name": "MangaDot",
+    "description": "MangaDot is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangadot/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://mangadot.net/favicon.ico",
+    "website": "https://mangadot.net"
+  },
+  {
     "id": "allmangaanime",
     "name": "AllManga (Anime)",
     "description": "AllManga (Anime) is an Anime provider for Seanime",
