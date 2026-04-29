@@ -3,7 +3,6 @@
 This file tracks the status of various plugins, extensions, and core fixes.
 
 ## 🚀 High Priority
-- [ ] **Animegg** - Add proper Sub/Dub implementation
 - [ ] **AnimeItaly** extension (Re-consideration)
 - [ ] **Toonitalia** extension (Re-consideration)
 
