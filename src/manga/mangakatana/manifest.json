@@ -1,0 +1,13 @@
+{
+  "id": "mangakatana",
+  "name": "MangaKatana",
+  "description": "MangaKatana is a manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangakatana/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://mangakatana.com/favicon.ico",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangakatana/provider.js"
+}

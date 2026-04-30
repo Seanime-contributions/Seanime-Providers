@@ -36,6 +36,18 @@
     "website": "https://mangadot.net"
   },
   {
+    "id": "mangakatana",
+    "name": "MangaKatana",
+    "description": "MangaKatana is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangakatana/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://mangakatana.com/favicon.ico",
+    "website": "https://mangakatana.com"
+  },
+  {
     "id": "allmangaanime",
     "name": "AllManga (Anime)",
     "description": "AllManga (Anime) is an Anime provider for Seanime",
