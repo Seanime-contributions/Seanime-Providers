@@ -5,7 +5,7 @@
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangadot/manifest.json",
   "version": "1.0.0",
   "author": "Pal",
-  "icon": "https://mangadot.net/favicon.ico",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangadot.ico",
   "type": "manga-provider",
   "language": "javascript",
   "lang": "en",
