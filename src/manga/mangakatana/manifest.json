@@ -5,7 +5,7 @@
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangakatana/manifest.json",
   "version": "1.0.0",
   "author": "Pal",
-  "icon": "https://mangakatana.com/favicon.ico",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangakatana.png",
   "type": "manga-provider",
   "language": "javascript",
   "lang": "en",
