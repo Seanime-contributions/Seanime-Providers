@@ -14,7 +14,7 @@
   "plugin": {
     "version": "1",
     "permissions": {
-      "scopes": [],
+      "scopes": ["storage"],
       "allow": {
         "networkAccess": {
           "allowedDomains": ["anilist.co", "*.anilist.co"],
