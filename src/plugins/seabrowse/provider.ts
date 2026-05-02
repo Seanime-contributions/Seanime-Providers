@@ -41,36 +41,7 @@ function init() {
       }
     });
 
-    panel.setContent(() => webviewHtml());
-  });
-}
-
-function normalizeUrl(input: string): string {
-  const trimmed = (input ?? "").trim();
-  if (!trimmed) return "https://anilist.co";
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
-}
-
-async function scrapeFullyRenderedHtml(url: string): Promise<string> {
-  const browser = await ChromeDP.newBrowser({
-    timeout: 60000,
-    userAgent: "SeaBrowse/1.0 (Seanime)",
-  });
-
-  try {
-    await browser.navigate(url);
-    await browser.sleep(1000);
-
-    const html = await browser.html();
-    return html;
-  } finally {
-    await browser.close();
-  }
-}
-
-function webviewHtml(): string {
-  return `<!DOCTYPE html>
+    panel.setContent(() => `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -215,5 +186,30 @@ function webviewHtml(): string {
     }
   </script>
 </body>
-</html>`;
+</html>`);
+  });
+}
+
+function normalizeUrl(input: string): string {
+  const trimmed = (input ?? "").trim();
+  if (!trimmed) return "https://anilist.co";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+async function scrapeFullyRenderedHtml(url: string): Promise<string> {
+  const browser = await ChromeDP.newBrowser({
+    timeout: 60000,
+    userAgent: "SeaBrowse/1.0 (Seanime)",
+  });
+
+  try {
+    await browser.navigate(url);
+    await browser.sleep(1000);
+
+    const html = await browser.html();
+    return html;
+  } finally {
+    await browser.close();
+  }
 }
