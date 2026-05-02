@@ -408,6 +408,18 @@
     "website": ""
   },
   {
+    "id": "seabrowse",
+    "name": "SeaBrowse",
+    "description": "A lightweight browser screen inside Seanime powered by ChromeDP.",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/seabrowse/manifest.json",
+    "author": "Pal",
+    "type": "plugin",
+    "language": "typescript",
+    "lang": "MULTI",
+    "icon": "",
+    "website": ""
+  },
+  {
     "id": "komiku",
     "name": "Komiku",
     "description": "Komiku is a manga provider for Seanime",
