@@ -2,7 +2,7 @@
   "id": "seabrowse",
   "name": "SeaBrowse",
   "version": "1.0.0",
-  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/seabrowse/manifest.json",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/seabrowse/manifest.json",
   "language": "typescript",
   "type": "plugin",
   "description": "A lightweight browser screen inside Seanime powered by ChromeDP.",
@@ -10,7 +10,7 @@
   "icon": "",
   "website": "",
   "lang": "multi",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/seabrowse/provider.ts",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/seabrowse/provider.ts",
   "plugin": {
     "version": "1",
     "permissions": {
