@@ -39,7 +39,7 @@ function init() {
             try {
               const u = new URL(href, baseHref);
               if (u.protocol === 'http:' || u.protocol === 'https:') {
-                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(u.toString())}`;
+                const proxyUrl = `https://api.cors.lol/?url=${encodeURIComponent(u.toString())}`;
                 console.log('[SeaBrowse] Fetching CSS via proxy:', proxyUrl);
                 const response = await fetch(proxyUrl);
                 if (!response.ok) return { match, replacement: match };
@@ -49,10 +49,12 @@ function init() {
                   if (urlPath.startsWith('data:') || urlPath.startsWith('#')) return urlMatch;
                   try {
                     const resolved = new URL(urlPath, u.toString()).toString();
+                    console.log('[SeaBrowse] Resolved URL:', urlPath, '->', resolved);
                     // Also proxy font URLs in CSS
-                    const proxiedFont = `https://corsproxy.io/?url=${encodeURIComponent(resolved)}`;
+                    const proxiedFont = `https://api.cors.lol/?url=${encodeURIComponent(resolved)}`;
                     return `url("${proxiedFont}")`;
-                  } catch {
+                  } catch (e) {
+                    console.log('[SeaBrowse] URL resolution error:', urlPath, e);
                     return urlMatch;
                   }
                 });
