@@ -14,57 +14,46 @@ class Provider {
     api = "https://animepahe.pw"
     headers = { Referer: "https://kwik.cx" }
 
+    // Up to 8 slots each, matching max buttons expected on a play page
     getSettings(): Settings {
         return {
-            episodeServers: ["Kwik", "Pahe"],
+            episodeServers: [
+                "Kwik 1", "Kwik 2", "Kwik 3", "Kwik 4",
+                "Kwik 5", "Kwik 6", "Kwik 7", "Kwik 8",
+                "Pahe 1", "Pahe 2", "Pahe 3", "Pahe 4",
+                "Pahe 5", "Pahe 6", "Pahe 7", "Pahe 8",
+            ],
             supportsDub: false,
         }
     }
 
     async search(opts: SearchOptions): Promise<SearchResult[]> {
         const req = await fetch(`${this.api}/api?m=search&q=${encodeURIComponent(opts.query)}`, {
-            headers: {
-                Cookie: "__ddg1_=;__ddg2_=;",
-            },
+            headers: { Cookie: "__ddg1_=;__ddg2_=;" },
         })
 
-        if (!req.ok) {
-            return []
-        }
+        if (!req.ok) return []
+
         const data = (await req.json()) as { data: AnimeData[] }
-        const results: SearchResult[] = []
+        if (!data?.data) return []
 
-        if (!data?.data) {
-            return []
-        }
-
-        data.data.map((item: AnimeData) => {
-            results.push({
-                subOrDub: "sub",
-                id: item.session,
-                title: item.title,
-                url: "",
-            })
-        })
-
-        return results
+        return data.data.map((item: AnimeData) => ({
+            subOrDub: "sub",
+            id: item.session,
+            title: item.title,
+            url: "",
+        }))
     }
 
     async findEpisodes(id: string): Promise<EpisodeDetails[]> {
         let episodes: EpisodeDetails[] = []
 
-        const req =
-            await fetch(
-                `${this.api}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`,
-                {
-                    headers: {
-                        Cookie: "__ddg1_=;__ddg2_=;",
-                    },
-                },
-            )
+        const req = await fetch(
+            `${this.api}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`,
+            { headers: { Cookie: "__ddg1_=;__ddg2_=;" } },
+        )
 
         const html = await req.text()
-
 
         function pushData(data: EpisodeData[]) {
             for (const item of data) {
@@ -78,49 +67,34 @@ class Provider {
         }
 
         const $ = LoadDoc(html)
-
         const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!
 
         const { last_page, data } = (await (
             await fetch(`${this.api}/api?m=release&id=${tempId}&sort=episode_asc&page=1`, {
-                headers: {
-                    Cookie: "__ddg1_=;__ddg2_=;",
-                },
+                headers: { Cookie: "__ddg1_=;__ddg2_=;" },
             })
-        ).json()) as {
-            last_page: number;
-            data: EpisodeData[]
-        }
+        ).json()) as { last_page: number; data: EpisodeData[] }
 
         pushData(data)
 
         const pageNumbers = Array.from({ length: last_page - 1 }, (_, i) => i + 2)
-
-        const promises = pageNumbers.map((pageNumber) =>
-            fetch(`${this.api}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`, {
-                headers: {
-                    Cookie: "__ddg1_=;__ddg2_=;",
-                },
-            }).then((res) => res.json()),
-        )
-        const results = (await Promise.all(promises)) as {
-            data: EpisodeData[]
-        }[]
+        const results = (await Promise.all(
+            pageNumbers.map((pageNumber) =>
+                fetch(`${this.api}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`, {
+                    headers: { Cookie: "__ddg1_=;__ddg2_=;" },
+                }).then((res) => res.json()),
+            )
+        )) as { data: EpisodeData[] }[]
 
         results.forEach((showData) => {
             for (const data of showData.data) {
-                if (data) {
-                    pushData([data])
-                }
+                if (data) pushData([data])
             }
-        });
+        })
 
         episodes.sort((a, b) => a.number - b.number)
 
-        if (episodes.length === 0) {
-            throw new Error("No episodes found.")
-        }
-
+        if (episodes.length === 0) throw new Error("No episodes found.")
 
         const lowest = episodes[0].number
         if (lowest > 1) {
@@ -131,110 +105,143 @@ class Provider {
 
         episodes = episodes.filter((episode) => Number.isInteger(episode.number))
 
+        // Fetch the play page for the first episode to extract button labels,
+        // then encode them into every episode ID so findEpisodeServer can use them
+        // without an extra fetch. Format:
+        //   {episodeSession}${animeId}${label0|label1|...}
+        try {
+            const firstEp = episodes[0]
+            const firstEpisodeId = firstEp.id.split("$")[0]
+            const firstAnimeId = firstEp.id.split("$")[1]
+
+            const playReq = await fetch(
+                `${this.api}/play/${firstAnimeId}/${firstEpisodeId}`,
+                { headers: { Cookie: "__ddg1_=;__ddg2_=;" } },
+            )
+            const playHtml = await playReq.text()
+            const $play = LoadDoc(playHtml)
+
+            const labels: string[] = []
+            $play("button[data-src]").each((_, el) => {
+                const fansub = $play(el).attr("data-fansub") ?? ""
+                const quality = $play(el).attr("data-resolution") ?? ""
+                const isEng = $play(el).attr("data-audio") === "eng"
+                const label = `${quality}p ${fansub}${isEng ? " Eng" : ""}`.trim()
+                labels.push(label)
+            })
+
+            if (labels.length > 0) {
+                const encodedLabels = labels.join("|")
+                episodes = episodes.map((ep) => ({
+                    ...ep,
+                    id: ep.id + "$" + encodedLabels,
+                }))
+            }
+        } catch (_) {
+            // If label fetch fails, fall back to Kwik N / Pahe N slot names
+        }
+
         return episodes
     }
 
     async findEpisodeServer(episode: EpisodeDetails, server: string): Promise<EpisodeServer> {
-        const episodeId = episode.id.split("$")[0]
-        const animeId = episode.id.split("$")[1]
+        const parts = episode.id.split("$")
+        const episodeId = parts[0]
+        const animeId = parts[1]
+        // parts[2] is the encoded labels string (may be undefined if fetch failed)
+        const encodedLabels = parts[2] ?? ""
+        const labels = encodedLabels.length > 0 ? encodedLabels.split("|") : []
+
+        const isPahe = server.startsWith("Pahe")
+        const slotIndex = parseInt(server.split(" ")[1]) - 1
+
+        // Build a reverse map from real label -> slot index so we can match
+        // e.g. "1080p HorribleSubs" -> 0
+        const labelToIndex: Record<string, number> = {}
+        labels.forEach((lbl, i) => { labelToIndex[lbl] = i })
+
+        // If server matches a real label directly, use that index instead
+        const resolvedIndex = server in labelToIndex ? labelToIndex[server] : slotIndex
 
         const req = await fetch(
             `${this.api}/play/${animeId}/${episodeId}`,
-            {
-                headers: {
-                    Cookie: "__ddg1_=;__ddg2_=;",
-                },
-            },
+            { headers: { Cookie: "__ddg1_=;__ddg2_=;" } },
         )
 
         const html = await req.text()
         const regex = /https:\/\/kwik\.cx\/e\/\w+/g
         const matches = html.match(regex)
 
-        if (matches === null) {
-            throw new Error("Failed to fetch episode server.")
-        }
+        if (matches === null) throw new Error("Failed to fetch episode server.")
 
         const $ = LoadDoc(html)
+        const buttons = $("button[data-src]")
 
-        const result: EpisodeServer = {
-            videoSources: [],
-            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
-            server: server,
+        if (resolvedIndex >= buttons.length) {
+            throw new Error(`Slot ${server} not available for this episode.`)
         }
 
-        const sourcePromises = $("button[data-src]").map(async (_, el): Promise<VideoSource | null> => {
-            let kwikEmbedUrl = el.data("src")!
-            if (!kwikEmbedUrl) return null
+        const el = buttons.eq(resolvedIndex)
+        const kwikEmbedUrl = el.attr("data-src")!
 
-            const fansub = el.data("fansub")!
-            const quality = el.data("resolution")!
-            let label = `${quality}p - ${fansub}`
-            if (el.data("audio") === "eng") label += " (Eng)"
-            if (kwikEmbedUrl === matches[0]) label += " (default)"
+        const fansub = el.attr("data-fansub") ?? ""
+        const quality = el.attr("data-resolution") ?? ""
+        const isEng = el.attr("data-audio") === "eng"
+        const sourceLabel = `${quality}p ${fansub}${isEng ? " Eng" : ""}`.trim()
 
-            try {
-                const src_req = await fetch(kwikEmbedUrl, {
-                    headers: {
-                        Referer: this.headers.Referer,
-                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
-                    },
-                })
-
-                const src_html = await src_req.text()
-                const kwikEmbedReferer = src_req.url
-                const scripts = src_html.match(/eval\(f.+?\}\)\)/g)
-                if (!scripts) return null
-
-                for (const _script of scripts) {
-                    const scriptMatch = _script.match(/eval(.+)/)
-                    if (!scriptMatch || !scriptMatch[1]) continue
-
-                    try {
-                        const decoded = eval(scriptMatch[1])
-                        const linkMatch = decoded.match(/source='(.+?)'/)
-                        if (linkMatch && linkMatch[1]) {
-                            const m3u8Url = linkMatch[1]
-
-                            if (server === "Pahe") {
-                                const paheUrl = m3u8Url
-                                    .replace("/stream/", "/mp4/")
-                                    .replace("/uwu.m3u8", "");
-
-                                return {
-                                    url: paheUrl,
-                                    type: "mp4",
-                                    quality: label,
-                                    subtitles: [],
-                                    headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
-                                }
-                            } else {
-                                return {
-                                    url: m3u8Url,
-                                    type: "m3u8",
-                                    quality: label,
-                                    subtitles: [],
-                                    headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Failed to extract link", e)
-                    }
-                }
-                return null
-            } catch (e) {
-                return null
-            }
+        // Original Kwik extraction logic
+        const src_req = await fetch(kwikEmbedUrl, {
+            headers: {
+                Referer: this.headers.Referer,
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
+            },
         })
 
-        const resolvedSources = await Promise.all(sourcePromises)
-        result.videoSources = resolvedSources.filter((source): source is VideoSource => source !== null)
+        const src_html = await src_req.text()
+        const scripts = src_html.match(/eval\(f.+?\}\)\)/g)
+        if (!scripts) throw new Error("Failed to fetch episode server.")
 
-        if (result.videoSources.length === 0) {
-            throw new Error(`Failed to extract any sources for ${server}.`)
+        for (const _script of scripts) {
+            const scriptMatch = _script.match(/eval(.+)/)
+            if (!scriptMatch || !scriptMatch[1]) continue
+
+            try {
+                const decoded = eval(scriptMatch[1])
+                const linkMatch = decoded.match(/source='(.+?)'/)
+                if (linkMatch && linkMatch[1]) {
+                    const m3u8Url = linkMatch[1]
+
+                    if (isPahe) {
+                        return {
+                            videoSources: [{
+                                url: m3u8Url.replace("/stream/", "/mp4/").replace("/uwu.m3u8", ""),
+                                type: "mp4",
+                                quality: sourceLabel,
+                                subtitles: [],
+                                headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            }],
+                            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            server: sourceLabel,
+                        }
+                    } else {
+                        return {
+                            videoSources: [{
+                                url: m3u8Url,
+                                type: "m3u8",
+                                quality: sourceLabel,
+                                subtitles: [],
+                                headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            }],
+                            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            server: sourceLabel,
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to extract link", e)
+            }
         }
 
-        return result
+        throw new Error(`Failed to extract any sources for ${server}.`)
     }
 }
