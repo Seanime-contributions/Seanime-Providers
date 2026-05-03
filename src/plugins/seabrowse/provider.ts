@@ -40,7 +40,7 @@ function init() {
               const u = new URL(href, baseHref);
               if (u.protocol === 'http:' || u.protocol === 'https:') {
                 console.log('[SeaBrowse] Fetching CSS:', u.toString());
-                const proxyUrl = `http://localhost:43211/api/v1/proxy?url=${encodeURIComponent(u.toString())}`;
+                const proxyUrl = `http://127.0.0.1:43211/api/v1/proxy?url=${encodeURIComponent(u.toString())}`;
                 const response = await fetch(proxyUrl);
                 if (!response.ok) return { match, replacement: match };
                 const css = await response.text();
@@ -53,7 +53,7 @@ function init() {
                     try {
                       const fontUrl = new URL(urlPath, u.toString()).toString();
                       console.log('[SeaBrowse] Fetching font:', fontUrl);
-                      const fontProxyUrl = `http://localhost:43211/api/v1/proxy?url=${encodeURIComponent(fontUrl)}`;
+                      const fontProxyUrl = `http://127.0.0.1:43211/api/v1/proxy?url=${encodeURIComponent(fontUrl)}`;
                       const fontResp = await fetch(fontProxyUrl);
                       if (fontResp.ok) {
                         const fontBuffer = await fontResp.arrayBuffer();

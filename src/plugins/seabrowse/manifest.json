@@ -17,7 +17,7 @@
       "scopes": ["storage"],
       "allow": {
         "networkAccess": {
-          "allowedDomains": ["localhost:43211"],
+          "allowedDomains": ["127.0.0.1:43211"],
           "reasoning": "Required to access local proxy for fetching external resources"
         }
       }
