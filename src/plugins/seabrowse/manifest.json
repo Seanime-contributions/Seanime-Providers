@@ -17,8 +17,8 @@
       "scopes": ["storage"],
       "allow": {
         "networkAccess": {
-          "allowedDomains": ["api.cors.lol"],
-          "reasoning": "Required to load external pages inside the embedded browser"
+          "allowedDomains": ["localhost:43211"],
+          "reasoning": "Required to access local proxy for fetching external resources"
         }
       }
     }

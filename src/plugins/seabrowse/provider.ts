@@ -26,7 +26,7 @@ function init() {
           }
         }
 
-        // Find and fetch all stylesheet links, then replace them with inline CSS
+        // Fetch and inline stylesheet links
         const styleLinkRegex = /<link\s+([^>]*rel=["']stylesheet["'][^>]*href=["'])([^"']+)(["'][^>]*)>/gi;
         const matches = [...html.matchAll(styleLinkRegex)];
         const cssReplacements: Promise<{ match: string, replacement: string }>[] = [];
@@ -39,27 +39,39 @@ function init() {
             try {
               const u = new URL(href, baseHref);
               if (u.protocol === 'http:' || u.protocol === 'https:') {
-                const proxyUrl = `https://api.cors.lol/?url=${encodeURIComponent(u.toString())}`;
-                console.log('[SeaBrowse] Fetching CSS via proxy:', proxyUrl);
+                console.log('[SeaBrowse] Fetching CSS:', u.toString());
+                const proxyUrl = `http://localhost:43211/api/v1/proxy?url=${encodeURIComponent(u.toString())}`;
                 const response = await fetch(proxyUrl);
                 if (!response.ok) return { match, replacement: match };
-                let css = await response.text();
-                // Rewrite url() in CSS to use full URLs
-                css = css.replace(/url\(["']?([^)"']+)["']?\)/gi, (urlMatch, urlPath) => {
-                  if (urlPath.startsWith('data:') || urlPath.startsWith('#')) return urlMatch;
-                  try {
-                    const resolved = new URL(urlPath, u.toString()).toString();
-                    console.log('[SeaBrowse] Resolved URL:', urlPath, '->', resolved);
-                    // Also proxy font URLs in CSS
-                    const proxiedFont = `https://api.cors.lol/?url=${encodeURIComponent(resolved)}`;
-                    return `url("${proxiedFont}")`;
-                  } catch (e) {
-                    console.log('[SeaBrowse] URL resolution error:', urlPath, e);
-                    return urlMatch;
+                const css = await response.text();
+                // Rewrite url() in CSS to use data URIs
+                const finalCss = await (async () => {
+                  const urlMatches = [...css.matchAll(/url\(["']?([^)"']+)["']?\)/gi)];
+                  let resultCss = css;
+                  for (const [full, urlPath] of urlMatches) {
+                    if (urlPath.startsWith('data:') || urlPath.startsWith('#')) continue;
+                    try {
+                      const fontUrl = new URL(urlPath, u.toString()).toString();
+                      console.log('[SeaBrowse] Fetching font:', fontUrl);
+                      const fontProxyUrl = `http://localhost:43211/api/v1/proxy?url=${encodeURIComponent(fontUrl)}`;
+                      const fontResp = await fetch(fontProxyUrl);
+                      if (fontResp.ok) {
+                        const fontBuffer = await fontResp.arrayBuffer();
+                        const base64 = btoa(String.fromCharCode(...new Uint8Array(fontBuffer)));
+                        const mimeType = fontUrl.endsWith('.woff2') ? 'font/woff2' :
+                                        fontUrl.endsWith('.woff') ? 'font/woff' :
+                                        fontUrl.endsWith('.ttf') ? 'font/ttf' :
+                                        fontUrl.endsWith('.otf') ? 'font/otf' : 'application/octet-stream';
+                        resultCss = resultCss.replace(full, `url("data:${mimeType};base64,${base64}")`);
+                      }
+                    } catch (e) {
+                      console.log('[SeaBrowse] Font fetch error:', urlPath, e);
+                    }
                   }
-                });
-                console.log('[SeaBrowse] Inlined CSS, length:', css.length);
-                return { match, replacement: `<style>${css}</style>` };
+                  return resultCss;
+                })();
+                console.log('[SeaBrowse] Inlined CSS with fonts');
+                return { match, replacement: `<style>${finalCss}</style>` };
               }
             } catch (e) {
               console.log('[SeaBrowse] CSS fetch error:', e);
