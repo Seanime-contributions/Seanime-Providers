@@ -17,7 +17,7 @@
       "scopes": ["storage"],
       "allow": {
         "networkAccess": {
-          "allowedDomains": ["anilist.co", "*.anilist.co"],
+          "allowedDomains": ["corsproxy.io"],
           "reasoning": "Required to load external pages inside the embedded browser"
         }
       }
