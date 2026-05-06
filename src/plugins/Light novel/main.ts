@@ -1189,7 +1189,14 @@ function init() {
                                         id: result.id,
                                         title: { romaji: result.title, english: result.title }
                                     };
-                                    await loadChaptersForActiveSource();
+                                    
+                                    // Directly load chapters for local EPUB
+                                    const source = State.sourceRegistry.get('local-epub');
+                                    if (source) {
+                                        State.currentChapters = await source.getChapters(result.id);
+                                        console.log('[novel-plugin] Loaded', State.currentChapters.length, 'chapters from local EPUB');
+                                    }
+                                    
                                     renderChapterButtons(container);
                                 } catch (err) {
                                     error.textContent = 'Failed to load EPUB: ' + err.message;
