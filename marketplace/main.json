@@ -447,7 +447,7 @@
     "id": "comix",
     "name": "Comix",
     "description": "Coomix is a manga provider for Seanime",
-    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/comix/manifest.json",
+    "manifestURI": "https://raw.githubusercontent.com/Ari-03/Pal/refs/heads/main/src/manga/comix/manifest.json",
     "author": "Pal",
     "type": "manga-provider",
     "language": "javascript",
