@@ -1548,6 +1548,43 @@
     font-size: 1em;
 }
 
+/* =========================================
+--- Local EPUB File Picker Styles ---
+========================================= */
+
+.novel-plugin-file-picker {
+    padding: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.novel-plugin-file-picker .novel-plugin-button {
+    margin: 10px auto;
+    display: inline-block;
+}
+
+.novel-plugin-file-picker .novel-plugin-error {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 4px;
+    color: #ff6b6b;
+}
+
+/* Local source badge */
+.novel-plugin-source-badge.local {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
 /* Notification styles */
 .novel-plugin-notification {
     position: fixed;
