@@ -4,7 +4,24 @@
         return;
     }
 
-    const NOVELBUDDY_URL = "https://corsproxy.io/?url=https://novelbuddy.com";
+    // Helper function to get Seanime proxy URL
+    function getProxyUrl() {
+        try {
+            const origin = window.location.origin;
+            // Extract port from origin (e.g., http://localhost:43211 -> 43211)
+            const url = new URL(origin);
+            const port = url.port || (url.protocol === 'https:' ? '443' : '80');
+            return `http://localhost:${port}/api/v1/proxy?url=`;
+        } catch (e) {
+            console.error('[novel-plugin] Error getting proxy URL:', e);
+            // Fallback to direct URL if proxy detection fails
+            return '';
+        }
+    }
+
+    const NOVELBUDDY_BASE_URL = "https://novelbuddy.com";
+    const PROXY_URL = getProxyUrl();
+    const NOVELBUDDY_URL = PROXY_URL ? `${PROXY_URL}${NOVELBUDDY_BASE_URL}` : NOVELBUDDY_BASE_URL;
 
     // --- Private Utility Functions ---
 
