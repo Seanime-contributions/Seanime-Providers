@@ -1127,8 +1127,20 @@ function init() {
                     ? \`<button class="novel-plugin-button" id="novel-plugin-continue-btn">Continue: \${lastRead.chapterTitle}</button>\`
                     : \`<button class="novel-plugin-button" id="novel-plugin-start-btn">Start Reading (Ch 1)</button>\`;
                 let selectorHtml = '';
-                if (State.matches.size > 1) {
-                    selectorHtml = \`<div class="novel-plugin-filter-container" style="margin-bottom:0.5rem;"><label>Source:</label><select id="novel-plugin-source-select" class="novel-plugin-select">\${[...State.matches.keys()].map(sid => \`<option value="\${sid}" \${sid === State.currentSourceId ? 'selected' : ''}>\${State.sourceRegistry.get(sid).name} (\${State.matches.get(sid).similarity.toFixed(2)})</option>\`).join('')}</select></div>\`;
+                // Always show source selector, include local-epub even if no matches
+                const allSources = [...State.sourceRegistry.keys()];
+                if (allSources.length > 0) {
+                    // Combine matched sources with local-epub if not present
+                    const sourcesToShow = new Set([...State.matches.keys()]);
+                    sourcesToShow.add('local-epub');
+                    
+                    selectorHtml = \`<div class="novel-plugin-filter-container" style="margin-bottom:0.5rem;"><label>Source:</label><select id="novel-plugin-source-select" class="novel-plugin-select">\${[...sourcesToShow].map(sid => {
+                        const source = State.sourceRegistry.get(sid);
+                        if (!source) return '';
+                        const matchScore = State.matches.get(sid)?.similarity.toFixed(2);
+                        const scoreText = matchScore ? \` (\${matchScore})\` : '';
+                        return \`<option value="\${sid}" \${sid === State.currentSourceId ? 'selected' : ''}>\${source.name}\${scoreText}</option>\`;
+                    }).join('')}</select></div>\`;
                 }
 
                 container.innerHTML = \`\${selectorHtml}\${readBtnHtml}<button class="novel-plugin-button secondary" id="novel-plugin-view-all-btn">View All Chapters (\${State.currentChapters.length})</button>\`;
