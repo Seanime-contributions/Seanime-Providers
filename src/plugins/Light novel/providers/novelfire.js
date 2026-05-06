@@ -4,27 +4,68 @@
         return;
     }
 
-    // Helper function to get Seanime proxy URL
-    function getProxyUrl() {
+    // Cached port for the session
+    let cachedPort = null;
+
+    // Helper function to detect port from network requests
+    function detectPortFromNetwork() {
         try {
-            let port = window.location.port;
-            
-            // Fallback for Electron apps where window.location.port might be empty
-            if (!port) {
-                const origin = window.location.origin;
-                const portMatch = origin.match(/:(\d+)/);
-                if (portMatch && portMatch[1]) {
-                    port = portMatch[1];
-                    console.log('[novel-plugin] Extracted port from origin:', port);
+            // Check existing performance entries
+            const entries = window.performance.getEntries();
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
                 }
             }
             
-            if (!port) {
-                console.error('[novel-plugin] No port detected in window.location or origin');
-                return '';
+            // Also try localhost pattern
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
             }
-            console.log('[novel-plugin] Detected port:', port);
-            return `http://localhost:${port}/api/v1/proxy?url=`;
+            
+            console.log('[novel-plugin] No Seanime API request found in network history');
+            return null;
+        } catch (e) {
+            console.error('[novel-plugin] Error detecting port from network:', e);
+            return null;
+        }
+    }
+
+    // Helper function to get Seanime proxy URL
+    function getProxyUrl() {
+        try {
+            // Return cached port if available
+            if (cachedPort) {
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Try to detect from network requests
+            const detectedPort = detectPortFromNetwork();
+            if (detectedPort) {
+                cachedPort = detectedPort;
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Fallback to window.location.port
+            const port = window.location.port;
+            if (port) {
+                cachedPort = port;
+                console.log('[novel-plugin] Detected port from window.location:', port);
+                return `http://localhost:${port}/api/v1/proxy?url=`;
+            }
+            
+            console.error('[novel-plugin] No port detected');
+            return '';
         } catch (e) {
             console.error('[novel-plugin] Error getting proxy URL:', e);
             return '';
@@ -61,8 +102,7 @@
         return matrix[b.length][a.length];
     }
 
-    function gtatgetUrSimilar;
-        const url = proxyUrl(targetUrl)
+    function getSimilarity(s1, s2) {
         let longer = s1.toLowerCase();
         let shorter = s2.toLowerCase();
         if (s1.length < s2.length) { longer = s2.toLowerCase(); shorter = s1.toLowerCase(); }
@@ -174,7 +214,7 @@
                 }
 
                 if (url) {
-                    chapters.push({ proxyerl(le });)
+                    chapters.push({ url: url, title: title });
                 }
             });
 

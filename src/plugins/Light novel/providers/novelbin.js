@@ -4,11 +4,74 @@
         return;
     }
 
+    // Cached port for the session
+    let cachedPort = null;
+
+    // Helper function to detect port from network requests
+    function detectPortFromNetwork() {
+        try {
+            // Check existing performance entries
+            const entries = window.performance.getEntries();
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            // Also try localhost pattern
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            console.log('[novel-plugin] No Seanime API request found in network history');
+            return null;
+        } catch (e) {
+            console.error('[novel-plugin] Error detecting port from network:', e);
+            return null;
+        }
+    }
+
     // Helper function to get Seanime proxy URL
     function getProxyUrl() {
         try {
-            ltiutnntur guge port);
-        return.e
+            // Return cached port if available
+            if (cachedPort) {
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Try to detect from network requests
+            const detectedPort = detectPortFromNetwork();
+            if (detectedPort) {
+                cachedPort = detectedPort;
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Fallback to window.location.port
+            const port = window.location.port;
+            if (port) {
+                cachedPort = port;
+                console.log('[novel-plugin] Detected port from window.location:', port);
+                return `http://localhost:${port}/api/v1/proxy?url=`;
+            }
+            
+            console.error('[novel-plugin] No port detected');
+            return '';
+        } catch (e) {
+            console.error('[novel-plugin] Error getting proxy URL:', e);
+            return '';
+        }
+    }
+
     const NOVELBIN_URL = "https://novelbin.me";
     const CORS_PROXY_URL = getProxyUrl();
 
@@ -18,8 +81,15 @@
         if (a.length === 0) return b.length;
         if (b.length === 0) return a.length;
         const matrix = [];
-     ; i++) {
-.length; j++) {
+        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+                }
             }
         }
         return matrix[b.length][a.length];
@@ -61,7 +131,7 @@
 
                 const title = titleElement?.title?.trim() || "Unknown Title";
                 let novelUrl = titleElement?.getAttribute('href') || "#";
-              u${CORS_PROXY_URL}elector('.cover')?.getAttribute('src') || "";
+                let image = item.querySelector('.cover')?.getAttribute('src') || "";
                 if (image.startsWith("//")) { 
                     image = `https:${image}`; 
                 } else if (image.startsWith("/")) {
