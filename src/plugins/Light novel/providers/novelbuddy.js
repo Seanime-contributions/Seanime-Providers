@@ -73,6 +73,7 @@
     }
 
     const NOVELBUDDY_BASE_URL = "https://novelbuddy.com";
+    const NOVELBUDDY_API_URL = "https://api.novelbuddy.com";
     const PROXY_BASE = getProxyUrl();
 
     // Helper function to proxy a URL
@@ -119,34 +120,23 @@
      * @returns {Promise<SearchResult[]>}
      */
     async function manualSearch(query) {
-        const url = `${NOVELBUDDY_URL}/search?q=${encodeURIComponent(query)}`;
+        const url = proxyUrl(`${NOVELBUDDY_API_URL}/titles/search?page=1&limit=24&q=${encodeURIComponent(query)}`);
         try {
             const res = await fetch(url);
-            const html = await res.text();
+            const json = await res.json();
             const results = [];
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            const items = doc.querySelectorAll('.book-item');
             
-            items.forEach(item => {
-                const titleElement = item.querySelector('h3 a');
-                const title = titleElement?.title?.trim() || "Unknown Title";
-                const novelUrl = titleElement?.getAttribute('href') || "#";
-                let image = item.querySelector('.thumb img.lazy')?.getAttribute('data-src') || "";
-                if (image.startsWith("//")) { 
-                    image = `https:${image}`; 
-                } else if (image.startsWith("/")) {
-                    image = `${NOVELBUDDY_BASE_URL}${image}`;
-                }
-                const latestChapter = item.querySelector('.latest-chapter')?.textContent?.trim() || "No Chapter";
-              
-                results.push({ 
-                    title: title, 
-                    url: novelUrl, 
-                    image: image, 
-                    latestChapter: latestChapter 
+            if (json.success && json.data && json.data.items) {
+                json.data.items.forEach(item => {
+                    results.push({
+                        title: item.name,
+                        url: item.id,
+                        id: item.id,
+                        image: item.cover,
+                        latestChapter: item.latest_chapters && item.latest_chapters[0] ? item.latest_chapters[0].name : "No Chapter"
+                    });
                 });
-            });
+            }
             return results;
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy Search Error:", err);
@@ -160,34 +150,21 @@
      * @returns {Promise<Chapter[]>}
      */
     async function getChapters(novelUrl) {
-        const targetUrl = `${NOVELBUDDY_BASE_URL}${novelUrl}`;
-        const url = proxyUrl(targetUrl);
         try {
+            // novelUrl is now the ID from search results
+            const url = proxyUrl(`${NOVELBUDDY_API_URL}/titles/${novelUrl}/chapters`);
             const res = await fetch(url);
-            const html = await res.text();
-            const bookIdMatch = html.match(/var bookId = (\d+);/);
-            if (!bookIdMatch || !bookIdMatch[1]) {
-                throw new Error("Could not find bookId on novel page.");
-            }
-            const bookId = bookIdMatch[1];
-            const chapterApiUrl = `${NOVELBUDDY_BASE_URL}/api/manga/${bookId}/chapters?source=detail`;
-            const chapterRes = await fetch(proxyUrl(chapterApiUrl));
-            const chapterHtml = await chapterRes.text();
+            const json = await res.json();
             const chapters = [];
             
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(chapterHtml, "text/html");
-            const chapterItems = doc.querySelectorAll('ul.chapter-list li a');
-            chapterItems.forEach(link => {
-                const url = link.getAttribute('href');
-                let title = link.querySelector('strong.chapter-title')?.textContent?.trim();
-                if (!title || title.length === 0) {
-                    title = link.getAttribute('title')?.trim() || "Unknown Chapter";
-                }
-                if (url) {
-                    chapters.push({ url: url, title: title });
-                }
-            });
+            if (json.success && json.data && json.data.chapters) {
+                json.data.chapters.forEach(chapter => {
+                    chapters.push({
+                        url: chapter.url,
+                        title: chapter.name
+                    });
+                });
+            }
             return chapters.reverse(); // Reverse to get CH 1 first
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy Details Error:", err);
@@ -208,17 +185,15 @@
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const contentElement = doc.querySelector('.content-inner');
+            const contentElement = doc.querySelector('.novel-tts-content');
     
             if (!contentElement) {
                 throw new Error("Could not extract chapter content.");
             }
     
-            contentElement.querySelectorAll('script, div[id^="pf-"], div[style="text-align:center"], ins, div[align="center"]').forEach(el => el.remove());
-            contentElement.querySelectorAll('div').forEach(div => {
-                if (div.innerHTML.trim() === '') div.remove();
-            });
-    
+            // Remove translation selector and other UI elements
+            contentElement.querySelectorAll('select, .mb-6').forEach(el => el.remove());
+            
             return contentElement.innerHTML;
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy ChapterContent Error:", err);
