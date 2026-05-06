@@ -7,6 +7,11 @@
     // Helper function to get Seanime proxy URL
     function getProxyUrl() {
         try {
+            console.log('[novel-plugin] DEBUG - window.location.port:', window.location.port);
+            console.log('[novel-plugin] DEBUG - window.location.origin:', window.location.origin);
+            console.log('[novel-plugin] DEBUG - window.location.hostname:', window.location.hostname);
+            console.log('[novel-plugin] DEBUG - window.location.href:', window.location.href);
+            
             const port = window.location.port;
             if (!port) {
                 console.error('[novel-plugin] No port detected in window.location');
