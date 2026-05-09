@@ -2,12 +2,12 @@
   "id": "comix",
   "name": "Comix",
   "description": "Comix is a manga provider for Seanime",
-  "manifestURI": "https://raw.githubusercontent.com/Ari-03/Pal/refs/heads/main/src/manga/comix/manifest.json",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-providers/refs/heads/main/src/manga/comix/manifest.json",
   "version": "1.4.0",
-  "author": "pal",
+  "author": "Pal & Ari-03",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/comix.png",
   "type": "manga-provider",
   "language": "javascript",
   "lang": "en",
-  "payloadURI": "https://raw.githubusercontent.com/Ari-03/Pal/refs/heads/main/src/manga/comix/provider.js"
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/comix/provider.js"
 }
