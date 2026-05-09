@@ -21,7 +21,7 @@ class Provider {
 
     async search(opts) {
         const query = opts.query;
-        const url = `${this.api}/api/search/page?query=${encodeURIComponent(query)}`;
+        const url = `${this.api}/collections/manga/documents/search?q=${encodeURIComponent(query)}&query_by=title%2CenglishTitle%2CotherNames`;
 
         try {
             const response = await fetch(url, {
@@ -38,14 +38,14 @@ class Provider {
             if (!data.hits || !Array.isArray(data.hits)) return [];
 
             return data.hits
-                .filter(hit => hit.type === 'Manga')
+                .filter(hit => hit.document && hit.document.type === 'Manga')
                 .map(hit => ({
-                    id: hit.id,
-                    title: hit.title,
-                    image: hit.mediumImage
-                        ? `${this.imgCdn}/${hit.mediumImage}`
-                        : hit.image
-                            ? `${this.imgCdn}/${hit.image}`
+                    id: hit.document.id,
+                    title: hit.document.title,
+                    image: hit.document.posterMedium
+                        ? `${this.imgCdn}${hit.document.posterMedium}`
+                        : hit.document.poster
+                            ? `${this.imgCdn}${hit.document.poster}`
                             : undefined,
                 }));
         } catch (e) {
@@ -113,7 +113,7 @@ class Provider {
             if (!data.readChapter || !Array.isArray(data.readChapter.pages)) return [];
 
             return data.readChapter.pages.map(page => ({
-                url: `${this.api}${page.image}`,
+                url: page.image.startsWith('http') ? page.image : `${this.api}${page.image}`,
                 index: page.number,
                 headers: { 'Referer': referer },
             }));
