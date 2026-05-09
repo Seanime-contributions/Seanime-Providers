@@ -3,7 +3,7 @@
   "name": "Comix",
   "description": "Comix is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Ari-03/Pal/refs/heads/main/src/manga/comix/manifest.json",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "pal",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/comix.png",
   "type": "manga-provider",
