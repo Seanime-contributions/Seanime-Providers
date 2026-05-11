@@ -1,11 +1,11 @@
 {
   "id": "anilist-notifications",
   "name": "AniList Notifications",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/plugins/anilist-notifications/manifest.json",
   "language": "typescript",
   "type": "plugin",
-  "description": "Shows AniList notifications in a tray icon.",
+  "description": "View your AniList notifications.",
   "author": "Pal",
   "icon": "https://anilist.co/img/icons/favicon-32x32.png",
   "website": "",
@@ -14,7 +14,7 @@
   "plugin": {
     "version": "1",
     "permissions": {
-      "scopes": ["anilist-token"],
+      "scopes": ["anilist-token", "database"],
       "allow": {
         "networkAccess": {
           "allowedDomains": ["anilist.co", "graphql.anilist.co"],
