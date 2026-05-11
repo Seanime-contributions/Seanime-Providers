@@ -201,6 +201,7 @@ function init() {
     webview.channel.on("refresh", () => fetchNotifications());
     webview.channel.on("mark-all-read", () => markAllAsRead());
     webview.channel.on("mark-read", (id: number) => markAsRead(id));
+    webview.channel.on("open-in-seanime", (id:number) => ctx.screen.navigateTo("/entry", { "id": id }))
 
     // ---------- WEBVIEW CONTENT ----------
     webview.setContent(() => `
@@ -668,6 +669,7 @@ function init() {
 
             const handleNotifClick = (n) => {
               window.webview.send("mark-read", n.id)
+              window.webview.send("open-in-seanime", n.media.id)
             }
 
             if (loading && notifications.length === 0) {
@@ -728,7 +730,7 @@ function init() {
                       <div
                         class="notification \${n.unread !== false ? "unread" : ""}"
                         onClick=\${() => handleNotifClick(n)}
-                        title=\${hasLink ? "Open on AniList" : undefined}
+                        title=\${hasLink ? "Open in Seanime" : undefined}
                       >
                         <div class="notification-inner">
 
