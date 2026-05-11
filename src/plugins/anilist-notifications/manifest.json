@@ -1,7 +1,7 @@
 {
   "id": "anilist-notifications",
   "name": "AniList Notifications",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/plugins/anilist-notifications/manifest.json",
   "language": "typescript",
   "type": "plugin",
