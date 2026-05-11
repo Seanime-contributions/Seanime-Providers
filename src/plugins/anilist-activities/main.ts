@@ -179,6 +179,15 @@ function init() {
                 .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; max-width: 65px; transition: transform 0.2s; }
                 .story-ring { width: 64px; height: 64px; padding: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; transition: transform 0.2s; }
                 .story-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #1F2937; }
+                /* GIF-specific styles */
+                .story-image[data-gif="true"], .sv-avatar[data-gif="true"], .reply-avatar[data-gif="true"] {
+                    animation: none !important;
+                    image-rendering: auto;
+                    object-fit: cover;
+                }
+                
+                /* Ensure GIFs animate properly in all contexts */
+                @keyframes none { none; }
                 .story-name { font-size: 0.75rem; font-weight: 500; color: ${MAIN_TEXT_COLOR}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
                 /* SEANIME ACCENT STYLES */
@@ -593,6 +602,35 @@ function init() {
                 // --- END TIMER CONTROL LOGIC ---
 
                 // --- UTILITIES ---
+                function isGifUrl(url) {
+                    return url && url.toLowerCase().includes('.gif');
+                }
+                
+                function createOptimizedImageElement(src, className, fallbackSrc) {
+                    const img = document.createElement('img');
+                    img.className = className;
+                    
+                    // Add cache-busting for GIFs to ensure they animate
+                    if (isGifUrl(src)) {
+                        const timestamp = Date.now();
+                        const separator = src.includes('?') ? '&' : '?';
+                        img.src = src + separator + 't=' + timestamp;
+                        img.loading = 'lazy';
+                        img.style.imageRendering = 'auto';
+                        img.setAttribute('data-gif', 'true');
+                    } else {
+                        img.src = src;
+                    }
+                    
+                    img.onerror = function() {
+                        if (fallbackSrc && this.src !== fallbackSrc) {
+                            this.src = fallbackSrc;
+                        }
+                    };
+                    
+                    return img;
+                }
+                
                 function timeAgo(t) {
                     const s = Math.floor((new Date() - new Date(t * 1000)) / 1000);
                     let i = s / 31536000;
@@ -867,7 +905,7 @@ function init() {
                                 createdAt
                                 user {
                                   name
-                                  avatar { medium }
+                                  avatar { large medium }
                                 }
                               }
                             }
@@ -883,7 +921,7 @@ function init() {
                         } else {
                             replyList.innerHTML = replies.map(r => \`
                                 <div class="reply-item">
-                                    <img class="reply-avatar" src="\${r.user.avatar.medium}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
+                                    <img class="reply-avatar\${isGifUrl(r.user.avatar.large || r.user.avatar.medium) ? '" data-gif="true"' : ''}" src="\${r.user.avatar.large || r.user.avatar.medium}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
                                     <div class="reply-body">
                                         <div class="reply-meta">
                                             <span>\${r.user.name}</span> \${timeAgo(r.createdAt)}
@@ -1063,8 +1101,19 @@ function init() {
                     if (replyModal) replyModal.classList.remove('is-visible', 'slide-in-right', 'slide-out-right', 'slide-in-left', 'slide-out-left');
                     window.closeReplyInputModal();
 
-                    v.querySelector('.sv-background').style.backgroundImage = \`url(\${act.coverImage || currentStoryData.profileImage})\`;
-                    v.querySelector('.sv-avatar').src = currentStoryData.profileImage;
+                    // Handle background image - use static image for GIFs to avoid animation issues
+                    const backgroundImage = act.coverImage || currentStoryData.profileImage;
+                    if (isGifUrl(backgroundImage)) {
+                        // For GIF backgrounds, use a placeholder or the first frame
+                        v.querySelector('.sv-background').style.backgroundImage = 'url(https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png)';
+                    } else {
+                        v.querySelector('.sv-background').style.backgroundImage = \`url(\${backgroundImage})\`;
+                    }
+                    const avatarElement = v.querySelector('.sv-avatar');
+                    avatarElement.src = currentStoryData.profileImage;
+                    if (isGifUrl(currentStoryData.profileImage)) {
+                        avatarElement.setAttribute('data-gif', 'true');
+                    }
                     
                     const svMeta = v.querySelector('.sv-meta');
                     svMeta.innerHTML = \`
@@ -1257,7 +1306,7 @@ function init() {
                                 return \`
                                 <div class="story-item" data-index="\${index}">
                                     <div class="story-ring" style="\${ringStyle}">
-                                        <img src="\${s.profileImage}" class="story-image" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
+                                        <img src="\${s.profileImage}" class="story-image\${isGifUrl(s.profileImage) ? '" data-gif="true"' : ''}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
                                     </div>
                                     <span class="story-name">\${s.name}</span>
                                 </div>\`;
@@ -1266,7 +1315,7 @@ function init() {
                                 return \`
                                 <div class="story-item" data-index="\${index}">
                                     <div class="story-ring" style="\${ring}">
-                                        <img src="\${s.profileImage}" class="story-image" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/medium/default.png'">
+                                        <img src="\${s.profileImage}" class="story-image\${isGifUrl(s.profileImage) ? '" data-gif="true"' : ''}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
                                     </div>
                                     <span class="story-name">\${s.name}</span>
                                 </div>\`;
@@ -1323,7 +1372,7 @@ function init() {
                                     createdAt             
                                     user { 
                                         name 
-                                        avatar { medium } 
+                                        avatar { large medium } 
                                     } 
                                 } 
                             } 
@@ -1346,7 +1395,9 @@ function init() {
                         
                         rawActs.forEach(act => {
                             const uName = act.user.name;
-                            if (!grouped[uName]) grouped[uName] = { name: uName, profileImage: act.user.avatar.medium, status: 'new', activities: [] };
+                            // Prioritize large avatar for better GIF support, fallback to medium
+                            const profileImage = act.user.avatar.large || act.user.avatar.medium;
+                            if (!grouped[uName]) grouped[uName] = { name: uName, profileImage: profileImage, status: 'new', activities: [] };
                             
                             const title = act.media.title.english || act.media.title.romaji;
                             
