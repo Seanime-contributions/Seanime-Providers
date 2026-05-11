@@ -7,7 +7,7 @@
   "type": "plugin",
   "description": "View your AniList notifications.",
   "author": "Pal",
-  "icon": "https://anilist.co/img/icons/favicon-32x32.png",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/anilist.ico",
   "website": "",
   "lang": "multi",
   "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/anilist-notifications/provider.ts",
