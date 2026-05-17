@@ -180,6 +180,18 @@
     "website": ""
   },
   {
+    "id": "animesaturnmirror",
+    "name": "AnimeSaturn (Mirror)",
+    "description": "AnimeSaturn is an online streaming provider for italian sub & dub anime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesaturnmirror/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "it",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesaturn.png",
+    "website": ""
+  },
+  {
     "id": "animepahe",
     "name": "AnimePahe",
     "description": "AnimePahe is an online streaming provider for english sub/dubs.",
