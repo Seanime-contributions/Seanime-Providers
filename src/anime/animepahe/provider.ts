@@ -14,7 +14,6 @@ class Provider {
     api = "https://animepahe.pw"
     headers = { Referer: "https://kwik.cx" }
 
-    // Up to 8 slots each, matching max buttons expected on a play page
     getSettings(): Settings {
         return {
             episodeServers: [
@@ -105,10 +104,6 @@ class Provider {
 
         episodes = episodes.filter((episode) => Number.isInteger(episode.number))
 
-        // Fetch the play page for the first episode to extract button labels,
-        // then encode them into every episode ID so findEpisodeServer can use them
-        // without an extra fetch. Format:
-        //   {episodeSession}${animeId}${label0|label1|...}
         try {
             const firstEp = episodes[0]
             const firstEpisodeId = firstEp.id.split("$")[0]
@@ -148,19 +143,15 @@ class Provider {
         const parts = episode.id.split("$")
         const episodeId = parts[0]
         const animeId = parts[1]
-        // parts[2] is the encoded labels string (may be undefined if fetch failed)
         const encodedLabels = parts[2] ?? ""
         const labels = encodedLabels.length > 0 ? encodedLabels.split("|") : []
 
         const isPahe = server.startsWith("Pahe")
         const slotIndex = parseInt(server.split(" ")[1]) - 1
 
-        // Build a reverse map from real label -> slot index so we can match
-        // e.g. "1080p HorribleSubs" -> 0
         const labelToIndex: Record<string, number> = {}
         labels.forEach((lbl, i) => { labelToIndex[lbl] = i })
 
-        // If server matches a real label directly, use that index instead
         const resolvedIndex = server in labelToIndex ? labelToIndex[server] : slotIndex
 
         const req = await fetch(
@@ -169,10 +160,6 @@ class Provider {
         )
 
         const html = await req.text()
-        const regex = /https:\/\/kwik\.cx\/e\/\w+/g
-        const matches = html.match(regex)
-
-        if (matches === null) throw new Error("Failed to fetch episode server.")
 
         const $ = LoadDoc(html)
         const buttons = $("button[data-src]")
@@ -182,17 +169,21 @@ class Provider {
         }
 
         const el = buttons.eq(resolvedIndex)
-        const kwikEmbedUrl = el.attr("data-src")!
+        const kwikEmbedUrl = el.attr("data-src")
+
+        // Guard: data-src must be a non-empty string before fetching
+        if (!kwikEmbedUrl || typeof kwikEmbedUrl !== "string" || kwikEmbedUrl.trim() === "") {
+            throw new Error(`No embed URL found for slot ${server} (index ${resolvedIndex}).`)
+        }
 
         const fansub = el.attr("data-fansub") ?? ""
         const quality = el.attr("data-resolution") ?? ""
         const isEng = el.attr("data-audio") === "eng"
         const sourceLabel = `${quality}p ${fansub}${isEng ? " Eng" : ""}`.trim()
 
-        // Original Kwik extraction logic
         const src_req = await fetch(kwikEmbedUrl, {
             headers: {
-                Referer: this.headers.Referer,
+                Referer: `${this.api}/play/${animeId}/${episodeId}`,
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
             },
         })
@@ -218,9 +209,9 @@ class Provider {
                                 type: "mp4",
                                 quality: sourceLabel,
                                 subtitles: [],
-                                headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                                headers: { Referer: kwikEmbedUrl },
                             }],
-                            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            headers: { Referer: kwikEmbedUrl },
                             server: sourceLabel,
                         }
                     } else {
@@ -230,9 +221,9 @@ class Provider {
                                 type: "m3u8",
                                 quality: sourceLabel,
                                 subtitles: [],
-                                headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                                headers: { Referer: kwikEmbedUrl },
                             }],
-                            headers: { Referer: "https://kwik.cx/e/GP7f5AoOyjyT" },
+                            headers: { Referer: kwikEmbedUrl },
                             server: sourceLabel,
                         }
                     }
