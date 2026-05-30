@@ -7,7 +7,11 @@ class Provider {
 
   getSettings() {
     return {
-      episodeServers: ["HD-2 SUB", "HD-2 DUB", "StreamHG SUB", "StreamHG DUB"],
+      episodeServers: [
+        "HD-2 SUB", "HD-2 DUB",
+        "StreamHG SUB", "StreamHG DUB",
+        "Earnvids SUB", "Earnvids DUB",
+      ],
       supportsDub: true,
     };
   }
@@ -64,7 +68,6 @@ class Provider {
       const epUrl = this.base + hrefMatch[1];
       const epTitle = titleMatch ? titleMatch[1].trim() : "";
 
-      // Extract episode number from the URL slug (e.g. /watch-online/horimiya-episode-13)
       const numberMatch = hrefMatch[1].match(/episode-(\d+)$/i);
       const number = numberMatch ? parseInt(numberMatch[1]) : 0;
 
@@ -76,7 +79,6 @@ class Provider {
       });
     }
 
-    // Deduplicate by URL, then by episode number (keep first occurrence)
     const seenUrls = new Set();
     const seenNumbers = new Set();
     const deduped = [];
@@ -87,7 +89,6 @@ class Provider {
       deduped.push(ep);
     }
 
-    // Sort ascending by episode number
     deduped.sort((a, b) => a.number - b.number);
 
     return deduped;
@@ -97,12 +98,13 @@ class Provider {
     const res = await fetch(episode.url);
     const html = await res.text();
 
-    // Map server name to the exact data-an-server-btn key(s) to look for
     const serverBtnMap = {
       "HD-2 SUB":     ["hsub-2", "sub-2"],
       "HD-2 DUB":     ["dub-2"],
       "StreamHG SUB": ["hsub-3", "sub-3"],
       "StreamHG DUB": ["dub-3"],
+      "Earnvids SUB": ["hsub-4", "sub-4"],
+      "Earnvids DUB": ["dub-4"],
     };
 
     const btnKeys = serverBtnMap[server];
@@ -114,7 +116,6 @@ class Provider {
         `data-an-server-btn="${key}"[^>]+data-an-video="([^"]+)"`,
         "i"
       );
-      // Also try reversed attribute order
       const btnRegex2 = new RegExp(
         `data-an-video="([^"]+)"[^>]+data-an-server-btn="${key}"`,
         "i"
@@ -133,7 +134,6 @@ class Provider {
       const embedRes = await fetch(embedUrl);
       const embedHtml = await embedRes.text();
 
-      // Extract master.m3u8 from the inline script
       const srcMatch = embedHtml.match(/src\s*=\s*["']([^"']+\.m3u8[^"']*)['"]/i)
         || embedHtml.match(/["'](https?:\/\/[^"']+\.m3u8[^"']*)['"]/);
 
@@ -156,7 +156,6 @@ class Provider {
 
       const unpacked = this.unPack(embedHtml);
       if (unpacked) {
-        // Look for hls2/hls3/hls4 m3u8 URLs in the links object
         const m3u8Match = unpacked.match(/"(?:hls2|hls3|hls4|hls)":\s*"(https?:\/\/[^"]+\.m3u8[^"]*)"/);
         if (m3u8Match) {
           return {
@@ -169,11 +168,47 @@ class Provider {
           };
         }
 
-        // Fallback: any m3u8 in the unpacked code
         const anyM3u8 = unpacked.match(/(https?:\/\/[^\s"']+\.m3u8[^\s"']*)/);
         if (anyM3u8) {
           return {
             server: server,
+            videoSources: [{
+              url: anyM3u8[1],
+              quality: "auto",
+              type: "hls",
+            }],
+          };
+        }
+      }
+    }
+
+    // otakuvid.online (Earnvids) packed JS
+    if (embedUrl.includes("otakuvid.online")) {
+      const embedRes = await fetch(embedUrl, {
+        headers: { Referer: embedUrl },
+      });
+      const embedHtml = await embedRes.text();
+
+      const unpacked = this.unPack(embedHtml);
+      if (unpacked) {
+        const m3u8Match = unpacked.match(/"(?:hls2|hls3|hls4|hls)":\s*"(https?:\/\/[^"]+\.m3u8[^"]*)"/);
+        if (m3u8Match) {
+          return {
+            server: server,
+            headers: { Referer: embedUrl },
+            videoSources: [{
+              url: m3u8Match[1],
+              quality: "auto",
+              type: "hls",
+            }],
+          };
+        }
+
+        const anyM3u8 = unpacked.match(/(https?:\/\/[^\s"']+\.m3u8[^\s"']*)/);
+        if (anyM3u8) {
+          return {
+            server: server,
+            headers: { Referer: embedUrl },
             videoSources: [{
               url: anyM3u8[1],
               quality: "auto",
@@ -189,7 +224,6 @@ class Provider {
 
   // Dean Edwards unpacker (handles both eval-based packing styles)
   unPack(code) {
-    // Match the packed eval block
     const regex = /eval\(function\(p,a,c,k,e,(?:r|d)\)\{[\s\S]*?\}\('([\s\S]*?)',\s*(\d+),\s*(\d+),\s*'([\s\S]*?)'\.split\('\|'\)/;
     const match = code.match(regex);
     if (!match) return null;
