@@ -66,7 +66,7 @@ class Provider {
         }
 
         const $ = LoadDoc(html)
-        const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!
+        const tempId = id
 
         const { last_page, data } = (await (
             await fetch(`${this.api}/api?m=release&id=${tempId}&sort=episode_asc&page=1`, {
