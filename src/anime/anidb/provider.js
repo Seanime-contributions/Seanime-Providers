@@ -86,6 +86,10 @@ class Provider {
 
     return {
       server: server,
+      headers: {
+        "Origin": "https://anidb.app",
+        "Referer": "https://anidb.app/",
+      },
       videoSources: [{
         url: srcMatch[1],
         quality: "auto",
