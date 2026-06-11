@@ -3,7 +3,6 @@
 This file tracks the status of various plugins, extensions, and core fixes.
 
 ## 🚀 High Priority
-- [ ] **Toonitalia** extension (Re-consideration)
 
 ## ⚡ Mid Priority
 - [ ] **Agefans** search improvements
