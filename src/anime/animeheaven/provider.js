@@ -37,7 +37,7 @@ class Provider {
     const html = await res.text();
 
     // Match gatea("HASH") and capture the episode number from the following watch2 div
-    const regex = /onclick='gatea\("([a-f0-9]+)"\)'[\s\S]*?<div class='watch2 bc\s*'>(\d+)<\/div>/g;
+    const regex = /onclick='gatea\("([a-f0-9]+)"\)'[\s\S]*?<div class='[^']*watch2[^']*'>(\d+)<\/div>/g;
     const episodes = [];
     let match;
     while ((match = regex.exec(html)) !== null) {
