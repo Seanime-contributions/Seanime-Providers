@@ -1,7 +1,7 @@
 /// <reference path="./online-streaming-provider.d.ts" />
 class Provider {
   constructor() {
-    this.base = "https://animeunity.cool";
+    this.base = "https://animeunity.ch";
   }
 
   getSettings() {
@@ -97,53 +97,39 @@ class Provider {
     });
     const html = await res.text();
 
-    // Match any <source> tag regardless of type, capture both src and type
-    const sourceMatch =
-      html.match(/<source[^>]+src=["']([^"']+)["'][^>]*type=["']([^"']+)["']/i) ||
-      html.match(/<source[^>]+type=["']([^"']+)["'][^>]*src=["']([^"']+)["']/i);
+    // Match the anixo.net embed iframe and pull its base64 "data" param
+    const iframeMatch = html.match(/<iframe[^>]+src=["']https:\/\/anixo\.net\/embed\.html\?data=([^"'&]+)["']/i);
+    if (!iframeMatch) throw new Error("Video embed not found");
 
-    if (!sourceMatch) throw new Error("Video source not found");
+    const encodedData = decodeURIComponent(iframeMatch[1]);
+    const streamUrl = this.base64Decode(encodedData);
 
-    // Attribute order differs between the two regex branches — normalise
-    let srcAttr, mimeType;
-    if (/^https?:\/\/|^\//.test(sourceMatch[1])) {
-      // First branch: src first, type second
-      srcAttr = sourceMatch[1];
-      mimeType = sourceMatch[2];
-    } else {
-      // Second branch: type first, src second
-      mimeType = sourceMatch[1];
-      srcAttr = sourceMatch[2];
+    if (!streamUrl.startsWith("http")) {
+      throw new Error("Decoded stream URL is invalid");
     }
 
-    // Resolve relative paths
-    if (srcAttr.startsWith("/")) {
-      srcAttr = `${this.base}${srcAttr}`;
-    }
-
-    // Normalize /proxy?url= → /proxy/?url=
-    srcAttr = srcAttr.replace(/\/proxy\?url=/, "/proxy/?url=");
-
-    // Determine stream type from MIME type
-    const isHls =
-      /mpegURL|mpegurl|x-mpegURL|vnd\.apple\.mpegurl/i.test(mimeType) ||
-      srcAttr.includes(".m3u8");
+    const isHls = streamUrl.includes(".m3u8");
     const streamType = isHls ? "m3u8" : "mp4";
 
     return {
       server: "AnimeUnity",
-      headers: {
-        Referer: `${this.base}/`,
-        Origin: this.base,
-      },
+      headers: {},
       videoSources: [
         {
-          url: srcAttr,
+          url: streamUrl,
           quality: "auto",
           type: streamType,
           subtitles: [],
         },
       ],
     };
+  }
+
+  base64Decode(str) {
+    if (typeof atob === "function") {
+      return atob(str);
+    }
+    // Fallback
+    return Buffer.from(str, "base64").toString("utf-8");
   }
 }
