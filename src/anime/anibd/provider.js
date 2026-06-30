@@ -97,6 +97,10 @@ class Provider {
       fullUrl = `${this.playBase}/r2/${m3u8Path}`;
     }
 
+    // Extract subtitle tracks from the player config, e.g.:
+    // tracks: [{ "label": "English", "file": "...sub.vtt", "kind": "captions", "default": true }]
+    const subtitles = this.extractSubtitles(embedHtml);
+
     return {
       server: server,
       videoSources: [{
@@ -104,8 +108,61 @@ class Provider {
         quality: "auto",
         type: "hls",
         headers: { Referer: referer },
+        subtitles: subtitles,
       }],
       headers: { Referer: referer },
     };
+  }
+
+  extractSubtitles(html) {
+    // Grab the tracks: [ ... ] array (non-greedy up to the matching closing bracket)
+    const tracksMatch = html.match(/tracks\s*:\s*(\[[\s\S]*?\])\s*,?\s*(?:title|\n\s*\})/i);
+    if (!tracksMatch) return [];
+
+    let tracksRaw = tracksMatch[1];
+
+    let tracks;
+    try {
+      // Tracks are usually valid-ish JSON but may use unquoted keys in some embeds;
+      // try strict JSON first, then fall back to a quoting fix.
+      tracks = JSON.parse(tracksRaw);
+    } catch (e) {
+      try {
+        const fixed = tracksRaw.replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+        tracks = JSON.parse(fixed);
+      } catch (e2) {
+        return [];
+      }
+    }
+
+    if (!Array.isArray(tracks)) return [];
+
+    return tracks
+      .filter((t) => t && t.file && (t.kind === "captions" || t.kind === "subtitles" || !t.kind))
+      .map((t, i) => ({
+        id: String(i + 1),
+        url: t.file,
+        language: this.labelToLangCode(t.label),
+        isDefault: !!t.default,
+      }));
+  }
+
+  labelToLangCode(label) {
+    if (!label) return "en";
+    const map = {
+      english: "en",
+      indonesian: "id",
+      malay: "ms",
+      spanish: "es",
+      portuguese: "pt",
+      french: "fr",
+      german: "de",
+      arabic: "ar",
+      thai: "th",
+      vietnamese: "vi",
+      japanese: "ja",
+    };
+    const key = label.trim().toLowerCase();
+    return map[key] || key.slice(0, 2);
   }
 }
