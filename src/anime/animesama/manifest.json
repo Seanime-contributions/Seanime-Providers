@@ -1,0 +1,13 @@
+{
+  "id": "animesamaanime",
+  "name": "AnimeSama (Anime)",
+  "description": "AnimeSama is an online streaming provider for sub & dub anime in french",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesama/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "fr",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animesama.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesama/provider.js"
+}
