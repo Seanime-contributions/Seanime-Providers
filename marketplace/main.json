@@ -12,6 +12,18 @@
     "website": ""
   },
   {
+    "id": "animesamaanime",
+    "name": "AnimeSama (Anime)",
+    "description": "AnimeSama is a french anime sub & dub provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesama/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "fr",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesama.png",
+    "website": ""
+  },
+  {
     "id": "mangahub",
     "name": "MangaHub",
     "description": "MangaHub is a Russian manga provider for Seanime",
