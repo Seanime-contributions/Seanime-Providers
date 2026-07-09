@@ -24,6 +24,18 @@
     "website": ""
   },
   {
+    "id": "donghuastream",
+    "name": "DonghuaStream",
+    "description": "DonghuaStream is an english donghua sub provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/donghuastream/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/donghuastream.jpeg",
+    "website": ""
+  },
+  {
     "id": "mangahub",
     "name": "MangaHub",
     "description": "MangaHub is a Russian manga provider for Seanime",
