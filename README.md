@@ -118,7 +118,7 @@ Or
 
 ### Other related projects (Made by me)
 
-- [Seanime Android](https://github.com/Pal-droid/seanime-android)
+- [Seanime Android](https://github.com/Pal-droid/seanime-android) ***DEPRECATED***
 
 ### Other connections
 
