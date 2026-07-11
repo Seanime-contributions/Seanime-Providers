@@ -10,7 +10,8 @@
   <img src="https://img.shields.io/website?url=https://seanime-contributions.github.io/Seanime-Providers/&label=Marketplace&logoColor=white&color=2ea44f&style=for-the-badge" />
 </p>
 
-> **⚠️ Disclaimer:** This is **not** the official Seanime extensions repository. For the official marketplace and further information, please consult [this README](https://github.com/Seanime-contributions/Seanime-Providers/blob/main/marketplace%2FREADME.md).
+> [!IMPORTANT]
+> This is **not** the official Seanime extensions repository. For the official marketplace, please consult **[this README](https://github.com/Seanime-contributions/Seanime-Providers/blob/main/marketplace%2FREADME.md)**.
 
 <p align="center">
 This repository contains custom <strong><a href="https://github.com/5rahim/seanime">Seanime</a></strong> plugins and extensions for adding support to various manga and anime sources.
