@@ -33,11 +33,15 @@ class Provider {
   }
 
   async findEpisodes(id) {
-    const res = await fetch(`${this.base}/anime.php?${id}`);
+    const url = `${this.base}/anime.php?${id}`;
+    console.log("findEpisodes fetching:", url);
+    const res = await fetch(url);
     const html = await res.text();
+    console.log("findEpisodes html length:", html.length);
+    console.log("findEpisodes html snippet:", html.slice(0, 500));
 
     // Match gatea("HASH") and capture the episode number from the following watch2 div
-    const regex = /onclick='gatea\("([a-f0-9]+)"\)'[\s\S]*?<div class='[^']*watch2[^']*'>(\d+)<\/div>/g;
+    const regex = /onclick='gatea\("([a-f0-9]+)"\)'[^>]*>(?:[\s\S]*?)<div[^>]*\bwatch2\b[^>]*>\s*(\d+)\s*<\/div>/g;
     const episodes = [];
     let match;
     while ((match = regex.exec(html)) !== null) {
