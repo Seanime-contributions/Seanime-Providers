@@ -18,7 +18,7 @@ But note that to prevent legal issues, all community made extensions that were r
 
 Here’s a list of all currently available **extensions and plugins**:
 
-![IMPORTANT]
+[!IMPORTANT]
 > To see the **full** list of providers see the [visual marketplace](https://seanime-contributions.github.io/Seanime-Providers).
 
 <details open>
