@@ -3,26 +3,23 @@
 class Provider {
   constructor() {
     this.baseUrl = "https://www.mynimeku.com";
-    this.proxyBase = "https://corsproxy.io?url=";
-  }
-
-  proxy(url) {
-    return `${this.proxyBase}${encodeURIComponent(url)}`;
   }
 
   async search(query) {
     const searchUrl = `${this.baseUrl}/search/${encodeURIComponent(query.query)}/`;
-    const res = await fetch(this.proxy(searchUrl));
+    const res = await fetch(searchUrl);
     const html = await res.text();
 
     const results = [];
-    const regex = /<a class="mynimeku-search-feed__cover"[^>]*href="(https:\/\/www\.mynimeku\.com\/komik\/[^"]+)"[^>]*aria-label="([^"]+)"[^>]*>\s*<img[^>]*src="([^"]+)"/gs;
+    const regex = /<a class="mynimeku-search-feed__cover"[^>]*href="([^"]+)"[^>]*aria-label="([^"]+)"[^>]*>\s*<img[^>]*src="([^"]+)"/gs;
 
     let match;
     while ((match = regex.exec(html)) !== null) {
       const url = match[1];
       const title = match[2].trim();
       const image = match[3];
+
+      if (!url.includes("/komik/")) continue;
 
       results.push({
         id: url,
@@ -37,31 +34,30 @@ class Provider {
   }
 
   async findChapters(id) {
-    const res = await fetch(this.proxy(id));
+    const res = await fetch(id);
     const html = await res.text();
     const chapters = [];
 
-    const chapterRegex = /<div[^>]*class='komik-series-chapter-row'[^>]*data-chapter-number='([\d.]+)'[^>]*>[\s\S]*?<a[^>]*class='komik-series-chapter-item'[^>]*href='([^']+)'[^>]*>[\s\S]*?<span class='komik-series-chapter-item__title'>([^<]+)<\/span>/g;
+    const chapterRegex = /<div[^>]*data-chapter-number='([\d.]+)'[^>]*>[\s\S]*?<a[^>]*class='komik-series-chapter-item'[^>]*href='([^']+)'[^>]*>[\s\S]*?<span class='komik-series-chapter-item__title'>([^<]+)<\/span>/g;
 
     let match;
     while ((match = chapterRegex.exec(html)) !== null) {
-      const number = parseFloat(match[1]);
+      const number = match[1];
       const url = match[2];
       const title = match[3].trim();
 
       chapters.push({
         id: url,
         title,
-        number,
-        url,
+        chapter: number,
       });
     }
 
-    return chapters.reverse();
+    return chapters.sort((a, b) => parseFloat(a.chapter) - parseFloat(b.chapter));
   }
 
   async findChapterPages(id) {
-    const res = await fetch(this.proxy(id));
+    const res = await fetch(id);
     const html = await res.text();
     const pages = [];
 
