@@ -549,5 +549,17 @@
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/anilist.ico",
     "website": ""
+  },
+  {
+    "id": "shademanga",
+    "name": "Shade Manga",
+    "description": "Proveedor de manga y cómics de Shade Manga.",
+    "manifestURI": "https://raw.githubusercontent.com/yerasuu/My-Seanime-Providers/main/shademanga/manifest.json",
+    "author": "yerasuu",
+    "type": "manga-provider",
+    "language": "typescript",
+    "lang": "es",
+    "icon": "https://raw.githubusercontent.com/yerasuu/My-Seanime-Providers/main/shademanga/icon.png",
+    "website": "https://shademanga.com/"
   }
 ]
