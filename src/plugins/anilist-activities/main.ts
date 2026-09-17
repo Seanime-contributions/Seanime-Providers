@@ -178,10 +178,9 @@ function init() {
                 .stories-container { display: flex; overflow-x: auto; gap: 20px; padding: 0 16px 5px 16px; scrollbar-width: none; }
                 .stories-container::-webkit-scrollbar { display: none; } 
                 .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; max-width: 65px; transition: transform 0.2s; }
+                .story-item.empty-self { cursor: default; }
                 .story-item.current-user.has-divider { position: relative; margin-right: 20px; }
                 .story-item.current-user.has-divider::after { content: ''; position: absolute; top: 0; bottom: 20px; right: -20px; width: 1px; background: rgba(156, 163, 175, 0.65); }
-                .story-item.empty-self .story-ring { display: none; }
-                .story-item.empty-self { justify-content: flex-end; min-height: 64px; }
                 .story-ring { width: 64px; height: 64px; padding: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; transition: transform 0.2s; }
                 .story-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #1F2937; }
                 /* GIF-specific styles */
@@ -1530,6 +1529,11 @@ function init() {
                         content.innerHTML = headerHtml + '<div class="stories-container">' + html + '</div><div style="padding: 0 16px 16px 16px; min-height: 1px;"></div>';
                         
                         content.querySelectorAll('.story-item').forEach(item => {
+                            if (item.classList.contains('empty-self')) {
+                                item.setAttribute('aria-disabled', 'true');
+                                item.setAttribute('aria-label', 'You have no recent activity');
+                                return;
+                            }
                             item.onclick = () => {
                                 const index = parseInt(item.getAttribute('data-index'));
                                 window.openStoryViewer(index); 
