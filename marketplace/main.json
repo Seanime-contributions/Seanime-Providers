@@ -84,18 +84,6 @@
     "website": "https://mangakatana.com"
   },
   {
-    "id": "allmangaanime",
-    "name": "AllManga (Anime)",
-    "description": "AllManga (Anime) is an Anime provider for Seanime",
-    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/allmanga/manifest.json",
-    "author": "Pal",
-    "type": "onlinestream-provider",
-    "language": "javascript",
-    "lang": "en",
-    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/allmanga.png",
-    "website": ""
-  },
-  {
     "id": "animeAV1",
     "name": "AnimeAV1",
     "description": "AnimeAV1 is an Anime provider for spanish anime for Seanime",
@@ -105,18 +93,6 @@
     "language": "javascript",
     "lang": "es",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animeav1.png",
-    "website": ""
-  },
-  {
-    "id": "anidb",
-    "name": "AniDB",
-    "description": "AniDB is an Anime provider for english sub & dub for Seanime",
-    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/anidb/manifest.json",
-    "author": "Pal",
-    "type": "onlinestream-provider",
-    "language": "javascript",
-    "lang": "en",
-    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/anidb.png",
     "website": ""
   },
   {
