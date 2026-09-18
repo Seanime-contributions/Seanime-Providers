@@ -525,6 +525,9 @@ function init() {
                 function isStoryFullyViewed(story) {
                     return !story.isCurrentUser && story.activities.length > 0 && story.activities.every(isActivityViewed);
                 }
+                function hasUnviewedActivities(story) {
+                    return story && story.activities.length > 0 && story.activities.some(activity => !isActivityViewed(activity));
+                }
                 function orderStoryGroups(stories, currentUserName) {
                     return [...stories]
                         .map(s => ({ ...s, isCurrentUser: Boolean(s.isCurrentUser || (currentUserName && s.name === currentUserName)) }))
@@ -1220,8 +1223,15 @@ function init() {
                         currentStoryIndex++;
                         renderStoryFrame(true);
                     } else {
-                        const nextUserIndex = currentStoryGroupIndex + 1;
-                        if (nextUserIndex < allStoryGroups.length) {
+                        let nextUserIndex = -1;
+                        for (let offset = 1; offset <= allStoryGroups.length; offset++) {
+                            const candidateIndex = (currentStoryGroupIndex + offset) % allStoryGroups.length;
+                            if (hasUnviewedActivities(allStoryGroups[candidateIndex])) {
+                                nextUserIndex = candidateIndex;
+                                break;
+                            }
+                        }
+                        if (nextUserIndex >= 0) {
                             window.openStoryViewer(nextUserIndex);
                         } else {
                             window.closeStoryViewer();
