@@ -1,7 +1,7 @@
 {
   "id": "anilist-activity",
   "name": "Anilist activity",
-  "version": "1.2.8",
+  "version": "1.3.8",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/anilist-activities/manifest.json",
   "description": "A plugin for viewing your friend's and your Anilist activities inside Seanime.",
   "author": "Pal",
@@ -10,6 +10,122 @@
   "type": "plugin",
   "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/anilist-activities/main.ts",
   "lang": "multi",
+  "userConfig": {
+    "requiresConfig": false,
+    "version": 1,
+    "fields": [
+      {
+        "name": "injectionPoint",
+        "label": "Injection Point",
+        "type": "select",
+        "default": "toolbar",
+        "options": [
+          {
+            "label": "Default (Toolbar)",
+            "value": "toolbar"
+          },
+          {
+            "label": "Above Currently Watching",
+            "value": "above-watching"
+          },
+          {
+            "label": "Bottom of Page",
+            "value": "bottom-page"
+          }
+        ]
+      },
+      {
+        "name": "manualOverrideSelector",
+        "label": "Manual Selector Override (CSS)",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "name": "bgStyle",
+        "label": "Background Style",
+        "type": "select",
+        "default": "glass",
+        "options": [
+          {
+            "label": "Glass (Blur)",
+            "value": "glass"
+          },
+          {
+            "label": "Solid Dark",
+            "value": "dark"
+          },
+          {
+            "label": "Solid Light",
+            "value": "light"
+          },
+          {
+            "label": "Transparent",
+            "value": "transparent"
+          }
+        ]
+      },
+      {
+        "name": "ringColor",
+        "label": "Ring Color",
+        "type": "select",
+        "default": "#FF6F61",
+        "options": [
+          {
+            "label": "Coral (Default)",
+            "value": "#FF6F61"
+          },
+          {
+            "label": "AniList Blue",
+            "value": "#3DB4F2"
+          },
+          {
+            "label": "Emerald Green",
+            "value": "#10B981"
+          },
+          {
+            "label": "Violet",
+            "value": "#8B5CF6"
+          },
+          {
+            "label": "Hot Pink",
+            "value": "#EC4899"
+          },
+          {
+            "label": "Orange",
+            "value": "#F97316"
+          },
+          {
+            "label": "Red",
+            "value": "#EF4444"
+          },
+          {
+            "label": "White",
+            "value": "#FFFFFF"
+          },
+          {
+            "label": "Seanime accent",
+            "value": "seanime"
+          }
+        ]
+      },
+      {
+        "name": "replyPosition",
+        "label": "Reply Modal Position",
+        "type": "select",
+        "default": "right",
+        "options": [
+          {
+            "label": "Right Side (Default)",
+            "value": "right"
+          },
+          {
+            "label": "Left Side",
+            "value": "left"
+          }
+        ]
+      }
+    ]
+  },
   "plugin": {
     "version": "1",
     "permissions": {
