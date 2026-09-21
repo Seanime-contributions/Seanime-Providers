@@ -561,5 +561,29 @@
     "lang": "es",
     "icon": "https://raw.githubusercontent.com/yerasuu/My-Seanime-Providers/main/shademanga/icon.png",
     "website": "https://shademanga.com/"
+  },
+  {
+    "id": "dipland-mangaball",
+    "name": "MangaBall",
+    "description": "Multi language manga provider. (Requires Aqua's Utils)",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/manifest.json",
+    "author": "dip-land",
+    "type": "manga-provider",
+    "language": "typescript",
+    "lang": "multi",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangaball.png",
+    "website": "https://mangaball.net/"
+  },
+  {
+    "id": "dipland-mangafire",
+    "name": "MangaFire",
+    "description": "Multi language manga provider.",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangafire/manifest.json",
+    "author": "dip-land",
+    "type": "manga-provider",
+    "language": "typescript",
+    "lang": "multi",
+    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangafire.png",
+    "website": "https://mangafire.to/"
   }
 ]
