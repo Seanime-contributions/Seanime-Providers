@@ -6,7 +6,7 @@ class Provider {
 
     constructor() {
         this.api = 'https://atsu.moe';
-        this.imgCdn = 'https://atsu.moe';
+        this.imgCdn = 'https://cdn.atsu.moe';
     }
 
     api = '';
@@ -56,9 +56,9 @@ class Provider {
                     id: hit.document.id,
                     title: hit.document.title,
                     image: hit.document.posterMedium
-                        ? `${this.imgCdn}${hit.document.posterMedium}`
+                        ? `${this.api}${hit.document.posterMedium}`
                         : hit.document.poster
-                            ? `${this.imgCdn}${hit.document.poster}`
+                            ? `${this.api}${hit.document.poster}`
                             : undefined,
                 }));
 
@@ -174,7 +174,7 @@ class Provider {
             console.log(`[Atsu.moe] findChapterPages: received ${data.readChapter.pages.length} pages`);
 
             const pages = data.readChapter.pages.map(page => ({
-                url: page.image.startsWith('http') ? page.image : `${this.api}${page.image}`,
+                url: page.image.startsWith('http') ? page.image : `${this.imgCdn}${page.image}`,
                 index: page.number,
                 headers: { 'Referer': referer },
             }));
