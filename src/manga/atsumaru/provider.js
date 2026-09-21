@@ -56,9 +56,9 @@ class Provider {
                     id: hit.document.id,
                     title: hit.document.title,
                     image: hit.document.posterMedium
-                        ? `${this.api}${hit.document.posterMedium}`
+                        ? `${this.imgCdn}${hit.document.posterMedium}`
                         : hit.document.poster
-                            ? `${this.api}${hit.document.poster}`
+                            ? `${this.imgCdn}${hit.document.poster}`
                             : undefined,
                 }));
 
