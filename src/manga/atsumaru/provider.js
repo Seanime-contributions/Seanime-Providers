@@ -6,7 +6,7 @@ class Provider {
 
     constructor() {
         this.api = 'https://atsu.moe';
-        this.imgCdn = 'https://atsu.moe';
+        this.imgCdn = 'https://cdn.atsu.moe';
     }
 
     api = '';
@@ -174,7 +174,7 @@ class Provider {
             console.log(`[Atsu.moe] findChapterPages: received ${data.readChapter.pages.length} pages`);
 
             const pages = data.readChapter.pages.map(page => ({
-                url: page.image.startsWith('http') ? page.image : `${this.api}${page.image}`,
+                url: page.image.startsWith('http') ? page.image : `${this.imgCdn}${page.image}`,
                 index: page.number,
                 headers: { 'Referer': referer },
             }));
