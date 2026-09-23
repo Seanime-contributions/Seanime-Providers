@@ -17,13 +17,21 @@ function init() {
         const DEFAULT_CHOICE = 'toolbar'; 
 
         const initialDropdownChoice = "{{injectionPoint}}" || DEFAULT_CHOICE;
-        const initialManualSelector = "{{manualOverrideSelector}}";
+        const initialManualSelector = String.raw`{{manualOverrideSelector}}`;
         const initialReplyPosition = "{{replyPosition}}" || 'right';
         
         const resolveTargetSelector = (dropdownChoice: string, manualOverride: string): string => {
-            return (manualOverride && manualOverride.trim() !== "") 
-                ? manualOverride.trim() 
+            const candidate = (manualOverride && manualOverride.trim() !== "")
+                ? manualOverride.trim()
                 : SELECTOR_MAP[dropdownChoice] || SELECTOR_MAP[DEFAULT_CHOICE];
+            if (typeof document === 'undefined') return candidate;
+            try {
+                document.querySelector(candidate);
+                return candidate;
+            } catch (error) {
+                console.warn('Invalid Anilist activity injection selector. Falling back to the default selector.', error);
+                return SELECTOR_MAP[DEFAULT_CHOICE];
+            }
         };
 
         const state = {
@@ -40,6 +48,7 @@ function init() {
             const ringColor = settings.ringColor || '#FF6F61';
             const REPLY_POSITION = settings.replyPosition;
             const feedBgClass = 'feed-bg-' + settings.bgStyle;
+            const targetSelector = JSON.stringify(settings.activeTargetSelector);
 
             const jsString = `
             (function() {
@@ -49,7 +58,7 @@ function init() {
                 const BOX_ID = "${INJECTED_BOX_ID}";
                 const VIEWER_ID = "${VIEWER_ID}";
                 const INPUT_MODAL_ID = "${INPUT_MODAL_ID}";
-                const TARGET_SEL = '${settings.activeTargetSelector}';
+                const TARGET_SEL = ${targetSelector};
                 const INJECTED_TOKEN = "${prefilledToken.replace(/"/g, '\\"')}";
                 const CACHE_KEY = "anilist-feed-cache-v5";
                 const CURRENT_USER_KEY = "anilist-feed-current-user";
@@ -1015,7 +1024,13 @@ function init() {
                 }
 
                 function ensureBox() {
-                    const target = document.querySelector(TARGET_SEL);
+                    let target;
+                    try {
+                        target = document.querySelector(TARGET_SEL);
+                    } catch (error) {
+                        console.warn('Invalid Anilist activity injection selector.', error);
+                        target = null;
+                    }
                     if (!target) return false;
                     if (document.getElementById(BOX_ID)) return true;
                     
