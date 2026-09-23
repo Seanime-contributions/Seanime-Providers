@@ -46,8 +46,6 @@ function init() {
                     scraperBin: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelbin.js",
                     scraperHall: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelhall.js",
                     scraperFire: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/novelfire.js",
-                    scraperLocal: "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/Light%20novel/providers/local-epub.js",
-                    jszip: "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
                 },
                 genres: [
                     "Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy", "Hentai",
@@ -1127,13 +1125,10 @@ function init() {
                     ? \`<button class="novel-plugin-button" id="novel-plugin-continue-btn">Continue: \${lastRead.chapterTitle}</button>\`
                     : \`<button class="novel-plugin-button" id="novel-plugin-start-btn">Start Reading (Ch 1)</button>\`;
                 let selectorHtml = '';
-                // Always show source selector, include local-epub even if no matches
+                // Show source selector for the providers that matched this novel.
                 const allSources = [...State.sourceRegistry.keys()];
                 if (allSources.length > 0) {
-                    // Combine matched sources with local-epub if not present
                     const sourcesToShow = new Set([...State.matches.keys()]);
-                    sourcesToShow.add('local-epub');
-                    
                     selectorHtml = \`<div class="novel-plugin-filter-container" style="margin-bottom:0.5rem;"><label>Source:</label><select id="novel-plugin-source-select" class="novel-plugin-select">\${[...sourcesToShow].map(sid => {
                         const source = State.sourceRegistry.get(sid);
                         if (!source) return '';
@@ -1142,7 +1137,6 @@ function init() {
                         return \`<option value="\${sid}" \${sid === State.currentSourceId ? 'selected' : ''}>\${source.name}\${scoreText}</option>\`;
                     }).join('')}</select></div>\`;
                 }
-
                 container.innerHTML = \`\${selectorHtml}\${readBtnHtml}<button class="novel-plugin-button secondary" id="novel-plugin-view-all-btn">View All Chapters (\${State.currentChapters.length})</button>\`;
                 container.querySelector('#novel-plugin-continue-btn')?.addEventListener('click', () => loadAndReadChapter(lastRead.chapterUrl, lastRead.chapterIndex));
                 container.querySelector('#novel-plugin-start-btn')?.addEventListener('click', () => { if (State.currentChapters.length) loadAndReadChapter(State.currentChapters[0].url, 0); });
@@ -1152,61 +1146,6 @@ function init() {
                 if (select) {
                     select.onchange = async (e) => {
                         State.currentSourceId = e.target.value;
-                        
-                        // Show file picker for local EPUB source
-                        if (e.target.value === 'local-epub') {
-                            if (!window.LocalEpubAPI) {
-                                container.innerHTML = \`<div class="novel-plugin-error">Local EPUB API not available</div>\`;
-                                return;
-                            }
-                            
-                            container.innerHTML = \`
-                                <div class="novel-plugin-file-picker">
-                                    <input type="file" id="novel-plugin-epub-input" accept=".epub" style="display: none;">
-                                    <button class="novel-plugin-button" id="novel-plugin-select-epub-btn">Select EPUB File</button>
-                                    <div id="novel-plugin-epub-loading" class="novel-plugin-loader small" style="display: none;"></div>
-                                    <div id="novel-plugin-epub-error" class="novel-plugin-error" style="display: none;"></div>
-                                </div>
-                            \`;
-                            
-                            const fileInput = container.querySelector('#novel-plugin-epub-input');
-                            const selectBtn = container.querySelector('#novel-plugin-select-epub-btn');
-                            const loading = container.querySelector('#novel-plugin-epub-loading');
-                            const error = container.querySelector('#novel-plugin-epub-error');
-                            
-                            selectBtn.onclick = () => fileInput.click();
-                            
-                            fileInput.onchange = async (e) => {
-                                const file = e.target.files[0];
-                                if (!file) return;
-                                
-                                loading.style.display = 'block';
-                                error.style.display = 'none';
-                                
-                                try {
-                                    const result = await window.LocalEpubAPI.loadEpub(file);
-                                    State.currentNovel = {
-                                        id: result.id,
-                                        title: { romaji: result.title, english: result.title }
-                                    };
-                                    
-                                    // Directly load chapters for local EPUB
-                                    const source = State.sourceRegistry.get('local-epub');
-                                    if (source) {
-                                        State.currentChapters = await source.getChapters(result.id);
-                                        console.log('[novel-plugin] Loaded', State.currentChapters.length, 'chapters from local EPUB');
-                                    }
-                                    
-                                    renderChapterButtons(container);
-                                } catch (err) {
-                                    error.textContent = 'Failed to load EPUB: ' + err.message;
-                                    error.style.display = 'block';
-                                    loading.style.display = 'none';
-                                }
-                            };
-                            
-                            return;
-                        }
                         
                         container.innerHTML = \`<div class="novel-plugin-loader small"></div>\`;
                         await loadChaptersForActiveSource();
@@ -1498,12 +1437,10 @@ function init() {
                     await Promise.all([
                         loadAsset(CONFIG.assets.css, CONFIG.ids.style, 'style', 'CSS'),
                         loadAsset(CONFIG.assets.queries, CONFIG.ids.scriptQuery, 'script', 'Queries'),
-                        loadAsset(CONFIG.assets.jszip, 'novel-plugin-jszip', 'script', 'JSZip'),
                         loadAsset(CONFIG.assets.scraperBuddy, CONFIG.ids.scriptScraperBuddy, 'script', 'NovelBuddy'),
                         loadAsset(CONFIG.assets.scraperBin, CONFIG.ids.scriptScraperBin, 'script', 'NovelBin'),
                         loadAsset(CONFIG.assets.scraperHall, CONFIG.ids.scriptScraperHall, 'script', 'NovelHall'),
                         loadAsset(CONFIG.assets.scraperFire, CONFIG.ids.scriptScraperFire, 'script', 'NovelFire'),
-                        loadAsset(CONFIG.assets.scraperLocal, 'novel-plugin-scrapers-local', 'script', 'Local EPUB')
                     ]);
                     const backdrop = document.createElement("div");
                     backdrop.id = CONFIG.ids.backdrop;
