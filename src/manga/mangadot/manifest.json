@@ -1,7 +1,7 @@
 {
   "id": "dipland-mangadot",
   "name": "MangaDot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangadot/manifest.json",
   "language": "typescript",
   "type": "manga-provider",

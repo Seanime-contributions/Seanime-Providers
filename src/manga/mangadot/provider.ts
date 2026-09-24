@@ -121,7 +121,9 @@ class Provider {
             pages.push({
                 url: `${this.baseURL}${image.url}`,
                 index: +page,
-                headers: {}
+                headers: {
+                    referer: this.baseURL
+                }
             })
         }
 
