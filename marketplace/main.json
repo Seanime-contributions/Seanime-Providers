@@ -468,6 +468,18 @@
     "website": ""
   },
   {
+    "id": "download-memory",
+    "name": "Download Memory",
+    "description": "Remembers every episode you have already downloaded so the Auto Downloader does not grab it again after Shoko, Sonarr or a rename script moves it out of your library",
+    "manifestURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/plugins/download-memory/manifest.json",
+    "author": "Ari-03",
+    "type": "plugin",
+    "language": "typescript",
+    "lang": "multi",
+    "icon": "",
+    "website": ""
+  },
+  {
     "id": "oneko",
     "name": "OnekoJs",
     "description": "Implements the famous Oneko.js script on seanime.",

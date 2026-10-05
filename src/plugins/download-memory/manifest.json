@@ -1,0 +1,32 @@
+{
+    "id": "download-memory",
+    "name": "Download Memory",
+    "version": "1.1.1",
+    "manifestURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/plugins/download-memory/manifest.json",
+    "language": "typescript",
+    "type": "plugin",
+    "description": "Remembers every episode you have already downloaded so the Auto Downloader does not grab it again after Shoko, Sonarr or a rename script moves it out of your library. Optional Shoko Server sync.",
+    "author": "Ari-03",
+    "icon": "",
+    "website": "",
+    "readme": "https://github.com/Ari-03/Seanime-Providers/blob/main/src/plugins/download-memory/README.md",
+    "lang": "multi",
+    "semverConstraint": ">= 3.7.1",
+    "payloadURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/plugins/download-memory/main.ts",
+    "plugin": {
+        "version": "1",
+        "permissions": {
+            "scopes": [
+                "storage",
+                "database"
+            ],
+            "allow": {
+                "networkAccess": {
+                    "allowedDomains": ["*"],
+                    "reasoning": "Only used to talk to your own Shoko Server at the URL you enter in the tray. Shoko can live on any host or port, so the address cannot be fixed in advance. Nothing else is contacted, and nothing is contacted at all unless you turn Shoko sync on."
+                }
+            }
+        }
+    },
+    "isDevelopment": false
+}
