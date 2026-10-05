@@ -456,6 +456,18 @@
     "website": ""
   },
   {
+    "id": "comix",
+    "name": "Comix",
+    "description": "Comix is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/manga/comix/manifest.json",
+    "author": "Pal & Ari-03",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/public/comix.png",
+    "website": "https://comix.to"
+  },
+  {
     "id": "default-torrent-filters",
     "name": "Default Torrent Filters",
     "description": "Automatically applies your preferred filters (Multi Subs, Dubbed, video/audio codecs) to torrent search results",

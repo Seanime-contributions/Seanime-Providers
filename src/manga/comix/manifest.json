@@ -1,0 +1,33 @@
+{
+  "id": "comix",
+  "name": "Comix",
+  "description": "Comix (comix.to) manga provider for Seanime. Needs the cf_clearance cookie and the matching User-Agent from a browser that opened comix.to. With Chrome or Chromium installed on the Seanime host, it refreshes the site's signing keys on its own.",
+  "manifestURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/manga/comix/manifest.json",
+  "version": "2.0.0",
+  "author": "Pal & Ari-03",
+  "icon": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/public/comix.png",
+  "website": "https://comix.to",
+  "readme": "https://github.com/Ari-03/Seanime-Providers/blob/main/src/manga/comix/README.md",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Ari-03/Seanime-Providers/main/src/manga/comix/provider.js",
+  "userConfig": {
+    "version": 1,
+    "requiresConfig": true,
+    "fields": [
+      {
+        "type": "text",
+        "name": "cfClearance",
+        "label": "cf_clearance cookie. Open comix.to in your browser, then DevTools > Application > Cookies > https://comix.to and copy the cf_clearance value.",
+        "default": ""
+      },
+      {
+        "type": "text",
+        "name": "userAgent",
+        "label": "User-Agent of that same browser. Run navigator.userAgent in its DevTools console and paste the result. It must match the browser the cookie came from.",
+        "default": ""
+      }
+    ]
+  }
+}

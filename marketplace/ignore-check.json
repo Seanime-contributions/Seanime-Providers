@@ -1,5 +1,9 @@
 [
   {
+    "id": "comix",
+    "reason": "Requires a user's cf_clearance cookie and matching User-Agent, which the public checker cannot supply."
+  },
+  {
     "id": "animeheaven",
     "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
   },
