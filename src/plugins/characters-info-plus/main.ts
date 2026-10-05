@@ -9,14 +9,14 @@ function init() {
 (function () {
     "use strict";
 
-    const PLUGIN_VERSION = "6";
+    const PLUGIN_VERSION = "7";
     if (window.__charactersInfoPlusVersion === PLUGIN_VERSION) return;
     window.__charactersInfoPlusVersion = PLUGIN_VERSION;
     window.__charactersInfoPlusLoaded = true;
 
-    const STYLE_ID = "characters-info-plus-styles-v6";
-    const TOOLTIP_ID = "characters-info-plus-tooltip-v6";
-    const BOUND_KEY = "cipBoundV6";
+    const STYLE_ID = "characters-info-plus-styles-v7";
+    const TOOLTIP_ID = "characters-info-plus-tooltip-v7";
+    const BOUND_KEY = "cipBoundV7";
     const CARD_SELECTOR = '[data-media-entry-characters-section-grid-item="true"]';
     const LINK_SELECTOR = '[data-media-entry-characters-section-grid-item-content-link="true"]';
     const cache = new Map();
@@ -34,7 +34,7 @@ function init() {
 
     function installStyles() {
         if (document.getElementById(STYLE_ID)) return;
-        ["characters-info-plus-styles", "characters-info-plus-styles-v2", "characters-info-plus-styles-v3", "characters-info-plus-styles-v4", "characters-info-plus-styles-v5"].forEach(function (styleId) {
+        ["characters-info-plus-styles", "characters-info-plus-styles-v2", "characters-info-plus-styles-v3", "characters-info-plus-styles-v4", "characters-info-plus-styles-v5", "characters-info-plus-styles-v6"].forEach(function (styleId) {
             const legacyStyle = document.getElementById(styleId);
             if (legacyStyle) legacyStyle.remove();
         });
@@ -83,14 +83,22 @@ function init() {
             #\${TOOLTIP_ID} .cip-name { margin:0; font-size:15px; line-height:1.2; font-weight:700; }
             #\${TOOLTIP_ID} .cip-native { margin:3px 0 0; color:#fff; opacity:.62; font-size:11px; }
             #\${TOOLTIP_ID} .cip-role { margin:10px 0 0; color:rgb(var(--color-brand-500)); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-            #\${TOOLTIP_ID} .cip-description { margin:9px 0 0; max-height:86px; overflow:hidden; opacity:.82; font-size:12px; line-height:1.45; }
+            #\${TOOLTIP_ID} .cip-description { position:relative; margin:9px 0 0; max-height:190px; overflow:hidden; opacity:.86; font-size:12px; line-height:1.5; }
+            #\${TOOLTIP_ID} .cip-description::after { content:""; position:absolute; right:0; bottom:0; left:0; height:34px; background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.97)); pointer-events:none; }
+            #\${TOOLTIP_ID} .cip-description p { margin:0 0 8px; }
+            #\${TOOLTIP_ID} .cip-description p:last-child { margin-bottom:0; }
+            #\${TOOLTIP_ID} .cip-description h1, #\${TOOLTIP_ID} .cip-description h2, #\${TOOLTIP_ID} .cip-description h3 { margin:0 0 7px; color:#fff; font-size:13px; line-height:1.3; }
+            #\${TOOLTIP_ID} .cip-description ul, #\${TOOLTIP_ID} .cip-description ol { margin:0 0 8px 18px; padding:0; }
+            #\${TOOLTIP_ID} .cip-description blockquote { margin:0 0 8px; padding-left:9px; border-left:2px solid rgb(var(--color-brand-500)); opacity:.8; }
+            #\${TOOLTIP_ID} .cip-description code { padding:1px 4px; border-radius:4px; background:#171717; color:rgb(var(--color-brand-500)); font-size:11px; }
+            #\${TOOLTIP_ID} .cip-description a { color:rgb(var(--color-brand-500)); text-decoration:underline; }
             #\${TOOLTIP_ID} .cip-meta { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; opacity:.72; font-size:10px; }
             #\${TOOLTIP_ID} .cip-meta span { padding:3px 6px; border:1px solid currentColor; border-radius:999px; }
             #\${TOOLTIP_ID} .cip-more { display:inline-flex; margin-top:12px; padding:7px 10px; border-radius:8px; background:rgb(var(--color-brand-500)); color:#000; font-size:11px; font-weight:700; text-decoration:none; }
             #\${TOOLTIP_ID} .cip-more:hover { filter:brightness(1.1); }
             #\${TOOLTIP_ID} .cip-loading { color:#fff; opacity:.7; font-size:12px; }
             #\${TOOLTIP_ID} .cip-error { color:#fff; opacity:.8; font-size:12px; }
-            #characters-info-plus-tooltip, #characters-info-plus-tooltip-v2, #characters-info-plus-tooltip-v3, #characters-info-plus-tooltip-v4, #characters-info-plus-tooltip-v5 { display:none !important; }
+            #characters-info-plus-tooltip, #characters-info-plus-tooltip-v2, #characters-info-plus-tooltip-v3, #characters-info-plus-tooltip-v4, #characters-info-plus-tooltip-v5, #characters-info-plus-tooltip-v6 { display:none !important; }
         \`;
         document.head.appendChild(style);
     }
@@ -162,8 +170,9 @@ function init() {
 
     function positionTooltip(card) {
         if (!tooltip || !card || !card.isConnected) return;
-        const rect = card.getBoundingClientRect();
-        const gap = 12;
+        const thumbnail = card.querySelector('[data-media-entry-characters-section-grid-item-image-container="true"]');
+        const rect = (thumbnail || card).getBoundingClientRect();
+        const gap = 6;
         const width = Math.min(340, window.innerWidth - 24);
         const height = tooltip.offsetHeight || 220;
         let left = rect.right + gap;
@@ -223,6 +232,82 @@ function init() {
         return element;
     }
 
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
+        });
+    }
+
+    function markdownInline(value) {
+        let text = escapeHtml(value);
+        text = text.replace(/\\x60([^\\x60\\n]+)\\x60/g, "<code>$1</code>");
+        text = text.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        text = text.replace(/\\*\\*([^*]+)\\*\\*/g, "<strong>$1</strong>");
+        text = text.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+        text = text.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+        text = text.replace(/(^|[^*])\\*([^*\\n]+)\\*(?!\\*)/g, "$1<em>$2</em>");
+        text = text.replace(/(^|[^_])_([^_\\n]+)_(?!_)/g, "$1<em>$2</em>");
+        return text;
+    }
+
+    function markdownToHtml(value) {
+        const lines = String(value || "").replace(/\\r/g, "").split("\\n");
+        const output = [];
+        let paragraph = [];
+        let listType = null;
+
+        function closeParagraph() {
+            if (paragraph.length) {
+                output.push("<p>" + paragraph.map(markdownInline).join("<br>") + "</p>");
+                paragraph = [];
+            }
+        }
+        function closeList() {
+            if (listType) {
+                output.push("</" + listType + ">");
+                listType = null;
+            }
+        }
+
+        lines.forEach(function (line) {
+            const trimmed = line.trim();
+            if (!trimmed) {
+                closeParagraph();
+                closeList();
+                return;
+            }
+            const heading = trimmed.match(/^(#{1,3})\\s+(.+)$/);
+            const unordered = trimmed.match(/^[-*+]\\s+(.+)$/);
+            const ordered = trimmed.match(/^\\d+[.]\\s+(.+)$/);
+            const quote = trimmed.match(/^>\\s?(.+)$/);
+            if (heading) {
+                closeParagraph();
+                closeList();
+                const tag = "h" + heading[1].length;
+                output.push("<" + tag + ">" + markdownInline(heading[2]) + "</" + tag + ">");
+            } else if (unordered || ordered) {
+                closeParagraph();
+                const nextType = unordered ? "ul" : "ol";
+                if (listType !== nextType) {
+                    closeList();
+                    listType = nextType;
+                    output.push("<" + listType + ">");
+                }
+                output.push("<li>" + markdownInline((unordered || ordered)[1]) + "</li>");
+            } else if (quote) {
+                closeParagraph();
+                closeList();
+                output.push("<blockquote>" + markdownInline(quote[1]) + "</blockquote>");
+            } else {
+                closeList();
+                paragraph.push(line);
+            }
+        });
+        closeParagraph();
+        closeList();
+        return output.join("") || "<p>No description available.</p>";
+    }
+
     function renderCharacter(card, character) {
         const box = ensureTooltip();
         resetTooltip(box);
@@ -239,8 +324,10 @@ function init() {
         header.appendChild(heading);
         box.appendChild(header);
         appendText(box, "p", "cip-role", "Character information");
-        const description = String(character.description || "No description available.").replace(/\\s+/g, " ").trim();
-        appendText(box, "p", "cip-description", description.length > 360 ? description.slice(0, 357) + "…" : description);
+        const description = document.createElement("div");
+        description.className = "cip-description";
+        description.innerHTML = markdownToHtml(character.description || "No description available.");
+        box.appendChild(description);
         const meta = document.createElement("div");
         meta.className = "cip-meta";
         if (character.gender) appendText(meta, "span", "", character.gender);
