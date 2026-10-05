@@ -264,18 +264,6 @@
     "website": ""
   },
   {
-    "id": "agefans",
-    "name": "AgeFans",
-    "description": "AgeFans is an online streaming provider for chinese sub anime",
-    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/agefans/manifest.json",
-    "author": "Pal",
-    "type": "onlinestream-provider",
-    "language": "javascript",
-    "lang": "zh",
-    "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/agefans.ico",
-    "website": ""
-  },
-  {
     "id": "hentaiworld",
     "name": "HentaiWorld",
     "description": "HentaiWorld is an online streaming provider for italian sub/dub hentai",

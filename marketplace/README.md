@@ -64,7 +64,6 @@ Here’s a list of all currently available **extensions and plugins**:
 | <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/hentaisaturn.png" width="48" height="48"/><br><b>HentaiSaturn</b></div> | Italiano | HentaiSaturn is an online streaming provider for Seanime | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/hentaisaturn/manifest.json) |
 | <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/hentaiworld.png" width="48" height="48"/><br><b>HentaiWorld</b></div> | Italiano | HentaiWorld is an online streaming provider for Seanime | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/hentaiworld/manifest.json) |
 | <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/anitube.png" width="48" height="48"/><br><b>AniTube</b></div> | Português | AniTube is an online streaming provider for Brazilian / Portugese subs/dubs. | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/anitube/manifest.json) |
-| <div align="center"><img src="https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/agefans.ico" width="48" height="48"/><br><b>AgeFans</b></div> | 中文 | AgeFans is an online streaming provider for chinese subs. | [Click here](https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/agefans/manifest.json) |
 
 </details>
 
