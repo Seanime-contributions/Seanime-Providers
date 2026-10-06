@@ -1,38 +1,50 @@
-[
-  {
-    "id": "comix",
-    "reason": "Requires a user's cf_clearance cookie and matching User-Agent, which the public checker cannot supply."
-  },
-  {
-    "id": "animeheaven",
-    "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
-  },
-  {
-    "id": "dipland-mangaball",
-    "reason": "Requires the external Aqua's Utils extension to function."
-  },
-  {
-    "id": "dipland-mangafire",
-    "reason": "Requires the external Aqua's Utils extension to function."
-  },
-  {
-    "id": "dipland-mangadot",
-    "reason": "Requires the external Aqua's Utils extension to function."
-  },
-  {
-    "id": "shademanga",
-    "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
-  },
-  {
-    "id": "lelmanga",
-    "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
-  },
-  {
-    "id": "mynimeku",
-    "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
-  },
-  {
-    "id": "animeav1",
-    "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
-  }
-]
+{
+  "ignoreAll": true,
+  "extensions": [
+    {
+      "id": "comix",
+      "ignore": true,
+      "reason": "Requires a user's cf_clearance cookie and matching User-Agent, which the public checker cannot supply."
+    },
+    {
+      "id": "animeheaven",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "dipland-mangaball",
+      "ignore": true,
+      "reason": "Requires the external Aqua's Utils extension to function."
+    },
+    {
+      "id": "dipland-mangafire",
+      "ignore": true,
+      "reason": "Requires the external Aqua's Utils extension to function."
+    },
+    {
+      "id": "dipland-mangadot",
+      "ignore": true,
+      "reason": "Requires the external Aqua's Utils extension to function."
+    },
+    {
+      "id": "shademanga",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "lelmanga",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "mynimeku",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "animeav1",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    }
+  ]
+}

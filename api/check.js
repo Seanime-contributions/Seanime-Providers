@@ -75,8 +75,8 @@ function getRateLimitState(ip, now) {
   return { timestamps, remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - timestamps.length) };
 }
 
-function resultCacheKey(query, ids) {
-  return JSON.stringify({ query, ids: [...ids].map(String).sort() });
+function resultCacheKey(query, ids, ignoreIds) {
+  return JSON.stringify({ query, ids: [...ids].map(String).sort(), ignoreIds: [...ignoreIds].map(String).sort() });
 }
 
 function providerTypeLabel(type) {
@@ -330,6 +330,25 @@ function ignoredResult(item, reason) {
   };
 }
 
+function getConfiguredIgnoreIds(ignoreConfig, requestedIgnoreIds) {
+  const legacyArray = Array.isArray(ignoreConfig);
+  const entries = legacyArray ? ignoreConfig : ignoreConfig?.extensions;
+  const ignoreAll = legacyArray || ignoreConfig?.ignoreAll === true;
+  const configured = new Map(
+    (Array.isArray(entries) ? entries : [])
+      .filter(entry => entry?.id && entry?.reason && (ignoreAll || entry.ignore === true))
+      .map(entry => [String(entry.id), String(entry.reason)])
+  );
+  if (!Array.isArray(requestedIgnoreIds)) return configured;
+  const requestable = new Map(
+    (Array.isArray(entries) ? entries : [])
+      .filter(entry => entry?.id && entry?.reason)
+      .map(entry => [String(entry.id), String(entry.reason)])
+  );
+  const requested = new Set(requestedIgnoreIds.map(String));
+  return new Map([...requestable].filter(([id]) => requested.has(id)));
+}
+
 async function mapWithConcurrency(items, worker, limit) {
   const results = new Array(items.length);
   let next = 0;
@@ -364,6 +383,7 @@ module.exports = async function handler(req, res) {
   const requestedIds = Array.isArray(body.ids)
     ? [...new Set(body.ids.map(String))]
     : [...new Set(String(req.query?.ids || "").split(",").map(value => value.trim()).filter(Boolean))];
+  const requestedIgnoreIds = Array.isArray(body.ignoreIds) ? body.ignoreIds : undefined;
 
   if (requestedIds.length > MAX_EXTENSIONS_PER_REQUEST) {
     return res.status(400).json({ error: `Select at most ${MAX_EXTENSIONS_PER_REQUEST} extensions per request.` });
@@ -372,7 +392,7 @@ module.exports = async function handler(req, res) {
   const now = Date.now();
   pruneStores(now);
   const ip = getClientIp(req);
-  const cacheKey = resultCacheKey(query, requestedIds);
+  const cacheKey = resultCacheKey(query, requestedIds, requestedIgnoreIds === undefined ? ["__configured__"] : requestedIgnoreIds);
   const rate = getRateLimitState(ip, now);
   if (rate.timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
     const retryAfter = Math.max(1, Math.ceil((rate.timestamps[0] + RATE_LIMIT_WINDOW_MS - now) / 1000));
@@ -402,18 +422,14 @@ module.exports = async function handler(req, res) {
   try {
     const catalog = await readJson(CATALOG_URL, "Marketplace catalog");
     const ignoreConfig = await readJson(IGNORE_CHECK_URL, "Checker ignore list");
-    const ignoreById = new Map(
-      (Array.isArray(ignoreConfig) ? ignoreConfig : [])
-        .filter(entry => entry?.id && entry?.reason)
-        .map(entry => [String(entry.id), String(entry.reason)])
-    );
+    const ignoreById = getConfiguredIgnoreIds(ignoreConfig, requestedIgnoreIds);
     const items = (Array.isArray(catalog) ? catalog : []).filter(item => CONTENT_TYPES.has(item?.type) && (!requestedIds.length || requestedIds.includes(item.id)));
     const results = await mapWithConcurrency(items, item => {
       const reason = ignoreById.get(String(item.id));
       return reason ? ignoredResult(item, reason) : checkProvider(item, query);
     }, MAX_CONCURRENCY);
     const summary = results.reduce((counts, item) => { counts[item.status] = (counts[item.status] || 0) + 1; return counts; }, {});
-    const payload = { query, checkedAt: new Date().toISOString(), total: results.length, selected: requestedIds, summary, results };
+    const payload = { query, checkedAt: new Date().toISOString(), total: results.length, selected: requestedIds, ignored: [...ignoreById.keys()], summary, results };
     resultCache.set(cacheKey, { expiresAt: Date.now() + RESULT_CACHE_TTL_MS, payload });
     res.setHeader("X-Detector-Cache", "MISS");
     return res.status(200).json(payload);
