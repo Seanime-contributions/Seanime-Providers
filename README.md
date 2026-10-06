@@ -75,8 +75,6 @@ https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/manga/man
 
 ## Where can I find the manifest URLs?
 
-[Click here](https://github.com/Pal-droid/Seanime-Providers/tree/main/marketplace/README.md) to see full list of extensions
-
 [Click here](https://seanime-contributions.github.io/Seanime-Providers/) to visit the extensions Marketplace
 
 [Click here](https://github.com/Seanime-contributions/Seanime-Providers/blob/main/src/other/README.md) to see the full list of contributors-maintained external extensions.
