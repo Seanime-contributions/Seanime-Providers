@@ -29,21 +29,20 @@ This repository contains custom <strong><a href="https://github.com/5rahim/seani
 ## Repository Structure
 
 ```
+api/
+└── check.js                     # Marketplace extension checker API
 src/
-├── anime/
-│   └── animeheaven/
-|       ├── ...
-|        ...
-└── manga/
-    ├── mangafreak/
-    │   ├── provider.js
-    │   ├── README.md
-    │   ├── manga-provider.d.ts
-    │   └── manifest.json
-    └── .../
+├── anime/                       # Anime providers
+│   ├── online-streaming-provider.d.ts
+│   └── shiro/
+│       ├── provider.js
+│       └── manifest.json
+└── manga/                       # Manga providers
+    ├── manga-provider.d.ts
+    └── mangafreak/
         ├── provider.js
-        ├── ....
-         ...
+        ├── README.md
+        └── manifest.json
 ```
 
 ---
