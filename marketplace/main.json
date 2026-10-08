@@ -584,5 +584,17 @@
     "language": "javascript",
     "lang": "en",
     "website": "https://xcomic.me/"
+  },
+  {
+    "id": "fanfox",
+    "name": "FanFox",
+    "description": "FanFox is a manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/fanfox/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/fanfox.png",
+    "website": ""
   }
 ]
