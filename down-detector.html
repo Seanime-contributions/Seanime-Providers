@@ -32,7 +32,7 @@
       function iconFor(item) { return item.icon || ICON_FALLBACK; }
       const state = { items:[], selected:new Set(), collapsed:new Set(), ignoreChecks:new Map() };
       function ignoreEntry(id) { return state.ignoreChecks.get(String(id)); }
-      function isIgnored(id) { return ignoreEntry(id)?.enabled !== false; }
+      function isIgnored(id) { return ignoreEntry(id)?.enabled === true; }
       const menuButton = $("#menu-button"); const menu = $("#site-menu");
       menuButton.addEventListener("click", () => { const hidden = menu.classList.toggle("hidden"); menuButton.setAttribute("aria-expanded", String(!hidden)); });
       document.addEventListener("click", event => { if (!event.target.closest(".menu-wrap")) { menu.classList.add("hidden"); menuButton.setAttribute("aria-expanded", "false"); } });
