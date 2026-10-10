@@ -86,6 +86,19 @@
       .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 18px 18px 12px; }
       .identity { min-width: 0; display: flex; align-items: center; gap: 12px; }
       .icon { width: 46px; height: 46px; flex: 0 0 46px; border: 1px solid var(--line); border-radius: 11px; object-fit: cover; background: var(--soft); }
+      .preview-carousel { padding: 0 18px 14px; }
+      .preview-frame { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 16 / 9; min-height: 174px; border: 1px solid var(--line); border-radius: 10px; background: #080808; }
+      .preview-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .preview-arrow { position: absolute; top: 50%; display: grid; place-items: center; width: 30px; height: 38px; transform: translateY(-50%); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; background: rgba(8,8,8,.78); color: var(--ink); cursor: pointer; font-size: 22px; line-height: 1; transition: background .16s ease, opacity .16s ease; }
+      .preview-arrow:hover { background: rgba(38,38,36,.96); }
+      .preview-arrow:disabled { opacity: .35; cursor: default; }
+      .preview-arrow.prev { left: 8px; }
+      .preview-arrow.next { right: 8px; }
+      .preview-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px; padding: 8px 2px 0; }
+      .preview-dots { display: flex; align-items: center; gap: 6px; }
+      .preview-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: var(--line-strong); cursor: pointer; transition: width .16s ease, background .16s ease; }
+      .preview-dot[aria-current="true"] { width: 20px; background: var(--ink); }
+      .preview-count { color: var(--muted); font: 10px "DM Mono", ui-monospace, monospace; }
       .card h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; overflow-wrap: anywhere; }
       .card-id { color: var(--muted); font-size: 11px; margin-top: 3px; overflow-wrap: anywhere; }
       .version { flex: 0 0 auto; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; font-size: 10px; }
@@ -160,6 +173,21 @@
       const $$ = (selector) => Array.from(document.querySelectorAll(selector));
       const placeholderDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='#1d1d1b'/><path d='M50 34v32M34 50h32' stroke='#494946' stroke-width='3'/></svg>");
       const state = { items: [], category: "all", query: "", author: "", language: "" };
+      const previewFiles = [
+        "anilist-activities-1.jpg", "anilist-activities-2.png",
+        "anime-news-1.png", "anime-news-2.png",
+        "character-info-plus-1.jpg", "cookie-clicker-1.png",
+        "ln-reader-1.png", "ln-reader-2.png", "ln-reader-3.png",
+      ];
+      const previewSlugAliases = { "anilist-activity": "anilist-activities", "characters-info-plus": "character-info-plus" };
+      const previewsBySlug = previewFiles.reduce((groups, filename) => {
+        const match = filename.match(/^(.+)-(\d+)\.([a-z0-9]+)$/i);
+        if (!match) return groups;
+        const [, slug, order] = match;
+        (groups[slug.toLocaleLowerCase()] ||= []).push({ order: Number(order), src: `public/plugins-ss/${filename}` });
+        return groups;
+      }, {});
+      Object.values(previewsBySlug).forEach(previews => previews.sort((a, b) => a.order - b.order));
       const DEFAULT_URI = "http://localhost";
       const DEFAULT_PORT = "43211";
 
@@ -206,11 +234,76 @@
         return rows.slice(0, 6);
       }
 
+      function renderPreviewCarousel(item) {
+        const slug = String(item.id || "").toLocaleLowerCase();
+        const previews = previewsBySlug[previewSlugAliases[slug] || slug];
+        if (!previews?.length) return null;
+
+        const carousel = document.createElement("section");
+        carousel.className = "preview-carousel";
+        carousel.setAttribute("aria-label", `${item.name} screenshot previews`);
+        let current = 0;
+        const frame = document.createElement("div");
+        frame.className = "preview-frame";
+        const image = document.createElement("img");
+        image.className = "preview-image";
+        image.loading = "lazy";
+        image.alt = `${item.name} screenshot 1 of ${previews.length}`;
+        frame.append(image);
+
+        const footer = document.createElement("div");
+        footer.className = "preview-footer";
+        const dots = document.createElement("div");
+        dots.className = "preview-dots";
+        const count = document.createElement("span");
+        count.className = "preview-count";
+        footer.append(dots, count);
+
+        const buttons = previews.map((preview, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "preview-dot";
+          dot.setAttribute("aria-label", `Show screenshot ${index + 1} of ${previews.length} for ${item.name}`);
+          dot.addEventListener("click", () => show(index));
+          dots.append(dot);
+          return dot;
+        });
+
+        const show = (index) => {
+          current = (index + previews.length) % previews.length;
+          image.src = previews[current].src;
+          image.alt = `${item.name} screenshot ${current + 1} of ${previews.length}`;
+          count.textContent = `${current + 1} / ${previews.length}`;
+          buttons.forEach((button, buttonIndex) => button.setAttribute("aria-current", String(buttonIndex === current)));
+        };
+
+        if (previews.length > 1) {
+          const previous = document.createElement("button");
+          previous.type = "button";
+          previous.className = "preview-arrow prev";
+          previous.setAttribute("aria-label", `Previous ${item.name} screenshot`);
+          previous.textContent = "‹";
+          previous.addEventListener("click", () => show(current - 1));
+          const next = document.createElement("button");
+          next.type = "button";
+          next.className = "preview-arrow next";
+          next.setAttribute("aria-label", `Next ${item.name} screenshot`);
+          next.textContent = "›";
+          next.addEventListener("click", () => show(current + 1));
+          frame.append(previous, next);
+        }
+        carousel.append(frame, footer);
+        show(0);
+        return carousel;
+      }
+
       function renderCard(item, index) {
         const article = document.createElement("article"); article.className = "card"; article.style.animationDelay = `${Math.min(index, 12) * 24}ms`;
         const icon = item.icon || placeholderDataUrl;
         const rows = metadataRows(item).map(([key, value]) => `<div class="detail"><span>${escapeHtml(key)}</span><span>${escapeHtml(valueText(value))}</span></div>`).join("");
         article.innerHTML = `<div class="card-top"><div class="identity"><img class="icon" src="${escapeHtml(icon)}" alt="" loading="lazy" /><div><h2>${escapeHtml(item.name)}</h2><div class="card-id mono">${escapeHtml(item.id || "")}</div></div></div><span class="version mono">v${escapeHtml(valueText(item.version).replace(/^v/i, ""))}</span></div><div class="card-body"><p class="description">${escapeHtml(item.description || "No description available.")}</p><div class="meta"><span class="chip"><b>${escapeHtml(typeLabel(item.type))}</b></span><span class="chip">${escapeHtml(item.contentLanguage)}</span><span class="chip">${escapeHtml(item.language)}</span>${item.manifestLoaded ? '<span class="chip">manifest ✓</span>' : '<span class="chip">catalog data</span>'}</div><div class="details">${rows}</div></div><div class="card-footer"><a class="action" href="${escapeHtml(item.manifestURI || "#")}" target="_blank" rel="noopener">Manifest ↗</a>${item.website ? `<a class="action" href="${escapeHtml(item.website)}" target="_blank" rel="noopener">Website ↗</a>` : ""}<button class="action install" type="button">Install</button></div>`;
+        const previewCarousel = renderPreviewCarousel(item);
+        if (previewCarousel) article.insertBefore(previewCarousel, article.querySelector(".card-body"));
         const image = article.querySelector("img"); image.addEventListener("error", () => { image.src = placeholderDataUrl; });
         article.querySelector(".install").addEventListener("click", () => installExtension(item, article.querySelector(".install")));
         return article;
