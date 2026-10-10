@@ -1,0 +1,14 @@
+{
+  "id": "animeunion",
+  "name": "AnimeUnion",
+  "description": "AnimeUnion search and streaming with available subtitle and dub episode sources.",
+  "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/animeunion/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "it",
+  "icon": "https://animeunion.tv/favicon.ico",
+  "website": "https://animeunion.tv",
+  "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/animeunion/provider.js"
+}
