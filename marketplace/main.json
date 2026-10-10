@@ -479,18 +479,6 @@
     "website": ""
   },
   {
-    "id": "anilist-notifications",
-    "name": "AniList Notifications",
-    "description": "View your AniList notifications.",
-    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/plugins/anilist-notifications/manifest.json",
-    "author": "Pal",
-    "type": "plugin",
-    "language": "typescript",
-    "lang": "multi",
-    "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/anilist.ico",
-    "website": ""
-  },
-  {
     "id": "shademanga",
     "name": "Shade Manga",
     "description": "Proveedor de manga y cómics de Shade Manga.",
