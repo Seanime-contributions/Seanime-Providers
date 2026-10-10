@@ -8,7 +8,7 @@
   "type": "onlinestream-provider",
   "language": "javascript",
   "lang": "it",
-  "icon": "https://animeunion.tv/favicon.ico",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/animeunion.png",
   "website": "https://animeunion.tv",
   "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/animeunion/provider.js"
 }
