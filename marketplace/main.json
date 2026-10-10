@@ -363,12 +363,12 @@
     "id": "anime-news",
     "name": "Anime News",
     "description": "Read the latest Anime News Network headlines in a dedicated WebView.",
-    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/aninewsnet-seanime/refs/heads/main/manifest.json",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/plugins/animenewsnetwork/manifest.json",
     "author": "SyntaxSama & Pal",
     "type": "plugin",
     "language": "typescript",
     "lang": "EN",
-    "icon": "https://raw.githubusercontent.com/Seanime-contributions/aninewsnet-seanime/refs/heads/main/animenewsnetwork.png",
+    "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/animenewsnetwork.png",
     "website": ""
   },
   {
