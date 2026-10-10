@@ -362,13 +362,13 @@
   {
     "id": "anime-news",
     "name": "Anime News",
-    "description": "Get Anime news in your Seanime instance!",
-    "manifestURI": "https://raw.githubusercontent.com/Pal-droid/aninewsnet-seanime/refs/heads/main/manifest.json",
+    "description": "Read the latest Anime News Network headlines in a dedicated WebView.",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/aninewsnet-seanime/refs/heads/main/manifest.json",
     "author": "SyntaxSama & Pal",
     "type": "plugin",
     "language": "typescript",
     "lang": "EN",
-    "icon": "https://raw.githubusercontent.com/Pal-droid/aninewsnet-seanime/refs/heads/main/animenewsnetwork.png",
+    "icon": "https://raw.githubusercontent.com/Seanime-contributions/aninewsnet-seanime/refs/heads/main/animenewsnetwork.png",
     "website": ""
   },
   {
