@@ -1,0 +1,14 @@
+{
+  "id": "dipland-mangafire",
+  "name": "MangaFire",
+  "version": "1.1.1",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangafire/manifest.json",
+  "language": "typescript",
+  "type": "manga-provider",
+  "description": "Multi language manga provider. (Requires Aqua's Utils)",
+  "author": "dip-land",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangafire.png",
+  "website": "https://mangafire.to/",
+  "lang": "multi",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangafire/provider.ts"
+}

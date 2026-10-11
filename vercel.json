@@ -1,0 +1,25 @@
+{
+  "functions": {
+    "api/check.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/marketplace",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/marketplace/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/detector",
+      "destination": "/down-detector.html"
+    },
+    {
+      "source": "/detector/",
+      "destination": "/down-detector.html"
+    }
+  ]
+}

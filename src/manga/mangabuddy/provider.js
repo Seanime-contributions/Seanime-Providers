@@ -1,107 +1,147 @@
 class Provider {
   constructor() {
-    this.api = "{{domain}}";
+    this.api = "https://mangak.io";
+    this.apiBase = "https://api.mangak.io";
   }
-
   getSettings() {
     return {
       supportsMultiLanguage: false,
       supportsMultiScanlator: false,
     };
   }
-
-  async fetchWithHeaders(url) {
-    return fetch(url, {
+  async fetchJSON(url) {
+    const response = await fetch(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-        Accept: "*/*",
+        Accept: "application/json",
         "X-Requested-With": "XMLHttpRequest",
         Referer: `${this.api}/`,
       },
     });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return response.json();
   }
-
+  async fetchHTML(url) {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+        Accept: "text/html",
+        Referer: `${this.api}/`,
+      },
+    });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return response.text();
+  }
   async search(opts) {
-    const url = `${this.api}/search?q=${encodeURIComponent(opts.query)}`;
     try {
-      const response = await this.fetchWithHeaders(url);
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-
-      const html = await response.text();
-      const decoded = typeof he !== "undefined" ? he.decode(html) : html;
-
-      const entryBlockRegex = /<div\s+class="book-item">([\s\S]*?)<\/div>\s*<\/div>/gi;
-      const mangas = [];
-      let match;
-
-      while ((match = entryBlockRegex.exec(decoded)) !== null) {
-        const chunk = match[1];
-        const id = chunk.match(/href="\/([^"]+)"/i)?.[1];
-        const title =
-          chunk.match(/<h3>\s*<a[^>]+title="([^"]+)"/i)?.[1]?.trim() ||
-          id?.replace(/-/g, " ") ||
-          "Untitled";
-        const thumb = chunk.match(/data-src="([^"]+\.(?:png|jpg|jpeg))"/i)?.[1];
-
-        if (!thumb || !id) continue;
-
-        mangas.push({
-          id,
-          title,
-          image: thumb.startsWith("http") ? thumb : `${this.api}${thumb}`,
-        });
-      }
-
-      return mangas;
+      const url = `${this.apiBase}/titles/search?page=1&limit=10&q=${encodeURIComponent(opts.query)}`;
+      const json = await this.fetchJSON(url);
+      if (!json.success || !json.data?.items) return [];
+      return json.data.items.map((item) => ({
+        id: `${item.id}:::${item.cv}`,
+        title: item.name,
+        image: item.cover,
+      }));
     } catch (e) {
       console.error("Search error:", e);
       return [];
     }
   }
 
+  // Derives the real chapter number from ch.name or the URL slug.
+  // Looks for a number following the word "chapter" to avoid matching
+  // volume numbers (e.g. "Vol.1 Chapter 5" must return "5", not "1").
+  // Falls back to the URL slug, then null if nothing can be parsed.
+  parseChapterNumber(ch) {
+    // 1. Prefer the number that follows the word "chapter" in the title.
+    const fromName = (ch.name || "").match(/chapter[-\s](\d+(?:[-.]\d+)?)/i);
+    if (fromName) return fromName[1].replace("-", ".");
+
+    // 2. Try the URL slug next (e.g. "chapter-118-5" → "118.5").
+    const fromUrl = (ch.url || "").match(/chapter[-/](\d+(?:[-.]\d+)?)/i);
+    if (fromUrl) return fromUrl[1].replace("-", ".");
+
+    // 3. Couldn't parse — signal that this chapter needs a fallback index.
+    return null;
+  }
+
+  // After all chapters have been mapped, chapters whose number could not be
+  // parsed are assigned decimal sub-numbers based on the last valid chapter:
+  //
+  //   lastValid = 134  →  faulty chapters become 134.1, 134.2, …
+  //
+  // If no valid predecessor exists, they are numbered 0.1, 0.2, …
+  assignFallbackNumbers(chapters) {
+    // Group consecutive null-chapter runs and assign sub-numbers.
+    let lastValid = "0";
+    // We need to track how many fallback chapters follow each valid anchor.
+    // First pass: resolve all parseable numbers.
+    // Second pass: for each null run, assign anchor.1, anchor.2, …
+    const result = [];
+    let runStart = -1;
+
+    const flushRun = (endIdx) => {
+      if (runStart === -1) return;
+      const anchor = parseFloat(lastValid);
+      for (let k = runStart; k < endIdx; k++) {
+        const subN = k - runStart + 1;
+        result[k] = {
+          ...result[k],
+          chapter: `${anchor}.${subN}`,
+        };
+      }
+      runStart = -1;
+    };
+
+    // Copy chapters into result first so we can mutate.
+    for (let i = 0; i < chapters.length; i++) {
+      result.push({ ...chapters[i] });
+    }
+
+    for (let i = 0; i < result.length; i++) {
+      if (result[i].chapter !== null) {
+        flushRun(i);
+        lastValid = result[i].chapter;
+      } else {
+        if (runStart === -1) runStart = i;
+        // Keep going — will flush when we hit the next valid chapter or end.
+      }
+    }
+    // Flush any trailing null run.
+    flushRun(result.length);
+
+    return result;
+  }
+
   async findChapters(mangaId) {
     try {
-      const mangaUrl = `${this.api}/${mangaId}`;
-      const detailResp = await this.fetchWithHeaders(mangaUrl);
-      if (!detailResp.ok) throw new Error(`${detailResp.status} ${detailResp.statusText}`);
+      const [hashId, cv] = mangaId.split(":::");
+      const chaptersUrl = cv
+        ? `${this.apiBase}/titles/${hashId}/chapters?cv=${cv}`
+        : `${this.apiBase}/titles/${hashId}/chapters`;
+      const json = await this.fetchJSON(chaptersUrl);
+      if (!json.success || !json.data?.chapters) return [];
 
-      const detailHtml = await detailResp.text();
-      const decodedDetail = typeof he !== "undefined" ? he.decode(detailHtml) : detailHtml;
+      // Step 1: map every chapter; unparseable ones get chapter: null.
+      const mapped = json.data.chapters.map((ch) => ({
+        id: ch.url.startsWith("/") ? ch.url.slice(1) : ch.url,
+        url: `${this.api}${ch.url}`,
+        title: ch.name,
+        chapter: this.parseChapterNumber(ch),
+      }));
 
-      const bookIdMatch = decodedDetail.match(/var\s+bookId\s*=\s*(\d+);/i);
-      const bookId = bookIdMatch?.[1];
-      if (!bookId) return [];
+      // Step 2: sort parseable chapters ascending; null chapters stay in
+      // their relative position (sort is stable in modern JS).
+      mapped.sort((a, b) => {
+        const an = a.chapter !== null ? parseFloat(a.chapter) : Infinity;
+        const bn = b.chapter !== null ? parseFloat(b.chapter) : Infinity;
+        return an - bn;
+      });
 
-      const apiUrl = `${this.api}/api/manga/${bookId}/chapters?source=detail`;
-      const chaptersResp = await this.fetchWithHeaders(apiUrl);
-      if (!chaptersResp.ok) throw new Error(`${chaptersResp.status} ${chaptersResp.statusText}`);
-
-      const chaptersHtml = await chaptersResp.text();
-      const decodedChapters = typeof he !== "undefined" ? he.decode(chaptersHtml) : chaptersHtml;
-
-      const chapterRegex =
-        /<li[^>]*>[\s\S]*?<a[^>]+href="([^"]+)"[^>]*>[\s\S]*?<strong[^>]*class="chapter-title"[^>]*>([^<]+)<\/strong>/gi;
-
-      const chapters = [];
-      let match;
-      while ((match = chapterRegex.exec(decodedChapters)) !== null) {
-        const href = match[1].trim();
-        const title = match[2].trim();
-        const chapterId = href.startsWith("/") ? href.slice(1) : href;
-        const chapterNum = title.match(/Chapter\s+([\d.]+)/i)?.[1] || "0";
-
-        chapters.push({
-          id: chapterId,
-          url: `${this.api}/${chapterId}`,
-          title,
-          chapter: chapterNum,
-        });
-      }
-
-      return chapters
-        .sort((a, b) => parseFloat(a.chapter) - parseFloat(b.chapter))
-        .map((c, i) => ({ ...c, index: i }));
+      // Step 3: assign decimal sub-numbers to null chapters.
+      return this.assignFallbackNumbers(mapped);
     } catch (e) {
       console.error("findChapters error:", e);
       return [];
@@ -111,27 +151,40 @@ class Provider {
   async findChapterPages(chapterId) {
     try {
       const url = `${this.api}/${chapterId}`;
-      const response = await this.fetchWithHeaders(url);
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      const html = await this.fetchHTML(url);
 
-      const html = await response.text();
-      const decoded = typeof he !== "undefined" ? he.decode(html) : html;
+      // The page embeds all image URLs in the __NEXT_DATA__ JSON block as initialChapter.images
+      const nextDataMatch = html.match(/<script id="__NEXT_DATA__" type="application\/json">([^<]+)<\/script>/);
+      if (nextDataMatch) {
+        const nextData = JSON.parse(nextDataMatch[1]);
+        const images = nextData?.props?.pageProps?.initialChapter?.images;
+        if (Array.isArray(images) && images.length > 0) {
+          console.log(`Found ${images.length} pages for chapter ${chapterId} (via __NEXT_DATA__)`);
+          return images.map((src, index) => ({
+            url: src,
+            index,
+            headers: { Referer: "https://mangak.io/" },
+          }));
+        }
+      }
 
-      const imgVarMatch = decoded.match(/var\s+chapImages\s*=\s*'([^']+)'/i);
-      if (!imgVarMatch || !imgVarMatch[1]) return [];
-
-      const rawImages = imgVarMatch[1]
-        .split(",")
-        .map((img) => img.trim())
-        .filter(Boolean);
-
-      const pages = rawImages.map((imgUrl, index) => ({
-        url: imgUrl.startsWith("http") ? imgUrl : `${this.api}${imgUrl}`,
-        index,
-        headers: { Referer: this.api },
-      }));
-
-      console.log(`Found ${pages.length} images for chapter ${chapterId} (direct-only mode)`);
+      // Fallback: scrape <img> tags if __NEXT_DATA__ is absent or empty.
+      const imgRegex = /<img[^>]+class="[^"]*w-full h-full object-cover[^"]*"[^>]+src="([^"]+)"/gi;
+      const pages = [];
+      const seen = new Set();
+      let match;
+      while ((match = imgRegex.exec(html)) !== null) {
+        const src = match[1];
+        if (!seen.has(src)) {
+          seen.add(src);
+          pages.push({
+            url: src,
+            index: pages.length,
+            headers: { Referer: "https://mangak.io/" },
+          });
+        }
+      }
+      console.log(`Found ${pages.length} pages for chapter ${chapterId} (via img fallback)`);
       return pages;
     } catch (e) {
       console.error("findChapterPages error:", e);

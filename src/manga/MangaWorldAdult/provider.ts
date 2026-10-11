@@ -1,4 +1,4 @@
-/// <reference path='./manga-provider.d.ts' />
+/// <reference path='../manga-provider.d.ts' />
 /// <reference path='./doc.d.ts' />
 
 class Provider {
@@ -142,6 +142,36 @@ class Provider {
 
           finalChapters.push(chapterDetails);
         });
+      }
+
+      if (finalChapters.length === 0) {
+        const chapterRegex = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
+        let match: RegExpExecArray | null;
+
+        while ((match = chapterRegex.exec(body)) !== null) {
+          const attributes = match[1];
+          const content = match[2];
+          const classMatch = attributes.match(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+          const hrefMatch = attributes.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+          if (!classMatch || !classMatch.slice(1).some(value => value?.split(/\s+/).includes('chap'))) continue;
+          if (!hrefMatch) continue;
+
+          const url = hrefMatch[1] ?? hrefMatch[2] ?? hrefMatch[3];
+          if (!url || !url.includes('/manga/') || !url.includes('/read/')) continue;
+
+          const titleMatch = content.match(/<span\b[^>]*class\s*=\s*(?:"([^"]*\bd-inline-block\b[^"]*)"|'([^']*\bd-inline-block\b[^']*)'|([^\s>]*\bd-inline-block\b[^\s>]*))[^>]*>([\s\S]*?)<\/span>/i);
+          const title = titleMatch ? titleMatch[4].replace(/<[^>]+>/g, '').trim() : '';
+          if (!title) continue;
+
+          const chapter = title.replace(/^.*?\s+/, '');
+          finalChapters.push({
+            id: url.split('manga/')[1].split('?')[0],
+            url: url.split('?')[0],
+            title,
+            chapter,
+            index: this.getConvertedIndex(chapter),
+          });
+        }
       }
 
       finalChapters.reverse();

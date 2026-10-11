@@ -3,35 +3,11 @@
   "name": "MangaBuddy",
   "description": "MangaBuddy is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangabuddy/manifest.json",
-  "version": "1.2.1",
+  "version": "2.4.2",
   "author": "Pal",
   "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangabuddy.png",
   "type": "manga-provider",
   "language": "javascript",
   "lang": "en",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangabuddy/provider.js",
-
-  "userConfig": {
-    "requiresConfig": false,
-    "version": 1,
-    "fields": [
-      {
-        "name": "domain",
-        "label": "Preferred Domain",
-        "type": "select",
-        "default": "https://mangabuddy.com",
-        "options": [
-          { "label": "mangabuddy.com", "value": "https://mangabuddy.com" },
-          { "label": "mangaforest.me", "value": "https://mangaforest.me" },
-          { "label": "mangacute.com", "value": "https://mangacute.com" },
-          { "label": "mangaxyz.com", "value": "https://mangaxyz.com" },
-          { "label": "mangapuma.com", "value": "https://mangapuma.com" },
-          { "label": "mangamirror.com", "value": "https://mangamirror.com" },
-          { "label": "truemanga.com", "value": "https://truemanga.com" },
-          { "label": "mangafab.com", "value": "https://mangafab.com" },
-          { "label": "manhwatube.com", "value": "https://manhwatube.com" }
-        ]
-      }
-    ]
-  }
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangabuddy/provider.js"
 }

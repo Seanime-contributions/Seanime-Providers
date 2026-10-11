@@ -3,7 +3,6 @@
 class Provider {
   constructor() {
     this.base = "https://www.animegg.org";
-    this.proxyBase = "http://localhost:43211/api/v1/proxy";
   }
 
   getSettings() {
@@ -44,10 +43,6 @@ class Provider {
     const html = await res.text();
     const episodes = [];
 
-    // UPDATED REGEX:
-    // 1. Capture the URL (Group 1)
-    // 2. Capture the Strong text (Group 2) - usually "Anime Name EpisodeNum"
-    // 3. Capture the Italic text (Group 3) - can be "Episode X" OR "Actual Title"
     const epRegex = /<a href="([^"]+)" class="anm_det_pop">[\s\S]*?<strong>(.*?)<\/strong>[\s\S]*?<i class="anititle">(.*?)<\/i>/g;
 
     let match;
@@ -56,11 +51,9 @@ class Provider {
       const strongText = match[2];
       const italicText = match[3];
 
-      // Try to extract number from URL first (e.g. /sword-art-online-episode-25)
       let epNumStr = href.match(/-episode-(\d+)/);
       let epNum = epNumStr ? parseInt(epNumStr[1]) : 0;
 
-      // Fallback: If URL doesn't have "-episode-", try extracting last number from strong tag
       if (!epNum) {
         const numMatch = strongText.match(/(\d+)$/);
         epNum = numMatch ? parseInt(numMatch[1]) : 0;
@@ -68,7 +61,7 @@ class Provider {
 
       episodes.push({
         id: href,
-        title: italicText.trim(), // e.g. "The World Seed" or "Episode 25"
+        title: italicText.trim(),
         number: epNum,
         url: `${this.base}${href}`,
       });
@@ -84,7 +77,6 @@ class Provider {
 
     let targetTabId = server === "GG-DUB" ? "dubbed-Animegg" : "subbed-Animegg";
 
-    // Fallback logic
     if (!html.includes(`id="${targetTabId}"`)) {
       if (targetTabId === "subbed-Animegg" && html.includes('id="dubbed-Animegg"')) {
         targetTabId = "dubbed-Animegg";
@@ -106,27 +98,20 @@ class Provider {
     const embedRes = await fetch(embedUrl);
     const embedHtml = await embedRes.text();
 
-    // 1. Extract the JS array definition
     const sourceMatch = embedHtml.match(/var\s+videoSources\s*=\s*(\[.*?\])/s);
     if (!sourceMatch) throw new Error("Video sources variable not found in embed");
 
     const rawSourceStr = sourceMatch[1];
     const parsedSources = [];
 
-    // 2. Regex to extract attributes from the unquoted JS objects
     const objRegex = /{.*?file:\s*"(.*?)".*?label:\s*"(.*?)".*?}/g;
-    
     let objMatch;
     while ((objMatch = objRegex.exec(rawSourceStr)) !== null) {
-      parsedSources.push({
-        file: objMatch[1],
-        label: objMatch[2]
-      });
+      parsedSources.push({ file: objMatch[1], label: objMatch[2] });
     }
 
     if (!parsedSources.length) throw new Error("No video sources parsed from embed");
 
-    // 3. Filter for best quality
     const bestSource = parsedSources.reduce((prev, current) => {
       const prevQuality = parseInt(prev.label) || 0;
       const currQuality = parseInt(current.label) || 0;
@@ -135,25 +120,17 @@ class Provider {
 
     if (!bestSource) throw new Error("No valid video source item found");
 
-    const initialUrl = `${this.base}${bestSource.file}`;
-
-    // 4. Construct the Proxy URL
-    const headers = {
-        "Referer": this.base
-    };
-
-    const encodedUrl = encodeURIComponent(initialUrl);
-    const encodedHeaders = encodeURIComponent(JSON.stringify(headers));
-    const proxyUrl = `${this.proxyBase}?url=${encodedUrl}&headers=${encodedHeaders}`;
+    const headers = { Referer: this.base };
 
     return {
       server: server,
+      headers: headers,
       videoSources: [
         {
-          url: proxyUrl,
+          url: `${this.base}${bestSource.file}`,
           quality: bestSource.label,
           type: "mp4",
-          headers: headers 
+          headers: headers,
         },
       ],
     };

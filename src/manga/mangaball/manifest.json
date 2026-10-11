@@ -1,0 +1,14 @@
+{
+  "id": "dipland-mangaball",
+  "name": "MangaBall",
+  "version": "1.0.0",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/manifest.json",
+  "language": "typescript",
+  "type": "manga-provider",
+  "description": "Multi language manga provider. (Requires Aqua's Utils)",
+  "author": "dip-land",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangaball.png",
+  "website": "https://mangaball.net/",
+  "lang": "multi",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/provider.ts"
+}

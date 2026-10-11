@@ -1,0 +1,24 @@
+{
+  "id": "ui-translation",
+  "name": "UI Translation",
+  "version": "1.4.4",
+  "manifestURI": "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/plugins/UI-Translation/manifest.json",
+  "language": "typescript",
+  "type": "plugin",
+  "description": "Translates Seanime UI into +10 different languages.",
+  "author": "jabifx & Pal",
+  "icon": "",
+  "website": "",
+  "lang": "multi",
+  "payloadURI": "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/plugins/UI-Translation/ui-translation.ts",
+  "plugin": {
+    "version": "1",
+    "permissions": {
+      "scopes": ["storage"],
+      "allow": {
+        "unsafeFlags": [{"flag": "dom-script-manipulation", "reason": "required for the plugin to work"}]
+      }
+    }
+  },
+  "isDevelopment": false
+}

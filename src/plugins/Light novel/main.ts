@@ -1125,10 +1125,18 @@ function init() {
                     ? \`<button class="novel-plugin-button" id="novel-plugin-continue-btn">Continue: \${lastRead.chapterTitle}</button>\`
                     : \`<button class="novel-plugin-button" id="novel-plugin-start-btn">Start Reading (Ch 1)</button>\`;
                 let selectorHtml = '';
-                if (State.matches.size > 1) {
-                    selectorHtml = \`<div class="novel-plugin-filter-container" style="margin-bottom:0.5rem;"><label>Source:</label><select id="novel-plugin-source-select" class="novel-plugin-select">\${[...State.matches.keys()].map(sid => \`<option value="\${sid}" \${sid === State.currentSourceId ? 'selected' : ''}>\${State.sourceRegistry.get(sid).name} (\${State.matches.get(sid).similarity.toFixed(2)})</option>\`).join('')}</select></div>\`;
+                // Show source selector for the providers that matched this novel.
+                const allSources = [...State.sourceRegistry.keys()];
+                if (allSources.length > 0) {
+                    const sourcesToShow = new Set([...State.matches.keys()]);
+                    selectorHtml = \`<div class="novel-plugin-filter-container" style="margin-bottom:0.5rem;"><label>Source:</label><select id="novel-plugin-source-select" class="novel-plugin-select">\${[...sourcesToShow].map(sid => {
+                        const source = State.sourceRegistry.get(sid);
+                        if (!source) return '';
+                        const matchScore = State.matches.get(sid)?.similarity.toFixed(2);
+                        const scoreText = matchScore ? \` (\${matchScore})\` : '';
+                        return \`<option value="\${sid}" \${sid === State.currentSourceId ? 'selected' : ''}>\${source.name}\${scoreText}</option>\`;
+                    }).join('')}</select></div>\`;
                 }
-
                 container.innerHTML = \`\${selectorHtml}\${readBtnHtml}<button class="novel-plugin-button secondary" id="novel-plugin-view-all-btn">View All Chapters (\${State.currentChapters.length})</button>\`;
                 container.querySelector('#novel-plugin-continue-btn')?.addEventListener('click', () => loadAndReadChapter(lastRead.chapterUrl, lastRead.chapterIndex));
                 container.querySelector('#novel-plugin-start-btn')?.addEventListener('click', () => { if (State.currentChapters.length) loadAndReadChapter(State.currentChapters[0].url, 0); });
@@ -1138,6 +1146,7 @@ function init() {
                 if (select) {
                     select.onchange = async (e) => {
                         State.currentSourceId = e.target.value;
+                        
                         container.innerHTML = \`<div class="novel-plugin-loader small"></div>\`;
                         await loadChaptersForActiveSource();
                         renderChapterButtons(container);
@@ -1271,12 +1280,12 @@ function init() {
                     if (panel) panel.style.display = State.showSettings ? 'block' : 'none';
                 };
 
-                const prev = createBtn('‹ Prev', State.currentChapterIndex <= 0, () => {
-                   const idx = State.currentChapterIndex - 1;
+                const prev = createBtn('‹ Prev', State.currentChapterIndex >= State.currentChapters.length - 1, () => {
+                   const idx = State.currentChapterIndex + 1;
                    loadAndReadChapter(State.currentChapters[idx].url, idx);
                 });
-                const next = createBtn('Next ›', State.currentChapterIndex >= State.currentChapters.length - 1, () => {
-                   const idx = State.currentChapterIndex + 1;
+                const next = createBtn('Next ›', State.currentChapterIndex <= 0, () => {
+                   const idx = State.currentChapterIndex - 1;
                    loadAndReadChapter(State.currentChapters[idx].url, idx);
                 });
                 const select = document.createElement('select');
@@ -1431,7 +1440,7 @@ function init() {
                         loadAsset(CONFIG.assets.scraperBuddy, CONFIG.ids.scriptScraperBuddy, 'script', 'NovelBuddy'),
                         loadAsset(CONFIG.assets.scraperBin, CONFIG.ids.scriptScraperBin, 'script', 'NovelBin'),
                         loadAsset(CONFIG.assets.scraperHall, CONFIG.ids.scriptScraperHall, 'script', 'NovelHall'),
-                        loadAsset(CONFIG.assets.scraperFire, CONFIG.ids.scriptScraperFire, 'script', 'NovelFire')
+                        loadAsset(CONFIG.assets.scraperFire, CONFIG.ids.scriptScraperFire, 'script', 'NovelFire'),
                     ]);
                     const backdrop = document.createElement("div");
                     backdrop.id = CONFIG.ids.backdrop;

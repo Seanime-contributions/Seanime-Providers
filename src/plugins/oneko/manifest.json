@@ -1,0 +1,24 @@
+{
+  "id": "oneko",
+  "name": "Onekojs",
+  "version": "1.0.1",
+  "manifestURI": "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/plugins/oneko/manifest.json",
+  "language": "typescript",
+  "type": "plugin",
+  "description": "Implements the famous Oneko.js script on seanime.",
+  "author": "jabifx & Pal",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/public/oneko.png",
+  "website": "",
+  "lang": "multi",
+  "payloadURI": "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/src/plugins/oneko/main.ts",
+  "plugin": {
+    "version": "1",
+    "permissions": {
+      "scopes": [],
+      "allow": {
+        "unsafeFlags": [{"flag": "dom-script-manipulation", "reason": "required for the plugin to work"}]
+      }
+    }
+  },
+  "isDevelopment": false
+}

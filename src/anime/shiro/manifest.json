@@ -1,0 +1,14 @@
+{
+  "id": "shiro",
+  "name": "Shiro",
+  "description": "Shiro is an AniList-backed online streaming provider for subbed and dubbed anime.",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/shiro/manifest.json",
+  "version": "1.1.1",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "en",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/shiro.ico",
+  "website": "https://shiro.so/",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/shiro/provider.js"
+}

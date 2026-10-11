@@ -4,7 +4,83 @@
         return;
     }
 
-    const NOVELBUDDY_URL = "https://corsproxy.io/?url=https://novelbuddy.com";
+    // Cached port for the session
+    let cachedPort = null;
+
+    // Helper function to detect port from network requests
+    function detectPortFromNetwork() {
+        try {
+            // Check existing performance entries
+            const entries = window.performance.getEntries();
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            // Also try localhost pattern
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            console.log('[novel-plugin] No Seanime API request found in network history');
+            return null;
+        } catch (e) {
+            console.error('[novel-plugin] Error detecting port from network:', e);
+            return null;
+        }
+    }
+
+    // Helper function to get Seanime proxy URL
+    function getProxyUrl() {
+        try {
+            // Return cached port if available
+            if (cachedPort) {
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Try to detect from network requests
+            const detectedPort = detectPortFromNetwork();
+            if (detectedPort) {
+                cachedPort = detectedPort;
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Fallback to window.location.port
+            const port = window.location.port;
+            if (port) {
+                cachedPort = port;
+                console.log('[novel-plugin] Detected port from window.location:', port);
+                return `http://localhost:${port}/api/v1/proxy?url=`;
+            }
+            
+            console.error('[novel-plugin] No port detected');
+            return '';
+        } catch (e) {
+            console.error('[novel-plugin] Error getting proxy URL:', e);
+            return '';
+        }
+    }
+
+    const NOVELBUDDY_BASE_URL = "https://novelbuddy.me";
+    const NOVELBUDDY_API_URL = "https://api.novelbuddy.me";
+    const PROXY_BASE = getProxyUrl();
+
+    // Helper function to proxy a URL
+    function proxyUrl(targetUrl) {
+        if (!PROXY_BASE) return targetUrl;
+        return PROXY_BASE + encodeURIComponent(targetUrl);
+    }
 
     // --- Private Utility Functions ---
 
@@ -39,39 +115,28 @@
     // --- Interface Implementation ---
 
     /**
-     * Searches NovelBuddy for a query
+     * Searches NoveproxyUrl(lBuddy for a _BASEquery)
      * @param {string} query 
      * @returns {Promise<SearchResult[]>}
      */
     async function manualSearch(query) {
-        const url = `${NOVELBUDDY_URL}/search?q=${encodeURIComponent(query)}`;
+        const url = proxyUrl(`${NOVELBUDDY_API_URL}/titles/search?page=1&limit=24&q=${encodeURIComponent(query)}`);
         try {
             const res = await fetch(url);
-            const html = await res.text();
+            const json = await res.json();
             const results = [];
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            const items = doc.querySelectorAll('.book-item');
             
-            items.forEach(item => {
-                const titleElement = item.querySelector('h3 a');
-                const title = titleElement?.title?.trim() || "Unknown Title";
-                const novelUrl = titleElement?.getAttribute('href') || "#";
-                let image = item.querySelector('.thumb img.lazy')?.getAttribute('data-src') || "";
-                if (image.startsWith("//")) { 
-                    image = `https:${image}`; 
-                } else if (image.startsWith("/")) {
-                    image = `${NOVELBUDDY_URL}${image}`;
-                }
-                const latestChapter = item.querySelector('.latest-chapter')?.textContent?.trim() || "No Chapter";
-              
-                results.push({ 
-                    title: title, 
-                    url: novelUrl, 
-                    image: image, 
-                    latestChapter: latestChapter 
+            if (json.success && json.data && json.data.items) {
+                json.data.items.forEach(item => {
+                    results.push({
+                        title: item.name,
+                        url: item.id,
+                        id: item.id,
+                        image: item.cover,
+                        latestChapter: item.latest_chapters && item.latest_chapters[0] ? item.latest_chapters[0].name : "No Chapter"
+                    });
                 });
-            });
+            }
             return results;
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy Search Error:", err);
@@ -85,34 +150,22 @@
      * @returns {Promise<Chapter[]>}
      */
     async function getChapters(novelUrl) {
-        const url = `${NOVELBUDDY_URL}${novelUrl}`;
         try {
+            // novelUrl is now the ID from search results
+            const url = proxyUrl(`${NOVELBUDDY_API_URL}/titles/${novelUrl}/chapters`);
             const res = await fetch(url);
-            const html = await res.text();
-            const bookIdMatch = html.match(/var bookId = (\d+);/);
-            if (!bookIdMatch || !bookIdMatch[1]) {
-                throw new Error("Could not find bookId on novel page.");
-            }
-            const bookId = bookIdMatch[1];
-            const chapterApiUrl = `${NOVELBUDDY_URL}/api/manga/${bookId}/chapters?source=detail`;
-            const chapterRes = await fetch(chapterApiUrl);
-            const chapterHtml = await chapterRes.text();
+            const json = await res.json();
             const chapters = [];
             
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(chapterHtml, "text/html");
-            const chapterItems = doc.querySelectorAll('ul.chapter-list li a');
-            chapterItems.forEach(link => {
-                const url = link.getAttribute('href');
-                let title = link.querySelector('strong.chapter-title')?.textContent?.trim();
-                if (!title || title.length === 0) {
-                    title = link.getAttribute('title')?.trim() || "Unknown Chapter";
-                }
-                if (url) {
-                    chapters.push({ url: url, title: title });
-                }
-            });
-            return chapters.reverse(); // Reverse to get CH 1 first
+            if (json.success && json.data && json.data.chapters) {
+                json.data.chapters.forEach(chapter => {
+                    chapters.push({
+                        url: chapter.url,
+                        title: chapter.name
+                    });
+                });
+            }
+            return chapters;
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy Details Error:", err);
             return [];
@@ -125,24 +178,30 @@
      * @returns {Promise<string>}
      */
     async function getChapterContent(chapterUrl) {
-        const url = `${NOVELBUDDY_URL}${chapterUrl}`;
+        const targetUrl = `${NOVELBUDDY_BASE_URL}${chapterUrl}`;
+        const url = proxyUrl(targetUrl);
         try {
             const res = await fetch(url);
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const contentElement = doc.querySelector('.content-inner');
+            const contentElement = doc.querySelector('.novel-tts-content');
     
             if (!contentElement) {
                 throw new Error("Could not extract chapter content.");
             }
     
-            contentElement.querySelectorAll('script, div[id^="pf-"], div[style="text-align:center"], ins, div[align="center"]').forEach(el => el.remove());
-            contentElement.querySelectorAll('div').forEach(div => {
-                if (div.innerHTML.trim() === '') div.remove();
-            });
-    
-            return contentElement.innerHTML;
+            // Remove translation selector and other UI elements
+            contentElement.querySelectorAll('select, .mb-6').forEach(el => el.remove());
+            
+            // Remove obfuscated freewebnovel.com spam
+            let contentHtml = contentElement.innerHTML;
+            contentHtml = contentHtml.replace(/ƒ𝗿e𝘦𝚠𝗲𝚋n𝚘ν𝙚𝗹\.𝑐o𝙢/g, '');
+            
+            // Remove repeated ※ pattern
+            contentHtml = contentHtml.replace(/※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※/g, '');
+            
+            return contentHtml;
         } catch (err) {
             console.error("[novel-plugin] NovelBuddy ChapterContent Error:", err);
             return "<p>Error loading chapter content.</p>";
@@ -239,3 +298,4 @@
     }
 
 })();
+

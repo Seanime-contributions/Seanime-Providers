@@ -4,9 +4,82 @@
         return;
     }
 
+    // Cached port for the session
+    let cachedPort = null;
+
+    // Helper function to detect port from network requests
+    function detectPortFromNetwork() {
+        try {
+            // Check existing performance entries
+            const entries = window.performance.getEntries();
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            // Also try localhost pattern
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            console.log('[novel-plugin] No Seanime API request found in network history');
+            return null;
+        } catch (e) {
+            console.error('[novel-plugin] Error detecting port from network:', e);
+            return null;
+        }
+    }
+
+    // Helper function to get Seanime proxy URL
+    function getProxyUrl() {
+        try {
+            // Return cached port if available
+            if (cachedPort) {
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Try to detect from network requests
+            const detectedPort = detectPortFromNetwork();
+            if (detectedPort) {
+                cachedPort = detectedPort;
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Fallback to window.location.port
+            const port = window.location.port;
+            if (port) {
+                cachedPort = port;
+                console.log('[novel-plugin] Detected port from window.location:', port);
+                return `http://localhost:${port}/api/v1/proxy?url=`;
+            }
+            
+            console.error('[novel-plugin] No port detected');
+            return '';
+        } catch (e) {
+            console.error('[novel-plugin] Error getting proxy URL:', e);
+            return '';
+        }
+    }
+
     const NOVELBIN_URL = "https://novelbin.me";
-    // ADDED: CORS Proxy
-    const CORS_PROXY_URL = "https://corsproxy.io/?url=";
+    const PROXY_BASE = getProxyUrl();
+
+    // Helper function to proxy a URL
+    function proxyUrl(targetUrl) {
+        if (!PROXY_BASE) return targetUrl;
+        return PROXY_BASE + encodeURIComponent(targetUrl);
+    }
 
     // --- Private Utility Functions ---
 
@@ -46,7 +119,7 @@
      * @returns {Promise<SearchResult[]>}
      */
     async function manualSearch(query) {
-        const url = `${CORS_PROXY_URL}${NOVELBIN_URL}/search?keyword=${encodeURIComponent(query)}`;
+        const url = proxyUrl(`${NOVELBIN_URL}/search?keyword=${encodeURIComponent(query)}`);
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -64,7 +137,6 @@
 
                 const title = titleElement?.title?.trim() || "Unknown Title";
                 let novelUrl = titleElement?.getAttribute('href') || "#";
-                
                 let image = item.querySelector('.cover')?.getAttribute('src') || "";
                 if (image.startsWith("//")) { 
                     image = `https:${image}`; 
@@ -104,9 +176,9 @@
             const novelSlug = urlSlugMatch[1];
             
             // Use the correct API endpoint provided by user
-            const chapterApiUrl = `${CORS_PROXY_URL}${NOVELBIN_URL}/ajax/chapter-archive?novelId=${novelSlug}`;
+            const chapterApiUrl = `${NOVELBIN_URL}/ajax/chapter-archive?novelId=${novelSlug}`;
 
-            const chapterRes = await fetch(chapterApiUrl);
+            const chapterRes = await fetch(proxyUrl(chapterApiUrl));
             if (!chapterRes.ok) throw new Error(`Chapter API failed: ${chapterRes.status}`);
             const html = await chapterRes.text();
             
@@ -136,7 +208,7 @@
      */
     async function getChapterContent(chapterUrl) {
         try {
-            const res = await fetch(`${CORS_PROXY_URL}${chapterUrl}`);
+            const res = await fetch(proxyUrl(chapterUrl));
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
             const html = await res.text();
             const parser = new DOMParser();

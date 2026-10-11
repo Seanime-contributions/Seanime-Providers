@@ -3,7 +3,7 @@
   "name": "AnimeToast",
   "description": "AnimeToast is an online streaming provider for german sub/dubs.",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animetoast/manifest.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Pal",
   "type": "onlinestream-provider",
   "language": "javascript",

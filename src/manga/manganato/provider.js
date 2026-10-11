@@ -1,7 +1,6 @@
 class Provider {
     constructor() {
         this.api = 'https://www.mangabats.com';
-        this.proxyBase = 'http://localhost:43211/api/v1/image-proxy';
     }
 
     getSettings() {
@@ -9,11 +8,6 @@ class Provider {
             supportsMultiLanguage: false,
             supportsMultiScanlator: false,
         };
-    }
-
-    applyProxy(targetUrl) {
-        const headers = JSON.stringify({ "Referer": `${this.api}/` });
-        return `${this.proxyBase}?url=${encodeURIComponent(targetUrl)}&headers=${encodeURIComponent(headers)}`;
     }
 
     async search(opts) {
@@ -50,7 +44,11 @@ class Provider {
                 mangas.push({
                     id: mangaId,
                     title: title,
-                    image: imageUrl ? this.applyProxy(imageUrl) : ''
+                    image: imageUrl || '',
+                    headers: {
+                        'Referer': this.api,
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
                 });
             }
             
@@ -185,8 +183,12 @@ class Provider {
                 const fullUrl = path.startsWith('http') ? path : `${baseCdn}${cleanPath}`;
                 
                 return {
-                    url: this.applyProxy(fullUrl),
+                    url: fullUrl,
                     index: index,
+                    headers: {
+                        'Referer': this.api + "/",
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
                 };
             });
         } catch (e) {

@@ -4,8 +4,83 @@
         return;
     }
 
+    // Cached port for the session
+    let cachedPort = null;
+
+    // Helper function to detect port from network requests
+    function detectPortFromNetwork() {
+        try {
+            // Check existing performance entries
+            const entries = window.performance.getEntries();
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/127\.0\.0\.1:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            // Also try localhost pattern
+            for (const entry of entries) {
+                if (entry.name && entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//)) {
+                    const match = entry.name.match(/http:\/\/localhost:(\d+)\/api\/v1\//);
+                    if (match && match[1]) {
+                        console.log('[novel-plugin] Detected port from network request:', match[1]);
+                        return match[1];
+                    }
+                }
+            }
+            
+            console.log('[novel-plugin] No Seanime API request found in network history');
+            return null;
+        } catch (e) {
+            console.error('[novel-plugin] Error detecting port from network:', e);
+            return null;
+        }
+    }
+
+    // Helper function to get Seanime proxy URL
+    function getProxyUrl() {
+        try {
+            // Return cached port if available
+            if (cachedPort) {
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Try to detect from network requests
+            const detectedPort = detectPortFromNetwork();
+            if (detectedPort) {
+                cachedPort = detectedPort;
+                return `http://localhost:${cachedPort}/api/v1/proxy?url=`;
+            }
+            
+            // Fallback to window.location.port
+            const port = window.location.port;
+            if (port) {
+                cachedPort = port;
+                console.log('[novel-plugin] Detected port from window.location:', port);
+                return `http://localhost:${port}/api/v1/proxy?url=`;
+            }
+            
+            console.error('[novel-plugin] No port detected');
+            return '';
+        } catch (e) {
+            console.error('[novel-plugin] Error getting proxy URL:', e);
+            return '';
+        }
+    }
+
+    // Helper function to proxy a URL
+    function proxyUrl(targetUrl) {
+        const proxyBase = getProxyUrl();
+        if (!proxyBase) return targetUrl;
+        return proxyBase + encodeURIComponent(targetUrl);
+    }
+
     const NOVELFIRE_URL = "https://novelfire.net";
-    const CORS_PROXY_URL = "https://corsproxy.io/?url=";
+    const CORS_PROXY_URL = getProxyUrl();
 
     // --- Private Utility Functions ---
 
@@ -45,7 +120,7 @@
      * @returns {Promise<SearchResult[]>}
      */
     async function manualSearch(query) {
-        const url = `${CORS_PROXY_URL}${NOVELFIRE_URL}/search?keyword=${encodeURIComponent(query)}`;
+        const url = proxyUrl(`${NOVELFIRE_URL}/search?keyword=${encodeURIComponent(query)}`);
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -98,7 +173,7 @@
             return results;
         } catch (err) {
             console.error("[novel-plugin] NovelFire Search Error:", err);
-            return [];
+            return [];proxyrl()
         }
     }
 
@@ -117,7 +192,7 @@
                     : `${novelUrl}/chapters`;
             }
 
-            const url = `${CORS_PROXY_URL}${chaptersUrl}`;
+            const url = proxyUrl(chaptersUrl);
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Chapter fetch failed: ${res.status}`);
             const html = await res.text();
@@ -143,8 +218,10 @@
                 }
             });
 
-            // Return chapters in correct order (already in order from the HTML)
-            return chapters;
+            // NovelFire renders its chapter list oldest-first (Chapter 1, 2, 3…).
+            // The reader's navigation uses a descending list: Prev increments the
+            // index and Next decrements it. Reverse here to match NovelHall.
+            return chapters.reverse();
         } catch (err) {
             console.error("[novel-plugin] NovelFire Details Error:", err);
             return [];
@@ -158,7 +235,7 @@
      */
     async function getChapterContent(chapterUrl) {
         try {
-            const res = await fetch(`${CORS_PROXY_URL}${chapterUrl}`);
+            const res = await fetch(proxyUrl(chapterUrl));
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
             const html = await res.text();
             const parser = new DOMParser();
@@ -194,6 +271,9 @@
                 const paragraphs = cleanHtml.split('\n').filter(p => p.trim());
                 cleanHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
             }
+
+            // Remove repeated ※ pattern
+            cleanHtml = cleanHtml.replace(/※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※\s※/g, '');
 
             return cleanHtml;
         } catch (err) {

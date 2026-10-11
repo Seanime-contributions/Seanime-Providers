@@ -1,0 +1,13 @@
+{
+  "id": "animesaturnmirror",
+  "name": "AnimeSaturn (Mirror)",
+  "description": "AnimeSaturn mirror",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesaturnmirror/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "it",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animesaturn.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesaturnmirror/provider.js"
+}

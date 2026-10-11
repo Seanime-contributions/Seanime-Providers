@@ -1,4 +1,4 @@
-/// <reference path='./online-streaming-provider.d.ts' />
+/// <reference path='../online-streaming-provider.d.ts' />
 /// <reference path='./doc.d.ts' />
 
 class Provider {
@@ -108,7 +108,10 @@ class Provider {
 
         const episodeServer: EpisodeServer = {
             server,
-            headers: {},
+            headers: {
+                'Referer': this.api + '/',
+                'Origin': this.api,
+            },
             videoSources: [
                 {
                     quality: '720p',

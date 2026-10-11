@@ -3,7 +3,7 @@
   "name": "MangaBats",
   "description": "MangaBats is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/manganato/manifest.json",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "author": "Pal",
   "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/mangabats.png",
   "type": "manga-provider",

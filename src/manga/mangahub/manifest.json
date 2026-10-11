@@ -1,0 +1,13 @@
+{
+  "id": "mangahub",
+  "name": "MangaHub",
+  "description": "MangaHub is a Russian manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/mangahub/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangahub.ico",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "ru",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/mangahub/provider.js"
+}

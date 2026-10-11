@@ -1,707 +1,361 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Seanime Marketplace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <script>
-      tailwind.config = { 
-        darkMode: "class",
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Inter', 'sans-serif'],
-                },
-                colors: {
-                    gray: {
-                        850: '#1f2937',
-                        900: '#111827',
-                        950: '#030712', 
-                    }
-                },
-                animation: {
-                    'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    'fade-in': 'fadeIn 0.5s ease-out',
-                },
-                keyframes: {
-                    fadeIn: {
-                        '0%': { opacity: '0', transform: 'translateY(10px)' },
-                        '100%': { opacity: '1', transform: 'translateY(0)' },
-                    }
-                }
-            }
-        }
-      };
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="A minimal marketplace for Seanime extensions, providers, and plugins." />
+    <title>Community Marketplace (managed by @Pal-droid)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
+      :root {
+        --paper: #080808;
+        --ink: #f2f2ef;
+        --muted: #989894;
+        --line: #282826;
+        --line-strong: #494946;
+        --panel: #121212;
+        --soft: #1d1d1b;
+        --accent: #f2f2ef;
+        --danger: #d45d5d;
+        --success: #6fc18f;
+        --radius: 14px;
+        color-scheme: dark;
+      }
 
-        /* Glass effect utilities */
-        .glass-panel {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .glass-card {
-            background: rgba(31, 41, 55, 0.4);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .glass-card:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-            background: rgba(31, 41, 55, 0.6);
-        }
-
-        .tab-active {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-            border-color: rgba(59, 130, 246, 0.3);
-        }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, system-ui, sans-serif;
+        line-height: 1.5;
+      }
+      button, input, select { font: inherit; }
+      button, a { -webkit-tap-highlight-color: transparent; }
+      a { color: inherit; }
+      .mono { font-family: "DM Mono", ui-monospace, SFMono-Regular, monospace; }
+      .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+      .site-header { border-bottom: 1px solid var(--line); background: rgba(8, 8, 8, .92); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 20; }
+      .header-row { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+      .brand { display: inline-flex; align-items: baseline; text-decoration: none; font-weight: 800; letter-spacing: -.04em; }
+      .brand-sub { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+      .brand-link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+      .brand-link:hover { color: var(--ink); }
+      .header-actions { display: flex; align-items: center; gap: 8px; }
+      .menu-wrap { position: relative; }
+      .menu-button { font-size: 19px; line-height: 1; }
+      .site-menu { position: absolute; top: calc(100% + 10px); right: 0; width: 220px; padding: 6px; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: 0 18px 40px rgba(0, 0, 0, .35); }
+      .site-menu.hidden { display: none; }
+      .site-menu a { display: block; padding: 10px; border-radius: 7px; color: var(--ink); font-size: 12px; text-decoration: none; }
+      .site-menu a:hover, .site-menu a.active { background: var(--soft); }
+      .icon-btn, .text-btn { border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; border-radius: 9px; padding: 8px 10px; transition: .18s ease; }
+      .icon-btn:hover, .text-btn:hover { color: var(--ink); background: var(--soft); border-color: var(--line); }
+      .hero { padding: 72px 0 44px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: 48px; align-items: end; }
+      .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
+      .eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--ink); }
+      h1 { max-width: 720px; margin: 17px 0 16px; font-size: clamp(2.45rem, 6vw, 5.6rem); line-height: .98; letter-spacing: -.075em; font-weight: 800; }
+      .hero-copy { max-width: 560px; color: var(--muted); font-size: 16px; }
+      .hero-note { border-top: 1px solid var(--ink); padding-top: 14px; color: var(--muted); font-size: 13px; }
+      .hero-note strong { color: var(--ink); display: block; margin-bottom: 4px; }
+      .toolbar { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 0; }
+      .search-row { display: grid; grid-template-columns: minmax(220px, 1fr) 190px 190px auto; gap: 10px; }
+      .field { position: relative; }
+      .field input, .field select { width: 100%; height: 44px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); color: var(--ink); padding: 0 13px; outline: none; transition: .18s ease; }
+      .field input { padding-left: 40px; }
+      .field input:focus, .field select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(242, 242, 239, .12); }
+      .search-icon { position: absolute; left: 14px; top: 13px; color: var(--muted); pointer-events: none; }
+      .clear-btn { height: 44px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
+      .clear-btn:hover { color: var(--ink); background: var(--soft); }
+      .tabs { display: flex; gap: 8px; overflow-x: auto; padding-top: 16px; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab { white-space: nowrap; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--muted); padding: 8px 13px; cursor: pointer; font-size: 12px; font-weight: 600; }
+      .tab:hover, .tab.active { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+      .results-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 26px 0 14px; }
+      .results-count { color: var(--muted); font-size: 13px; }
+      .results-count strong { color: var(--ink); }
+      .data-status { color: var(--muted); font-size: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding-bottom: 72px; }
+      .card { min-width: 0; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; animation: rise .35s both; }
+      .card:hover { transform: translateY(-3px); border-color: var(--ink); box-shadow: 0 12px 28px rgba(17, 17, 17, .08); }
+      @keyframes rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+      .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 18px 18px 12px; }
+      .identity { min-width: 0; display: flex; align-items: center; gap: 12px; }
+      .icon { width: 46px; height: 46px; flex: 0 0 46px; border: 1px solid var(--line); border-radius: 11px; object-fit: cover; background: var(--soft); }
+      .preview-carousel { padding: 0 18px 14px; }
+      .preview-frame { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 16 / 9; min-height: 174px; border: 1px solid var(--line); border-radius: 10px; background: #080808; }
+      .preview-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .preview-arrow { position: absolute; top: 50%; display: grid; place-items: center; width: 30px; height: 38px; transform: translateY(-50%); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; background: rgba(8,8,8,.78); color: var(--ink); cursor: pointer; font-size: 22px; line-height: 1; transition: background .16s ease, opacity .16s ease; }
+      .preview-arrow:hover { background: rgba(38,38,36,.96); }
+      .preview-arrow:disabled { opacity: .35; cursor: default; }
+      .preview-arrow.prev { left: 8px; }
+      .preview-arrow.next { right: 8px; }
+      .preview-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px; padding: 8px 2px 0; }
+      .preview-dots { display: flex; align-items: center; gap: 6px; }
+      .preview-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: var(--line-strong); cursor: pointer; transition: width .16s ease, background .16s ease; }
+      .preview-dot[aria-current="true"] { width: 20px; background: var(--ink); }
+      .preview-count { color: var(--muted); font: 10px "DM Mono", ui-monospace, monospace; }
+      .card h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; overflow-wrap: anywhere; }
+      .card-id { color: var(--muted); font-size: 11px; margin-top: 3px; overflow-wrap: anywhere; }
+      .version { flex: 0 0 auto; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; font-size: 10px; }
+      .card-body { padding: 0 18px 17px; flex: 1; }
+      .description { min-height: 60px; margin: 8px 0 15px; color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+      .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+      .chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; color: var(--muted); font-size: 10px; }
+      .chip b { color: var(--ink); font-weight: 600; }
+      .details { margin-top: 13px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 7px; }
+      .detail { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: 11px; }
+      .detail span:last-child { color: var(--ink); text-align: right; overflow-wrap: anywhere; }
+      .card-footer { min-height: 58px; display: flex; align-items: center; gap: 8px; padding: 11px 18px; border-top: 1px solid var(--line); background: var(--panel); }
+      .action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; border-radius: 7px; padding: 0 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; font-size: 11px; font-weight: 600; }
+      .action:hover { background: var(--soft); }
+      .action.install { margin-left: auto; color: var(--paper); background: var(--ink); border-color: var(--ink); }
+      .action.install:hover { background: #d7d7d3; }
+      .action:disabled { cursor: wait; opacity: .6; }
+      .empty, .loading { grid-column: 1 / -1; padding: 72px 20px; text-align: center; border: 1px dashed var(--line-strong); border-radius: var(--radius); color: var(--muted); }
+      .empty strong { display: block; color: var(--ink); margin-bottom: 5px; }
+      footer { border-top: 1px solid var(--line); padding: 22px 0 36px; color: var(--muted); font-size: 12px; }
+      .footer-row { display: flex; justify-content: space-between; gap: 20px; }
+      .footer-row a { text-underline-offset: 3px; }
+      .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(17, 17, 17, .55); opacity: 1; transition: opacity .2s; }
+      .modal-backdrop.hidden { display: none; opacity: 0; }
+      .modal { width: min(440px, 100%); background: var(--panel); border: 1px solid var(--ink); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.2); padding: 22px; }
+      .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+      .modal h2 { margin: 0; font-size: 16px; }
+      .modal label { display: block; color: var(--muted); font-size: 11px; font-weight: 600; margin: 13px 0 6px; }
+      .modal input { width: 100%; height: 40px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 11px; outline: none; }
+      .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+      .toast { position: fixed; right: 20px; bottom: 20px; z-index: 60; max-width: calc(100% - 40px); padding: 11px 14px; background: var(--ink); color: var(--paper); border-radius: 8px; font-size: 12px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: .2s ease; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+      .toast.error { background: var(--danger); }
+      @media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 52px; } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .search-row { grid-template-columns: 1fr 1fr; } .field:first-child { grid-column: 1 / -1; } }
+      @media (max-width: 560px) { .shell { width: min(100% - 28px, 1180px); } .header-row { min-height: 62px; } .brand-sub { font-size: 10px; } h1 { font-size: 3rem; } .grid { grid-template-columns: 1fr; } .search-row { grid-template-columns: 1fr; } .field:first-child { grid-column: auto; } .clear-btn { width: 100%; } .results-bar, .footer-row { align-items: flex-start; flex-direction: column; } }
     </style>
   </head>
-  <body class="bg-gray-950 text-gray-200 font-sans antialiased min-h-screen flex flex-col">
-
-    <div class="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none z-0"></div>
-
-    <nav class="glass-panel sticky top-0 z-50 border-b-0 shadow-lg shadow-black/20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-          <div class="flex items-center justify-between w-full md:w-auto">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                </div>
-                <h1 class="text-xl font-bold tracking-tight text-white">
-                  Seanime <span class="text-gray-500 font-normal">Marketplace</span>
-                </h1>
-            </div>
-            
-            <button id="settings-btn-mobile" class="md:hidden p-2 text-gray-400 hover:text-white transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
-          </div>
-
-          <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 mask-linear">
-                <button class="tab-btn whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full border border-transparent hover:bg-gray-800 transition" data-tab="plugins">Plugins</button>
-                <button class="tab-btn whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full border border-transparent hover:bg-gray-800 transition" data-tab="online">Online Streams</button>
-                <button class="tab-btn whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full border border-transparent hover:bg-gray-800 transition" data-tab="manga">Manga</button>
-                <button class="tab-btn whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full border border-transparent hover:bg-gray-800 transition" data-tab="torrent">Torrents</button>
-                <button class="tab-btn whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full border border-transparent hover:bg-gray-800 transition" data-tab="styling">Styling</button>
-              </div>
-
-              <button id="settings-btn" class="hidden md:flex p-2 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800 rounded-lg transition border border-gray-700/50">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-              </button>
-          </div>
-        </div>
+  <body>
+    <header class="site-header">
+      <div class="shell header-row">
+        <div class="brand"><span>Community Marketplace <span class="brand-sub">(managed by <a class="brand-link" href="https://github.com/Pal-droid" target="_blank" rel="noopener">@Pal-droid</a>)</span></span></div>
+        <div class="header-actions"><a class="text-btn" href="https://github.com/Seanime-contributions/Seanime-Providers" target="_blank" rel="noopener">GitHub ↗</a><button class="icon-btn" id="settings-btn" type="button" aria-label="Open settings">⚙</button><div class="menu-wrap"><button class="icon-btn menu-button" id="menu-button" type="button" aria-label="Open menu" aria-expanded="false">☰</button><nav class="site-menu hidden" id="site-menu"><a class="active" href="./">Marketplace</a><a href="./down-detector.html">Extensions down detector</a></nav></div></div>
       </div>
-    </nav>
+    </header>
 
-    <div class="relative z-10 border-b border-gray-800/50 bg-gray-950/50 backdrop-blur-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-500 group-focus-within:text-blue-400 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <input
-              id="search"
-              type="search"
-              placeholder="Search plugins, authors, tags..."
-              class="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-900/50 border border-gray-800 text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-gray-900 outline-none transition-all shadow-inner"
-            />
-        </div>
-      </div>
-    </div>
-
-    <main class="flex-grow max-w-7xl mx-auto p-4 sm:p-6 w-full relative z-10">
-
-      <section id="plugins" class="tab-content grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></section>
-      <section id="online" class="tab-content hidden grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></section>
-      <section id="manga" class="tab-content hidden grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></section>
-      <section id="torrent" class="tab-content hidden grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></section>
-
-      <section id="styling" class="tab-content hidden space-y-6">
-        <div id="styling-container" class="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2"></div>
-        <div id="styling-empty" class="text-center py-12 text-gray-500">
-             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-             Loading themes...
+    <main>
+      <section class="toolbar" aria-label="Marketplace filters">
+        <div class="shell">
+          <div class="search-row">
+            <label class="field"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search name, description, author, version…" autocomplete="off" /></label>
+            <label class="field"><select id="author-filter" aria-label="Filter by author"><option value="">All authors</option></select></label>
+            <label class="field"><select id="language-filter" aria-label="Filter by language"><option value="">All languages</option></select></label>
+            <button class="clear-btn" id="clear-filters" type="button">Clear filters</button>
+          </div>
+          <nav class="tabs" aria-label="Extension categories"><button class="tab active" data-category="all" type="button">All</button><button class="tab" data-category="plugin" type="button">Plugins</button><button class="tab" data-category="onlinestream-provider" type="button">Online streams</button><button class="tab" data-category="manga-provider" type="button">Manga</button><button class="tab" data-category="anime-torrent-provider" type="button">Torrents</button></nav>
         </div>
       </section>
+
+      <section class="shell results-bar"><div class="results-count"><strong id="result-count">—</strong> extensions shown</div><div class="data-status" id="data-status">Loading manifests…</div></section>
+      <section class="shell grid" id="extension-grid" aria-live="polite"><div class="loading">Loading the extension catalog…</div></section>
     </main>
 
-    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded-lg shadow-2xl transform translate-y-24 transition-transform duration-300 flex items-center gap-3 z-[60]">
-        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-        <span id="toast-msg" class="text-sm font-medium">Operation successful</span>
+    <footer><div class="shell footer-row"><span>Seanime Marketplace · Community maintained</span></div></footer>
+
+    <div class="toast" id="toast" role="status"></div>
+    <div class="modal-backdrop hidden" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="modal"><div class="modal-head"><h2 id="settings-title">Install settings</h2><button class="icon-btn" id="settings-close" type="button" aria-label="Close settings">×</button></div><p class="hero-copy" style="font-size:13px;margin:0">Choose the Seanime server that should receive installations.</p><label for="setting-uri">Server URI</label><input id="setting-uri" type="text" placeholder="http://localhost" /><label for="setting-port">Server port</label><input id="setting-port" type="text" placeholder="43211" /><div class="modal-actions"><button class="action" id="settings-cancel" type="button">Cancel</button><button class="action install" id="settings-save" type="button">Save settings</button></div></div>
     </div>
-
-    <!-- Added 'flex' class here to ensure centering works when 'hidden' is removed -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center z-[80] p-4 transition-opacity opacity-0">
-        <div class="glass-card bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl max-w-md w-full p-6 transform scale-95 transition-transform duration-200" id="settings-content">
-            <h3 class="text-lg font-bold text-white mb-1">Server Settings</h3>
-            <p class="text-sm text-gray-500 mb-6">Configure where extensions are installed.</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase">Server URI</label>
-                    <input type="text" id="setting-uri" placeholder="http://localhost" class="w-full px-4 py-2.5 rounded-lg bg-gray-950 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition" />
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase">Server Port</label>
-                    <input type="text" id="setting-port" placeholder="43211" class="w-full px-4 py-2.5 rounded-lg bg-gray-950 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition" />
-                </div>
-            </div>
-
-            <div class="mt-8 flex justify-end gap-3">
-                <button id="settings-close" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Cancel</button>
-                <button id="settings-save" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-lg shadow-blue-500/20 transition">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Added 'flex' class here as well for the snippet modal -->
-    <div id="snippet-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center z-[70] p-4 sm:p-6 transition-opacity opacity-0">
-      <div class="bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl max-w-4xl w-full h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-200" id="modal-content">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-950">
-          <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></span>
-              <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></span>
-              <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></span>
-              <h3 class="ml-3 text-sm font-mono text-gray-400">css_preview.css</h3>
-          </div>
-          <div class="flex items-center gap-3">
-            <button id="modal-copy" class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                Copy Code
-            </button>
-            <button id="modal-close" class="text-gray-500 hover:text-white transition p-1">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="flex-1 overflow-auto p-6 bg-[#0d1117]">
-          <pre class="font-mono text-xs sm:text-sm leading-relaxed text-gray-300"><code id="modal-code" class="language-css"></code></pre>
-        </div>
-      </div>
-    </div>
-
-    <template id="skeleton-template">
-        <div class="glass-card rounded-xl p-5 flex flex-col h-full animate-pulse">
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 rounded-lg bg-gray-800"></div>
-                <div class="ml-3 flex-1 space-y-2">
-                    <div class="h-4 bg-gray-800 rounded w-3/4"></div>
-                    <div class="h-3 bg-gray-800 rounded w-1/2"></div>
-                </div>
-            </div>
-            <div class="space-y-2 flex-grow">
-                <div class="h-3 bg-gray-800 rounded w-full"></div>
-                <div class="h-3 bg-gray-800 rounded w-5/6"></div>
-            </div>
-            <div class="mt-5 flex gap-2">
-                <div class="h-8 w-20 bg-gray-800 rounded-lg"></div>
-            </div>
-        </div>
-    </template>
-
-    <template id="card-template">
-      <div class="glass-card rounded-xl p-5 flex flex-col h-full group animate-fade-in">
-        <div class="flex items-start justify-between mb-4">
-            <div class="flex items-center">
-                <img class="w-12 h-12 rounded-xl bg-gray-800 border border-gray-700 object-cover shadow-sm" loading="lazy" onerror="this.onerror=null;this.src=placeholderDataUrl" />
-                <div class="ml-3">
-                    <h2 class="text-base font-bold leading-tight text-gray-100 group-hover:text-blue-400 transition-colors"></h2>
-                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span class="author-text"></span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <p class="text-sm text-gray-400 leading-relaxed flex-grow desc-text line-clamp-3"></p>
-
-        <div class="mt-5 flex flex-wrap items-center gap-2 pt-4 border-t border-gray-800/50 buttons-container">
-            </div>
-      </div>
-    </template>
-
-    <template id="snippet-template">
-      <div class="glass-card rounded-xl overflow-hidden group animate-fade-in border-l-4 border-l-blue-500/50">
-        <div class="p-4 bg-gray-900/30 flex items-center justify-between border-b border-gray-800">
-            <div>
-                <h3 class="font-semibold text-sm text-gray-200"></h3>
-                <p class="text-[10px] text-gray-500 mt-0.5 font-mono opacity-70 snippet-file"></p>
-            </div>
-            <div class="flex items-center gap-1">
-                <button class="eye-btn p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition" title="Preview">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                </button>
-                <button class="copy-btn p-2 text-gray-400 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition" title="Copy">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <div class="bg-[#0d1117] p-4 overflow-x-auto">
-             <pre class="text-xs text-gray-400 font-mono"><code class="snippet-code"></code></pre>
-        </div>
-      </div>
-    </template>
 
     <script>
-      // --- Utilities ---
-      const placeholderDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='#1f2937'/><path d='M50 40 L50 60 M40 50 L60 50' stroke='#374151' stroke-width='2'/></svg>`);
-      const $ = (s) => document.querySelector(s);
-      const $$ = (s) => Array.from(document.querySelectorAll(s));
-
-      // --- Settings Logic ---
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+      const placeholderDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='#1d1d1b'/><path d='M50 34v32M34 50h32' stroke='#494946' stroke-width='3'/></svg>");
+      const state = { items: [], category: "all", query: "", author: "", language: "" };
+      const previewFiles = [
+        "anilist-activities-1.jpg", "anilist-activities-2.png",
+        "anime-news-1.png", "anime-news-2.png",
+        "character-info-plus-1.jpg", "cookie-clicker-1.png",
+        "ln-reader-1.png", "ln-reader-2.png", "ln-reader-3.png",
+      ];
+      const previewSlugAliases = { "anilist-activity": "anilist-activities", "characters-info-plus": "character-info-plus" };
+      const previewsBySlug = previewFiles.reduce((groups, filename) => {
+        const match = filename.match(/^(.+)-(\d+)\.([a-z0-9]+)$/i);
+        if (!match) return groups;
+        const [, slug, order] = match;
+        (groups[slug.toLocaleLowerCase()] ||= []).push({ order: Number(order), src: `public/plugins-ss/${filename}` });
+        return groups;
+      }, {});
+      Object.values(previewsBySlug).forEach(previews => previews.sort((a, b) => a.order - b.order));
       const DEFAULT_URI = "http://localhost";
       const DEFAULT_PORT = "43211";
 
-      function getStoredSettings() {
-          return {
-              uri: localStorage.getItem('seanime_uri') || DEFAULT_URI,
-              port: localStorage.getItem('seanime_port') || DEFAULT_PORT
-          };
+      function settingValues() { return { uri: localStorage.getItem("seanime_uri") || DEFAULT_URI, port: localStorage.getItem("seanime_port") || DEFAULT_PORT }; }
+      function installUrl() { const { uri, port } = settingValues(); return `${uri.replace(/\/$/, "")}:${port}/api/v1/extensions/external/install`; }
+      function showToast(message, error = false) { const toast = $("#toast"); toast.textContent = message; toast.className = `toast show${error ? " error" : ""}`; clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove("show"), 3200); }
+      function copyText(text) { navigator.clipboard?.writeText(text).then(() => showToast("Copied to clipboard")).catch(() => showToast("Copy failed", true)); }
+      function valueText(value) { if (value === undefined || value === null || value === "") return "—"; if (Array.isArray(value)) return value.join(", "); if (typeof value === "object") return Object.entries(value).map(([key, val]) => `${key}: ${valueText(val)}`).join(" · "); return String(value); }
+      function normalized(value) { return valueText(value).toLocaleLowerCase(); }
+      function typeLabel(type) { return ({ plugin: "Plugin", "onlinestream-provider": "Online stream", "manga-provider": "Manga", "anime-torrent-provider": "Torrent" })[type] || type || "Extension"; }
+      function categoryMatches(item) { return state.category === "all" || item.type === state.category; }
+
+      async function getManifest(item) {
+        if (!item.manifestURI) return {};
+        try { const response = await fetch(item.manifestURI); return response.ok ? await response.json() : {}; } catch { return {}; }
       }
 
-      function saveSettings(uri, port) {
-          // Remove trailing slash from URI if present
-          if (uri.endsWith('/')) uri = uri.slice(0, -1);
-          localStorage.setItem('seanime_uri', uri);
-          localStorage.setItem('seanime_port', port);
-          showToast("Settings saved!");
+      function enrichItem(item, manifest) {
+        return { ...item, ...manifest, icon: manifest.icon || item.icon || "", name: item.name || item.id || "Unnamed", author: item.author || "Unknown", language: manifest.language || item.language || "Unknown", contentLanguage: manifest.lang || item.lang || "Unknown", version: manifest.version || item.version || "Unversioned", manifestLoaded: Object.keys(manifest).length > 0 };
       }
 
-      function getInstallUrl() {
-          const { uri, port } = getStoredSettings();
-          return `${uri}:${port}/api/v1/extensions/external/install`;
+      function updateSelect(select, values, label) {
+        const previous = select.value;
+        select.innerHTML = `<option value="">${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+        if (values.includes(previous)) select.value = previous;
       }
+      function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]); }
 
-      // Safe Clipboard Copy
-      function copyToClipboard(text) {
-          const textArea = document.createElement("textarea");
-          textArea.value = text;
-          textArea.style.position = "fixed"; // Avoid scrolling to bottom
-          textArea.style.left = "-9999px";
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          try {
-            document.execCommand('copy');
-            showToast("Copied to clipboard!");
-          } catch (err) {
-            showToast("Failed to copy", true);
-            console.error('Fallback: Oops, unable to copy', err);
-          }
-          document.body.removeChild(textArea);
-      }
-
-      function showToast(msg, isError = false) {
-          const toast = document.getElementById('toast');
-          const msgEl = document.getElementById('toast-msg');
-          const icon = toast.querySelector('svg');
-
-          msgEl.textContent = msg;
-          toast.classList.remove('translate-y-24');
-
-          if(isError) {
-              icon.classList.remove('text-green-400');
-              icon.classList.add('text-red-400');
-              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
-          } else {
-              icon.classList.remove('text-red-400');
-              icon.classList.add('text-green-400');
-              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
-          }
-
-          setTimeout(() => {
-              toast.classList.add('translate-y-24');
-          }, 3000);
-      }
-
-      // --- Logic ---
-
-      function setActiveTab(id) {
-        // Button Styles
-        $$(".tab-btn").forEach((b) => {
-            b.classList.remove("tab-active", "text-blue-400", "shadow-sm");
-            b.classList.add("text-gray-400", "hover:text-gray-200");
+      function currentItems() {
+        const query = state.query.trim().toLocaleLowerCase();
+        return state.items.filter(item => {
+          if (!categoryMatches(item) || (state.author && item.author !== state.author) || (state.language && item.contentLanguage !== state.language)) return false;
+          const haystack = [item.name, item.id, item.description, item.author, item.type, item.language, item.contentLanguage, item.version, item.website, item.episodeServers, item.supportsDub].map(normalized).join(" ");
+          return !query || haystack.includes(query);
         });
-        const activeBtn = $$(".tab-btn").find((b) => b.dataset.tab === id);
-        if (activeBtn) {
-            activeBtn.classList.add("tab-active", "shadow-sm");
-            activeBtn.classList.remove("text-gray-400", "hover:text-gray-200");
-        }
-
-        // Content Visibility
-        $$(".tab-content").forEach((el) => el.classList.add("hidden"));
-        const content = document.getElementById(id);
-        content.classList.remove("hidden");
-        content.classList.add("animate-fade-in");
       }
 
-      function renderSkeletons(containerId, count = 6) {
-          const container = document.getElementById(containerId);
-          container.innerHTML = "";
-          const tpl = document.getElementById("skeleton-template");
-          for(let i=0; i<count; i++) {
-              container.appendChild(tpl.content.cloneNode(true));
-          }
+      function metadataRows(item) {
+        const rows = [["Author", item.author], ["Language", item.contentLanguage], ["Extension language", item.language], ["Type", typeLabel(item.type)]];
+        if (item.supportsDub !== undefined) rows.push(["Dub support", item.supportsDub ? "Yes" : "No"]);
+        if (item.episodeServers) rows.push(["Servers", item.episodeServers]);
+        if (item.license) rows.push(["License", item.license]);
+        if (item.repository) rows.push(["Repository", item.repository]);
+        return rows.slice(0, 6);
       }
 
-      function normalizePluginData(data) {
-        if (!data) return [];
-        if (Array.isArray(data)) return data;
-        // Try to find array in object values
-        const arrCandidates = Object.values(data).filter(
-          (v) => Array.isArray(v) && v.length && typeof v[0] === "object"
-        );
-        if (arrCandidates.length) return arrCandidates.flat();
-        // Try to find objects in object values
-        const objValues = Object.values(data).filter(
-          (v) => v && typeof v === "object" && !Array.isArray(v)
-        );
-        if (objValues.length) return objValues;
-        return [];
-      }
+      function renderPreviewCarousel(item) {
+        const slug = String(item.id || "").toLocaleLowerCase();
+        const previews = previewsBySlug[previewSlugAliases[slug] || slug];
+        if (!previews?.length) return null;
 
-      async function loadPlugins() {
-        const categories = ["plugins", "online", "manga", "torrent"];
+        const carousel = document.createElement("section");
+        carousel.className = "preview-carousel";
+        carousel.setAttribute("aria-label", `${item.name} screenshot previews`);
+        let current = 0;
+        const frame = document.createElement("div");
+        frame.className = "preview-frame";
+        const image = document.createElement("img");
+        image.className = "preview-image";
+        image.loading = "lazy";
+        image.alt = `${item.name} screenshot 1 of ${previews.length}`;
+        frame.append(image);
 
-        // Show skeletons first
-        categories.forEach(id => renderSkeletons(id));
+        const footer = document.createElement("div");
+        footer.className = "preview-footer";
+        const dots = document.createElement("div");
+        dots.className = "preview-dots";
+        const count = document.createElement("span");
+        count.className = "preview-count";
+        footer.append(dots, count);
 
-        const url = "https://raw.githubusercontent.com/pal-droid/seanime-providers/main/marketplace/main.json";
-        let res, data;
+        const buttons = previews.map((preview, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "preview-dot";
+          dot.setAttribute("aria-label", `Show screenshot ${index + 1} of ${previews.length} for ${item.name}`);
+          dot.addEventListener("click", () => show(index));
+          dots.append(dot);
+          return dot;
+        });
 
-        try {
-          res = await fetch(url);
-          if (!res.ok) throw new Error("Failed to fetch main.json");
-          data = await res.json();
-        } catch (e) {
-          console.error("Error loading plugins:", e);
-          categories.forEach(id => {
-              document.getElementById(id).innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <p class="text-red-400 bg-red-500/10 px-4 py-2 rounded-lg inline-block">Failed to load marketplace data.</p>
-                </div>`;
-          });
-          return;
-        }
-
-        // Clear skeletons
-        categories.forEach(id => document.getElementById(id).innerHTML = "");
-
-        const items = normalizePluginData(data);
-
-        // If no items
-        if (!items.length) {
-             categories.forEach(id => {
-              document.getElementById(id).innerHTML = `<div class="col-span-full text-center text-gray-500 py-10">No items found.</div>`;
-          });
-          return;
-        }
-
-        const tpl = document.getElementById("card-template");
-        const containers = {
-          plugin: document.getElementById("plugins"),
-          "onlinestream-provider": document.getElementById("online"),
-          "manga-provider": document.getElementById("manga"),
-          "anime-torrent-provider": document.getElementById("torrent"),
+        const show = (index) => {
+          current = (index + previews.length) % previews.length;
+          image.src = previews[current].src;
+          image.alt = `${item.name} screenshot ${current + 1} of ${previews.length}`;
+          count.textContent = `${current + 1} / ${previews.length}`;
+          buttons.forEach((button, buttonIndex) => button.setAttribute("aria-current", String(buttonIndex === current)));
         };
 
-        items.forEach((item) => {
-          if (!item || typeof item !== "object") return;
-          const type = item.type || "";
-          const target = containers[type];
-          if (!target) return;
-
-          const node = tpl.content.cloneNode(true);
-          const img = node.querySelector("img");
-          const title = node.querySelector("h2");
-          const authorEl = node.querySelector(".author-text");
-          const desc = node.querySelector(".desc-text");
-          const btns = node.querySelector(".buttons-container");
-
-          img.src = item.icon || placeholderDataUrl;
-          title.textContent = item.name || item.id || "Unnamed";
-          authorEl.textContent = item.author || "Unknown";
-          desc.textContent = item.description || "No description available.";
-
-          btns.innerHTML = "";
-
-          // Website Button
-          if (item.website) {
-            const a = document.createElement("a");
-            a.href = item.website;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.className = "px-3 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition flex items-center gap-1";
-            a.innerHTML = `<span>Website</span> <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`;
-            btns.appendChild(a);
-          }
-
-          // Install Button
-          if (item.manifestURI) {
-            const btn = document.createElement("button");
-            btn.className = "px-4 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-lg transition shadow-lg shadow-blue-500/20 flex items-center gap-1 ml-auto";
-            btn.textContent = "Install";
-
-            btn.addEventListener("click", async () => {
-              btn.disabled = true;
-              const originalText = btn.textContent;
-              btn.innerHTML = `<svg class="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing`;
-
-              try {
-                // CHANGED: Use dynamic URL logic
-                const installUrl = getInstallUrl();
-                
-                const res = await fetch(
-                  installUrl,
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ manifestUri: item.manifestURI }),
-                  }
-                );
-
-                let result = {};
-                try { result = await res.json(); } catch {}
-
-                if (res.ok && (result.success ?? true)) {
-                  btn.className = "px-4 py-1.5 text-xs font-medium text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg transition ml-auto";
-                  btn.innerHTML = `Installed`;
-                } else {
-                  throw new Error("Install failed");
-                }
-              } catch (err) {
-                console.error(err);
-                btn.textContent = "Failed";
-                btn.classList.add("bg-red-500");
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.classList.remove("bg-red-500");
-                }, 2000);
-              }
-            });
-
-            btns.appendChild(btn);
-          }
-
-          target.appendChild(node);
-        });
+        if (previews.length > 1) {
+          const previous = document.createElement("button");
+          previous.type = "button";
+          previous.className = "preview-arrow prev";
+          previous.setAttribute("aria-label", `Previous ${item.name} screenshot`);
+          previous.textContent = "‹";
+          previous.addEventListener("click", () => show(current - 1));
+          const next = document.createElement("button");
+          next.type = "button";
+          next.className = "preview-arrow next";
+          next.setAttribute("aria-label", `Next ${item.name} screenshot`);
+          next.textContent = "›";
+          next.addEventListener("click", () => show(current + 1));
+          frame.append(previous, next);
+        }
+        carousel.append(frame, footer);
+        show(0);
+        return carousel;
       }
 
-      function applySearch(term) {
-        const q = term.trim().toLowerCase();
-        const cards = document.querySelectorAll(".tab-content > div");
-        let found = false;
-
-        cards.forEach((card) => {
-          if (!card) return;
-          // Skip skeleton loaders from search
-          if(card.querySelector('.animate-pulse')) return;
-
-          const text = card.innerText.toLowerCase();
-          if (q === "" || text.includes(q)) {
-              card.style.display = "";
-              found = true;
-          } else {
-              card.style.display = "none";
-          }
-        });
+      function renderCard(item, index) {
+        const article = document.createElement("article"); article.className = "card"; article.style.animationDelay = `${Math.min(index, 12) * 24}ms`;
+        const icon = item.icon || placeholderDataUrl;
+        const rows = metadataRows(item).map(([key, value]) => `<div class="detail"><span>${escapeHtml(key)}</span><span>${escapeHtml(valueText(value))}</span></div>`).join("");
+        article.innerHTML = `<div class="card-top"><div class="identity"><img class="icon" src="${escapeHtml(icon)}" alt="" loading="lazy" /><div><h2>${escapeHtml(item.name)}</h2><div class="card-id mono">${escapeHtml(item.id || "")}</div></div></div><span class="version mono">v${escapeHtml(valueText(item.version).replace(/^v/i, ""))}</span></div><div class="card-body"><p class="description">${escapeHtml(item.description || "No description available.")}</p><div class="meta"><span class="chip"><b>${escapeHtml(typeLabel(item.type))}</b></span><span class="chip">${escapeHtml(item.contentLanguage)}</span><span class="chip">${escapeHtml(item.language)}</span>${item.manifestLoaded ? '<span class="chip">manifest ✓</span>' : '<span class="chip">catalog data</span>'}</div><div class="details">${rows}</div></div><div class="card-footer"><a class="action" href="${escapeHtml(item.manifestURI || "#")}" target="_blank" rel="noopener">Manifest ↗</a>${item.website ? `<a class="action" href="${escapeHtml(item.website)}" target="_blank" rel="noopener">Website ↗</a>` : ""}<button class="action install" type="button">Install</button></div>`;
+        const previewCarousel = renderPreviewCarousel(item);
+        if (previewCarousel) article.insertBefore(previewCarousel, article.querySelector(".card-body"));
+        const image = article.querySelector("img"); image.addEventListener("error", () => { image.src = placeholderDataUrl; });
+        article.querySelector(".install").addEventListener("click", () => installExtension(item, article.querySelector(".install")));
+        return article;
       }
 
-      async function loadSnippets() {
-        const container = document.getElementById("styling-container");
-        const empty = document.getElementById("styling-empty");
+      function render() {
+        const grid = $("#extension-grid"); const items = currentItems(); grid.innerHTML = "";
+        $("#result-count").textContent = items.length;
+        if (!items.length) { grid.innerHTML = `<div class="empty"><strong>No extensions match those filters.</strong>Try clearing a filter or searching for another term.</div>`; return; }
+        items.forEach((item, index) => grid.appendChild(renderCard(item, index)));
+      }
 
-        let res;
+      async function installExtension(item, button) {
+        const original = button.textContent; button.disabled = true; button.textContent = "Installing…";
+        try { const response = await fetch(installUrl(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestUri: item.manifestURI }) }); const result = await response.json().catch(() => ({})); if (!response.ok || result.success === false) throw new Error("Install failed"); button.textContent = "Installed"; showToast(`${item.name} installed`); }
+        catch (error) { console.error(error); button.disabled = false; button.textContent = original; showToast("Could not install extension", true); }
+      }
+
+      async function loadCatalog() {
         try {
-          res = await fetch("styles/snippets.json");
-          if (!res.ok) throw new Error("no snippets.json");
-        } catch {
-          empty.innerHTML = `<div class="p-4 bg-gray-900 rounded-lg border border-gray-800 text-sm">Snippets not found. Make sure <code class="text-blue-400">marketplace/styles/snippets.json</code> exists.</div>`;
-          return;
-        }
-
-        let data;
-        try {
-          data = await res.json();
-        } catch {
-          empty.textContent = "Invalid JSON.";
-          return;
-        }
-
-        let snippets = [];
-        if (Array.isArray(data)) snippets = data;
-        else if (Array.isArray(data.snippets)) snippets = data.snippets;
-        else snippets = Object.values(data).filter((v) => v && (v.file || v.path));
-
-        if (!snippets.length) {
-          empty.textContent = "No snippets listed.";
-          return;
-        }
-
-        empty.style.display = 'none'; // Hide loading
-        const tpl = document.getElementById("snippet-template");
-
-        await Promise.all(
-          snippets.map(async (s, idx) => {
-            const item = typeof s === "string" ? { name: s, file: s } : s;
-            const file = item.file || item.path;
-            const name = item.name || file || `snippet-${idx + 1}`;
-
-            const node = tpl.content.cloneNode(true);
-            node.querySelector("h3").textContent = name;
-            node.querySelector(".snippet-file").textContent = file;
-
-            const codeEl = node.querySelector(".snippet-code");
-            const copyBtn = node.querySelector(".copy-btn");
-            const eyeBtn = node.querySelector(".eye-btn");
-
-            try {
-              const r = await fetch(file);
-              if (!r.ok) throw new Error("not found");
-              const txt = await r.text();
-              codeEl.textContent = txt.trim();
-            } catch {
-              codeEl.textContent = "/* failed to load file: " + file + " */";
-            }
-
-            copyBtn.addEventListener("click", () => copyToClipboard(codeEl.textContent));
-
-            eyeBtn.addEventListener("click", () => {
-              $("#modal-code").textContent = codeEl.textContent;
-              const modal = $("#snippet-modal");
-              modal.classList.remove("hidden");
-              // Small delay to allow display:flex to apply before opacity transition
-              requestAnimationFrame(() => {
-                  modal.classList.remove("opacity-0");
-                  modal.querySelector('#modal-content').classList.remove("scale-95");
-                  modal.querySelector('#modal-content').classList.add("scale-100");
-              });
-
-            });
-
-            container.appendChild(node);
-          })
-        );
+          const response = await fetch("marketplace/main.json"); if (!response.ok) throw new Error("Catalog unavailable");
+          const catalog = await response.json(); const rawItems = Array.isArray(catalog) ? catalog : Object.values(catalog).flat().filter(value => value && typeof value === "object");
+          $("#data-status").textContent = `Loading ${rawItems.length} manifests…`;
+          state.items = await Promise.all(rawItems.map(async item => enrichItem(item, await getManifest(item))));
+          const authors = [...new Set(state.items.map(item => item.author).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+          const languages = [...new Set(state.items.map(item => item.contentLanguage).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+          updateSelect($("#author-filter"), authors, "All authors"); updateSelect($("#language-filter"), languages, "All languages");
+          $("#data-status").textContent = `${state.items.length} extensions · ${state.items.filter(item => item.manifestLoaded).length} manifests parsed`;
+          render();
+        } catch (error) { console.error(error); $("#data-status").textContent = "Could not load marketplace/main.json"; $("#extension-grid").innerHTML = `<div class="empty"><strong>Could not load the catalog.</strong>Try refreshing the page.</div>`; }
       }
 
-      // --- Initialization ---
+      function resetFilters() { state.query = ""; state.author = ""; state.language = ""; $("#search").value = ""; $("#author-filter").value = ""; $("#language-filter").value = ""; render(); }
+      function openSettings() { const values = settingValues(); $("#setting-uri").value = values.uri; $("#setting-port").value = values.port; $("#settings-modal").classList.remove("hidden"); $("#setting-uri").focus(); }
+      function closeSettings() { $("#settings-modal").classList.add("hidden"); }
+      const menuButton = $("#menu-button");
+      const menu = $("#site-menu");
+      menuButton.addEventListener("click", () => { const hidden = menu.classList.toggle("hidden"); menuButton.setAttribute("aria-expanded", String(!hidden)); });
+      document.addEventListener("click", event => { if (!event.target.closest(".menu-wrap")) { menu.classList.add("hidden"); menuButton.setAttribute("aria-expanded", "false"); } });
 
       window.addEventListener("DOMContentLoaded", () => {
-        // Tabs
-        $$(".tab-btn").forEach((btn) =>
-          btn.addEventListener("click", () => setActiveTab(btn.dataset.tab))
-        );
-        setActiveTab("manga");
-
-        // Search
-        let t;
-        $("#search").addEventListener("input", (e) => {
-          clearTimeout(t);
-          t = setTimeout(() => applySearch(e.target.value), 120);
-        });
-
-        // Modal logic (Snippet)
-        const modal = $("#snippet-modal");
-        const closeModal = () => {
-            modal.classList.add("opacity-0");
-            modal.querySelector('#modal-content').classList.remove("scale-100");
-            modal.querySelector('#modal-content').classList.add("scale-95");
-            setTimeout(() => modal.classList.add("hidden"), 200);
-        };
-
-        $("#modal-close").addEventListener("click", closeModal);
-        $("#modal-copy").addEventListener("click", () => copyToClipboard($("#modal-code").textContent));
-
-        modal.addEventListener("click", (e) => {
-          if (e.target === modal) closeModal();
-        });
-
-        // --- SETTINGS MODAL LOGIC ---
-        const settingsModal = $("#settings-modal");
-        const settingsContent = $("#settings-content");
-        
-        const openSettings = () => {
-            const { uri, port } = getStoredSettings();
-            $("#setting-uri").value = uri;
-            $("#setting-port").value = port;
-            
-            settingsModal.classList.remove("hidden");
-            requestAnimationFrame(() => {
-                settingsModal.classList.remove("opacity-0");
-                settingsContent.classList.remove("scale-95");
-                settingsContent.classList.add("scale-100");
-            });
-        };
-
-        const closeSettings = () => {
-            settingsModal.classList.add("opacity-0");
-            settingsContent.classList.remove("scale-100");
-            settingsContent.classList.add("scale-95");
-            setTimeout(() => settingsModal.classList.add("hidden"), 200);
-        };
-
-        // Triggers
-        $("#settings-btn").addEventListener("click", openSettings);
-        $("#settings-btn-mobile").addEventListener("click", openSettings);
-        $("#settings-close").addEventListener("click", closeSettings);
-        $("#settings-save").addEventListener("click", () => {
-            const uri = $("#setting-uri").value.trim();
-            const port = $("#setting-port").value.trim();
-            saveSettings(uri, port);
-            closeSettings();
-        });
-
-        settingsModal.addEventListener("click", (e) => {
-             if (e.target === settingsModal) closeSettings();
-        });
-
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if(e.key === "Escape") {
-                if(!modal.classList.contains('hidden')) closeModal();
-                if(!settingsModal.classList.contains('hidden')) closeSettings();
-            }
-        });
-
-        loadPlugins();
-        loadSnippets();
+        $$(".tab").forEach(button => button.addEventListener("click", () => { $$(".tab").forEach(tab => tab.classList.remove("active")); button.classList.add("active"); state.category = button.dataset.category; render(); }));
+        $("#search").addEventListener("input", event => { state.query = event.target.value; render(); });
+        $("#author-filter").addEventListener("change", event => { state.author = event.target.value; render(); });
+        $("#language-filter").addEventListener("change", event => { state.language = event.target.value; render(); });
+        $("#clear-filters").addEventListener("click", resetFilters);
+        $("#settings-btn").addEventListener("click", openSettings); $("#settings-close").addEventListener("click", closeSettings); $("#settings-cancel").addEventListener("click", closeSettings);
+        $("#settings-save").addEventListener("click", () => { localStorage.setItem("seanime_uri", $("#setting-uri").value.trim() || DEFAULT_URI); localStorage.setItem("seanime_port", $("#setting-port").value.trim() || DEFAULT_PORT); closeSettings(); showToast("Install settings saved"); });
+        $("#settings-modal").addEventListener("click", event => { if (event.target.id === "settings-modal") closeSettings(); });
+        document.addEventListener("keydown", event => { if (event.key === "Escape") closeSettings(); });
+        loadCatalog();
       });
     </script>
   </body>
 </html>
-

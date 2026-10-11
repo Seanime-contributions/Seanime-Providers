@@ -1,6 +1,6 @@
 (function() {
     // Check if script is already loaded
-    if (window.NovelBinSource) {
+    if (window.NovelHallSource) {
         return;
     }
 

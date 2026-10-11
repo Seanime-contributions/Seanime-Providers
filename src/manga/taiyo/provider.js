@@ -101,10 +101,21 @@ class Provider {
                 if (!response.ok) break;
 
                 const data = await response.json();
-                const result = data?.[0]?.result?.data?.json;
-                if (!result) break;
+                const envelope = Array.isArray(data) ? data[0] : data;
+                let result = envelope?.result?.data?.json
+                    ?? envelope?.result?.data
+                    ?? envelope?.json
+                    ?? envelope;
+                if (typeof result === 'string') {
+                    try {
+                        result = JSON.parse(result);
+                    } catch {
+                        break;
+                    }
+                }
+                if (!Array.isArray(result?.chapters)) break;
 
-                totalPages = result.totalPages ?? 1;
+                totalPages = result.totalPages ?? result.pagination?.totalPages ?? 1;
 
                 for (const chapter of result.chapters ?? []) {
                     // Encode mangaId into the chapter id as "mangaId|chapterId"

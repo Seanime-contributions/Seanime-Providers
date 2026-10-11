@@ -1,0 +1,13 @@
+{
+  "id": "kuramanga",
+  "name": "KuraManga",
+  "description": "KuraManga is a Manhwa provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/kuramanga/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/kuramanga.ico",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/kuramanga/provider.js"
+}

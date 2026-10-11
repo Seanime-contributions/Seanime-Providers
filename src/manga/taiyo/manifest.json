@@ -3,7 +3,7 @@
   "name": "Taiyo",
   "description": "Taiyo is a manga provider for Seanime",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/manga/taiyo/manifest.json",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "pal",
   "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/taiyo.jpeg",
   "type": "manga-provider",

@@ -1,0 +1,13 @@
+{
+  "id": "animeunitymirror",
+  "name": "AnimeUnity (Mirror)",
+  "description": "AnimeUnity mirror",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animeunitymirror/manifest.json",
+  "version": "1.1.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "it",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animeunity.webp",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animeunitymirror/provider.js"
+}
