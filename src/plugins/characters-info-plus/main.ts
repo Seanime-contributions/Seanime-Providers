@@ -148,6 +148,7 @@ function init() {
                 timeoutId = setTimeout(function () { reject(new Error("AniList request timed out")); }, 6000);
             })
         ]).finally(function () { clearTimeout(timeoutId); });
+        promise.catch(function () { cache.delete(id); });
         cache.set(id, promise);
         return promise;
     }
@@ -366,7 +367,6 @@ function init() {
         if (!id) return;
         card.dataset[BOUND_KEY] = "true";
         card.classList.add("cip-character-card");
-        fetchCharacter(id).catch(function () {});
         card.addEventListener("mouseenter", function () {
             clearTimeout(hideTimer);
             activeCard = card;
