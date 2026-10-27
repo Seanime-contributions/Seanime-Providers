@@ -1,4 +1,4 @@
-/// <reference path="./core.d.ts" />
+/// <reference path="../../core.d.ts" />
 
 // ---------------------------------------------------------------------------
 // MAIN ENTRYPOINT

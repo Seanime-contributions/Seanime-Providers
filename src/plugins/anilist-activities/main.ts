@@ -1,5 +1,5 @@
 
-/// <reference path="./core.d.ts" />  
+/// <reference path="../../core.d.ts" />
 
 function init() {  
     $ui.register((ctx) => {  

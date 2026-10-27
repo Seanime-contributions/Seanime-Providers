@@ -1,4 +1,4 @@
-/// <reference path="./core.d.ts" />
+/// <reference path="../../core.d.ts" />
 /// <reference path="../manga-provider.d.ts" />
 
 class Provider {
