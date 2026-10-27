@@ -49,6 +49,7 @@ function init() {
             const REPLY_POSITION = settings.replyPosition;
             const feedBgClass = 'feed-bg-' + settings.bgStyle;
             const targetSelector = JSON.stringify(settings.activeTargetSelector);
+            const injectedToken = JSON.stringify(prefilledToken).replace(/<\/script/gi, match => '<\\/' + match.slice(2));
 
             const jsString = `
             (function() {
@@ -59,7 +60,7 @@ function init() {
                 const VIEWER_ID = "${VIEWER_ID}";
                 const INPUT_MODAL_ID = "${INPUT_MODAL_ID}";
                 const TARGET_SEL = ${targetSelector};
-                const INJECTED_TOKEN = "${prefilledToken.replace(/"/g, '\\"')}";
+                const INJECTED_TOKEN = ${injectedToken};
                 const CACHE_KEY = "anilist-feed-cache-v5";
                 const CURRENT_USER_KEY = "anilist-feed-current-user";
                 const CURRENT_USER_AVATAR_KEY = "anilist-feed-current-user-avatar";
@@ -1123,25 +1124,50 @@ function init() {
                                 return \`
                                 <div class="story-item\${s.isCurrentUser ? ' current-user' : ''}\${s.isCurrentUser && s.activities.length === 0 ? ' empty-self' : ''}\${s.isCurrentUser && index < allStoryGroups.length - 1 ? ' has-divider' : ''}" data-index="\${index}">
                                     <div class="story-ring" style="\${ringStyle}">
-                                        <img src="\${s.profileImage}" class="story-image\${isGifUrl(s.profileImage) ? '" data-gif="true"' : ''}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
+                                        <img class="story-image">
                                     </div>
-                                    <span class="story-name">\${s.isCurrentUser ? 'You' : s.name}</span>
+                                    <span class="story-name"></span>
                                 </div>\`;
                             } else {
                                 const ring = getSegmentedRingStyle(s.activities);
                                 return \`
                                 <div class="story-item\${s.isCurrentUser ? ' current-user' : ''}\${s.isCurrentUser && s.activities.length === 0 ? ' empty-self' : ''}\${s.isCurrentUser && index < allStoryGroups.length - 1 ? ' has-divider' : ''}" data-index="\${index}">
                                     <div class="story-ring" style="\${ring}">
-                                        <img src="\${s.profileImage}" class="story-image\${isGifUrl(s.profileImage) ? '" data-gif="true"' : ''}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
+                                        <img class="story-image">
                                     </div>
-                                    <span class="story-name">\${s.isCurrentUser ? 'You' : s.name}</span>
+                                    <span class="story-name"></span>
                                 </div>\`;
                             }
                         }).join('');
                         
                         content.innerHTML = headerHtml + '<div class="stories-container">' + html + '</div><div class="stories-footer-spacer"></div>';
                         
-                        content.querySelectorAll('.story-item').forEach(item => {
+                        content.querySelectorAll('.story-item').forEach((item, index) => {
+                            const story = allStoryGroups[index];
+                            const storyName = item.querySelector('.story-name');
+                            if (storyName) storyName.textContent = story.isCurrentUser ? 'You' : String(story.name ?? '');
+
+                            const storyImage = item.querySelector('.story-image');
+                            if (storyImage) {
+                                const defaultAvatar = 'https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png';
+                                const rawAvatarUrl = typeof story.profileImage === 'string' ? story.profileImage : '';
+                                let avatarUrl = defaultAvatar;
+                                if (rawAvatarUrl) {
+                                    try {
+                                        const parsedAvatarUrl = new URL(rawAvatarUrl, window.location.origin);
+                                        if (parsedAvatarUrl.protocol === 'https:' || parsedAvatarUrl.protocol === 'http:') {
+                                            avatarUrl = parsedAvatarUrl.toString();
+                                        }
+                                    } catch (_) {}
+                                }
+                                if (isGifUrl(avatarUrl)) storyImage.setAttribute('data-gif', 'true');
+                                storyImage.addEventListener('error', () => {
+                                    storyImage.removeAttribute('data-gif');
+                                    storyImage.src = defaultAvatar;
+                                }, { once: true });
+                                storyImage.src = avatarUrl;
+                            }
+
                             if (item.classList.contains('empty-self')) {
                                 item.setAttribute('aria-disabled', 'true');
                                 item.setAttribute('aria-label', 'You have no recent activity');
