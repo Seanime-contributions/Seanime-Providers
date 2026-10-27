@@ -114,11 +114,12 @@ Or
 ### Contributors
 
 <p align="center">
-  <a href="https://github.com/yerasuu"><img src="https://avatars.githubusercontent.com/u/5020678?v=4" width="64" alt="yerasuu"></a>&nbsp;&nbsp;
-  <a href="https://github.com/Ari-03"><img src="https://avatars.githubusercontent.com/u/64171580?v=4" width="64" alt="Ari-03"></a>&nbsp;&nbsp;
-  <a href="https://github.com/Rafou376"><img src="https://avatars.githubusercontent.com/u/108695858?v=4" width="64" alt="Rafou376"></a>&nbsp;&nbsp;
-  <a href="https://github.com/mohaisreal"><img src="https://avatars.githubusercontent.com/u/72509835?v=4" width="64" alt="mohaisreal"></a>&nbsp;&nbsp;
+  <a href="https://github.com/yerasuu"><img src="https://avatars.githubusercontent.com/u/5020678?v=4" width="64" alt="yerasuu"></a>
+  <a href="https://github.com/Ari-03"><img src="https://avatars.githubusercontent.com/u/64171580?v=4" width="64" alt="Ari-03"></a>
+  <a href="https://github.com/Rafou376"><img src="https://avatars.githubusercontent.com/u/108695858?v=4" width="64" alt="Rafou376"></a>
+  <a href="https://github.com/mohaisreal"><img src="https://avatars.githubusercontent.com/u/72509835?v=4" width="64" alt="mohaisreal"></a>
   <a href="https://github.com/dip-land"><img src="https://avatars.githubusercontent.com/u/82669765?v=4" width="64" alt="dip-land"></a>
+  <a href="https://github.com/LostMorality"><img src="https://avatars.githubusercontent.com/u/187643700?v=4" width="64" alt="LostMorality"></a>
 </p>
 
 ---
