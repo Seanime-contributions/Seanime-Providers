@@ -656,17 +656,54 @@ function init() {
                         if (replies.length === 0) {
                             replyList.innerHTML = '<div class="reply-none">No replies yet. Be the first!</div>';
                         } else {
-                            replyList.innerHTML = replies.map(r => \`
-                                <div class="reply-item">
-                                    <img class="reply-avatar\${isGifUrl(r.user.avatar.large || r.user.avatar.medium) ? '" data-gif="true"' : ''}" src="\${r.user.avatar.large || r.user.avatar.medium}" onerror="this.src='https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png'">
-                                    <div class="reply-body">
-                                        <div class="reply-meta">
-                                            <span>\${r.user.name}</span> \${timeAgo(r.createdAt)}
-                                        </div>
-                                        <div class="reply-text">\${r.text.replace(/\\n/g, '<br>')}</div>
-                                    </div>
-                                </div>
-                            \`).join('');
+                            const defaultAvatar = 'https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png';
+                            const fragment = document.createDocumentFragment();
+                            replies.forEach(reply => {
+                                const item = document.createElement('div');
+                                item.className = 'reply-item';
+
+                                const avatar = document.createElement('img');
+                                avatar.className = 'reply-avatar';
+                                avatar.alt = '';
+                                const rawAvatarUrl = reply?.user?.avatar?.large || reply?.user?.avatar?.medium || defaultAvatar;
+                                let avatarUrl = defaultAvatar;
+                                try {
+                                    const parsedAvatarUrl = new URL(rawAvatarUrl, window.location.origin);
+                                    if (parsedAvatarUrl.protocol === 'https:' || parsedAvatarUrl.protocol === 'http:') {
+                                        avatarUrl = parsedAvatarUrl.toString();
+                                    }
+                                } catch (_) {}
+                                avatar.src = avatarUrl;
+                                avatar.onerror = () => {
+                                    avatar.onerror = null;
+                                    avatar.src = defaultAvatar;
+                                };
+                                if (isGifUrl(avatarUrl)) avatar.setAttribute('data-gif', 'true');
+
+                                const body = document.createElement('div');
+                                body.className = 'reply-body';
+                                const meta = document.createElement('div');
+                                meta.className = 'reply-meta';
+                                const userName = document.createElement('span');
+                                userName.textContent = String(reply?.user?.name ?? 'Unknown');
+                                meta.appendChild(userName);
+                                meta.appendChild(document.createTextNode(' ' + timeAgo(reply?.createdAt)));
+
+                                const text = document.createElement('div');
+                                text.className = 'reply-text';
+                                const lines = String(reply?.text ?? '').split('\\n');
+                                lines.forEach((line, index) => {
+                                    if (index > 0) text.appendChild(document.createElement('br'));
+                                    text.appendChild(document.createTextNode(line));
+                                });
+
+                                body.appendChild(meta);
+                                body.appendChild(text);
+                                item.appendChild(avatar);
+                                item.appendChild(body);
+                                fragment.appendChild(item);
+                            });
+                            replyList.replaceChildren(fragment);
                         }
                     } else {
                         replyList.innerHTML = '<div class="reply-none">Failed to load replies.</div>';
