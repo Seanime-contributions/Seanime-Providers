@@ -4,10 +4,12 @@
 function init() {  
     $ui.register((ctx) => {  
         const INJECTED_BOX_ID = "activity-stories-feed";  
-        const VIEWER_ID = "story-viewer-overlay";  
+        const VIEWER_ID = "story-viewer-overlay";
         const INPUT_MODAL_ID = "reply-input-modal";
         const STYLES_URI = "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/plugins/anilist-activities/styles.css";
         const SCRIPT_DATA_ATTR = "data-injected-box-script";  
+        const LOADING_SCRIPT_ATTR = "data-anilist-activity-loading-script";
+        const LOADING_BOX_ID = "anilist-activity-loading";
 
         const SELECTOR_MAP = {
             'toolbar': 'div[data-home-toolbar-container="true"]',
@@ -36,12 +38,146 @@ function init() {
 
         const state = {
             activeTargetSelector: resolveTargetSelector(initialDropdownChoice, initialManualSelector),
+            activityHistoryDays: "{{activityHistoryDays}}" || '7',
+            cacheRefreshMinutes: "{{cacheRefreshMinutes}}" || '5',
             bgStyle: "{{bgStyle}}" || 'glass',
             ringColor: "{{ringColor}}" || '#FF6F61',
             replyPosition: initialReplyPosition,
         };
+
+        const ACTIVITY_STORE_KEY = 'anilist-activity-cache-v1';
+        const DEFAULT_AVATAR = 'https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png';
+
+        function formatActivityStatusForPlugin(status: string = '', progress: number | null = null): string {
+            const statusLower = status.toLowerCase();
+            if (statusLower.includes('watched episode')) return (statusLower.includes('rewatched') ? 'Rewatched Episode ' : 'Watched Episode ') + (progress || '');
+            if (statusLower.includes('read chapter')) return (statusLower.includes('reread') ? 'Reread Chapter ' : 'Read Chapter ') + (progress || '');
+            if (statusLower === 'completed') return 'Completed';
+            if (statusLower === 'rewatched') return 'Rewatched';
+            if (statusLower === 'reread') return 'Reread';
+            if (statusLower === 'dropped') return 'Dropped';
+            if (statusLower === 'plans to watch') return 'Plans to Watch';
+            if (statusLower === 'plans to read') return 'Plans to Read';
+            if (statusLower === 'paused') return 'Paused';
+            if (statusLower === 'planning') return 'Planning';
+            if (statusLower === 'current') return 'Currently Watching';
+            if (statusLower === 'repeating') return 'Repeating';
+            return status.replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        function timeAgoForPlugin(timestamp: number): string {
+            const seconds = Math.max(0, Math.floor(Date.now() / 1000) - timestamp);
+            let value = seconds / 31536000;
+            if (value > 1) return Math.floor(value) + 'y ago';
+            value = seconds / 2592000;
+            if (value > 1) return Math.floor(value) + 'mo ago';
+            value = seconds / 86400;
+            if (value > 1) return Math.floor(value) + 'd ago';
+            value = seconds / 3600;
+            if (value > 1) return Math.floor(value) + 'h ago';
+            value = seconds / 60;
+            if (value > 1) return Math.floor(value) + 'm ago';
+            return 'Just now';
+        }
+
+        async function fetchActivitiesForPlugin(token: string, settings: typeof state, forceRefresh = false): Promise<any> {
+            const historyDays = Math.min(365, Math.max(1, Number(settings.activityHistoryDays) || 7));
+            const cacheMinutes = Math.min(1440, Math.max(1, Number(settings.cacheRefreshMinutes) || 5));
+            const cached = $store.get<any>(ACTIVITY_STORE_KEY);
+            if (!forceRefresh && cached && cached.historyDays === historyDays && Date.now() < cached.timestamp + cacheMinutes * 60 * 1000) {
+                return { ...cached, fromCache: true };
+            }
+
+            const createdAtGreater = Math.floor(Date.now() / 1000) - historyDays * 24 * 60 * 60;
+            const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token };
+            const followedQuery = `
+                query ($createdAtGreater: Int!) {
+                    Viewer { id name avatar { large medium } }
+                    Page(page: 1, perPage: 50) {
+                        activities(type: MEDIA_LIST, sort: ID_DESC, isFollowing: true, createdAt_greater: $createdAtGreater) {
+                            ... on ListActivity {
+                                id media { id type title { romaji english } coverImage { extraLarge } }
+                                status progress createdAt likeCount isLiked
+                                user { name avatar { large medium } }
+                            }
+                        }
+                    }
+                }`;
+            const response = await fetch('https://graphql.anilist.co', {
+                method: 'POST', headers,
+                body: JSON.stringify({ query: followedQuery, variables: { createdAtGreater } })
+            });
+            const json = await response.json();
+            if (!response.ok || json.errors) throw new Error(json.errors ? json.errors[0].message : 'Invalid Token or Network Error');
+
+            const currentUser = json.data.Viewer;
+            const currentUserName = currentUser?.name || '';
+            const currentUserId = currentUser?.id;
+            const followedActivities = json.data.Page?.activities || [];
+            let ownActivities: any[] = [];
+            if (currentUserId) {
+                const ownQuery = `
+                    query ($userId: Int!, $createdAtGreater: Int!) {
+                        Page(page: 1, perPage: 50) {
+                            activities(type: MEDIA_LIST, sort: ID_DESC, userId: $userId, createdAt_greater: $createdAtGreater) {
+                                ... on ListActivity {
+                                    id media { id type title { romaji english } coverImage { extraLarge } }
+                                    status progress createdAt likeCount isLiked
+                                    user { name avatar { large medium } }
+                                }
+                            }
+                        }
+                    }`;
+                try {
+                    const ownResponse = await fetch('https://graphql.anilist.co', {
+                        method: 'POST', headers,
+                        body: JSON.stringify({ query: ownQuery, variables: { userId: currentUserId, createdAtGreater } })
+                    });
+                    const ownJson = await ownResponse.json();
+                    if (!ownResponse.ok || ownJson.errors) throw new Error(ownJson.errors ? ownJson.errors[0].message : 'Unable to fetch your activities');
+                    ownActivities = ownJson.data.Page?.activities || [];
+                } catch (error) {
+                    console.warn('Unable to fetch your activities; showing followed-user activities only.', error);
+                }
+            }
+
+            const grouped: Record<string, any> = {};
+            [...followedActivities, ...ownActivities]
+                .filter((activity, index, activities) => activities.findIndex(item => item.id === activity.id) === index)
+                .forEach(activity => {
+                    if (!activity?.user?.name || !activity.media) return;
+                    const name = activity.user.name;
+                    const profileImage = activity.user.avatar?.large || activity.user.avatar?.medium || DEFAULT_AVATAR;
+                    if (!grouped[name]) grouped[name] = { name, profileImage, status: 'new', isCurrentUser: name === currentUserName, activities: [] };
+                    grouped[name].activities.push({
+                        id: activity.id,
+                        mediaId: activity.media.id,
+                        mediaType: activity.media.type,
+                        textMain: formatActivityStatusForPlugin(activity.status, activity.progress),
+                        mediaTitle: activity.media.title?.english || activity.media.title?.romaji || '',
+                        timestamp: timeAgoForPlugin(activity.createdAt),
+                        coverImage: activity.media.coverImage?.extraLarge || '',
+                        likeCount: activity.likeCount || 0,
+                        isLiked: Boolean(activity.isLiked),
+                    });
+                });
+
+            if (currentUserName && !grouped[currentUserName]) {
+                const avatar = currentUser?.avatar?.large || currentUser?.avatar?.medium || DEFAULT_AVATAR;
+                grouped[currentUserName] = { name: currentUserName, profileImage: avatar, status: 'new', isCurrentUser: true, activities: [] };
+            }
+            const result = {
+                timestamp: Date.now(),
+                historyDays,
+                currentUserName,
+                currentUserAvatar: currentUser?.avatar?.large || currentUser?.avatar?.medium || DEFAULT_AVATAR,
+                stories: Object.values(grouped).map((story: any) => ({ ...story, activities: story.activities.reverse() })),
+            };
+            $store.set(ACTIVITY_STORE_KEY, result);
+            return { ...result, fromCache: false };
+        }
           
-        async function getSmartInjectedScript(prefilledToken: string = '', settings: typeof state): Promise<string> {
+        async function getSmartInjectedScript(prefilledToken: string = '', settings: typeof state, prefetchedData: any = null): Promise<string> {
             const stylesResponse = await fetch(STYLES_URI);
             if (!stylesResponse.ok) throw new Error("Unable to load activity feed styles.");
             const styles = (await stylesResponse.text()).replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
@@ -50,6 +186,8 @@ function init() {
             const feedBgClass = 'feed-bg-' + settings.bgStyle;
             const targetSelector = JSON.stringify(settings.activeTargetSelector);
             const injectedToken = JSON.stringify(prefilledToken).replace(/<\/script/gi, match => '<\\/' + match.slice(2));
+            const injectedData = JSON.stringify(prefetchedData || { stories: [], currentUserName: '', currentUserAvatar: DEFAULT_AVATAR, error: 'No activity data was available.' })
+                .replace(/<\/script/gi, match => '<\\/' + match.slice(2));
 
             const jsString = `
             (function() {
@@ -61,11 +199,10 @@ function init() {
                 const INPUT_MODAL_ID = "${INPUT_MODAL_ID}";
                 const TARGET_SEL = ${targetSelector};
                 const INJECTED_TOKEN = ${injectedToken};
-                const CACHE_KEY = "anilist-feed-cache-v5";
+                const PREFETCHED_DATA = ${injectedData};
                 const CURRENT_USER_KEY = "anilist-feed-current-user";
                 const CURRENT_USER_AVATAR_KEY = "anilist-feed-current-user-avatar";
                 const VIEWED_ACTIVITIES_KEY = "anilist-viewed-activity-ids";
-                const CACHE_DURATION_MS = 300000;
                 const STORY_DURATION = 5000;
                 const RING_COLOR = '${ringColor}';
                 const MAX_REPLY_CHARS = 140;
@@ -78,13 +215,13 @@ function init() {
                 let currentStoryIndex = 0;
                 let currentStoryTimer = null;
                 let progressInterval = null;
+                let viewerSessionId = 0;
                 let startTime = 0;
                 let currentActivityIdForReply = null; 
                 let isInteractionActive = false;
                 let isManuallyPaused = false;
-                                let touchStartTime = 0;
+                let touchStartTime = 0;
                 let touchHoldTimeout = null;
-                let scrollLockState = null;
                 let viewedActivityIds = new Set();
                 try {
                     viewedActivityIds = new Set(JSON.parse(localStorage.getItem(VIEWED_ACTIVITIES_KEY) || '[]').map(String));
@@ -118,31 +255,6 @@ function init() {
                     const ring = document.querySelector('.story-item[data-index="' + storyGroupIndex + '"] .story-ring');
                     if (story && ring) ring.setAttribute('style', getStoryRingStyle(story));
                 }
-                function lockBackgroundScroll() {
-                    if (scrollLockState) return;
-                    const body = document.body;
-                    const root = document.documentElement;
-                    scrollLockState = {
-                        bodyOverflow: body.style.overflow,
-                        rootOverflow: root.style.overflow,
-                        bodyOverscrollBehavior: body.style.overscrollBehavior,
-                        rootOverscrollBehavior: root.style.overscrollBehavior,
-                    };
-                    body.style.overflow = 'hidden';
-                    root.style.overflow = 'hidden';
-                    body.style.overscrollBehavior = 'none';
-                    root.style.overscrollBehavior = 'none';
-                }
-                function unlockBackgroundScroll() {
-                    if (!scrollLockState) return;
-                    const body = document.body;
-                    const root = document.documentElement;
-                    body.style.overflow = scrollLockState.bodyOverflow;
-                    root.style.overflow = scrollLockState.rootOverflow;
-                    body.style.overscrollBehavior = scrollLockState.bodyOverscrollBehavior;
-                    root.style.overscrollBehavior = scrollLockState.rootOverscrollBehavior;
-                    scrollLockState = null;
-                }
                 function markActivityViewed(activityId) {
                     const id = String(activityId);
                     if (viewedActivityIds.has(id)) return;
@@ -163,9 +275,15 @@ function init() {
                 }
                 // --- TIMER CONTROL LOGIC ---
 
-                function pauseViewerTimer() {
+                function stopViewerTimer() {
                     if (currentStoryTimer) clearTimeout(currentStoryTimer);
                     if (progressInterval) clearInterval(progressInterval);
+                    currentStoryTimer = null;
+                    progressInterval = null;
+                }
+
+                function pauseViewerTimer() {
+                    stopViewerTimer();
                     
                     const activeBar = document.querySelector('.sv-progress-bar.active');
                     if (activeBar) {
@@ -199,9 +317,10 @@ function init() {
 
                 function restartStoryTimer() {
                     if (isInteractionActive || isManuallyPaused) return;
+                    const viewerOpen = document.getElementById(VIEWER_ID)?.classList.contains('is-open');
+                    if (!viewerOpen) return;
 
-                    if (currentStoryTimer) clearTimeout(currentStoryTimer);
-                    if (progressInterval) clearInterval(progressInterval);
+                    stopViewerTimer();
                     startTime = Date.now();
                     
                     const activeBar = document.querySelector('.sv-progress-bar.active');
@@ -213,7 +332,14 @@ function init() {
                         fill.style.width = '0%';
                     }
                     
-                    currentStoryTimer = setTimeout(window.nextStory, STORY_DURATION);
+                    const timerSessionId = viewerSessionId;
+                    currentStoryTimer = setTimeout(() => {
+                        const viewer = document.getElementById(VIEWER_ID);
+                        if (timerSessionId !== viewerSessionId || !currentStoryData || !viewer?.classList.contains('is-open')) {
+                            return;
+                        }
+                        window.nextStory();
+                    }, STORY_DURATION);
                     progressInterval = setInterval(() => {
                         const percent = Math.min(100, ((Date.now() - startTime) / STORY_DURATION) * 100);
                         if (fill) fill.style.width = percent + '%';
@@ -791,14 +917,17 @@ function init() {
                     const storyGroup = allStoryGroups[storyGroupIndex];
                     if (!storyGroup) return;
 
+                    viewerSessionId++;
                     currentStoryData = storyGroup;
                     currentStoryGroupIndex = storyGroupIndex;
                     const firstUnviewedIndex = storyGroup.activities.findIndex(activity => !isActivityViewed(activity));
                     currentStoryIndex = firstUnviewedIndex >= 0 ? firstUnviewedIndex : 0;
-                    
+
+                    const viewer = document.getElementById(VIEWER_ID);
+                    if (!viewer) return;
+                    viewer.classList.add('is-open');
+
                     renderStoryFrame(true);
-                    document.getElementById(VIEWER_ID).classList.add('is-open');
-                    lockBackgroundScroll();
 
                     document.addEventListener('keydown', handleKeyDown);
                     setupTouchHandling();
@@ -812,23 +941,25 @@ function init() {
                 }
 
                 window.closeStoryViewer = () => {
-                    document.getElementById(VIEWER_ID).classList.remove('is-open');
-                    window.closeReplies(); 
-                    window.closeReplyInputModal(); 
-                    
-                    if(currentStoryTimer) clearTimeout(currentStoryTimer);
-                    if(progressInterval) clearInterval(progressInterval); 
+                    // Stop all timer work before closing child modals. Their
+                    // delayed cleanup must not keep the closed viewer's state alive.
+                    viewerSessionId++;
+                    stopViewerTimer();
+
+                    document.getElementById(VIEWER_ID)?.classList.remove('is-open');
 
                     currentStoryData = null;
                     currentStoryGroupIndex = -1;
                     isInteractionActive = false;
-                                        isManuallyPaused = false;
-                    unlockBackgroundScroll();
+                    isManuallyPaused = false;
+                    window.closeReplies();
+                    window.closeReplyInputModal();
                     document.removeEventListener('keydown', handleKeyDown);
                 }
 
                 window.nextStory = () => {
-                    if(!currentStoryData) return;
+                    const viewer = document.getElementById(VIEWER_ID);
+                    if (!currentStoryData || !viewer?.classList.contains('is-open')) return;
                     if(currentStoryIndex < currentStoryData.activities.length - 1) {
                         currentStoryIndex++;
                         renderStoryFrame(true);
@@ -1054,11 +1185,7 @@ function init() {
                 // --- RENDER LOGIC ---
                 function attachReloadListener() {
                     const reloadBtn = document.getElementById('reload-btn');
-                    if (reloadBtn) reloadBtn.onclick = () => {
-                        const tokenToUse = INJECTED_TOKEN;
-                        if (tokenToUse) fetchActivities(tokenToUse, true);
-                        else renderTokenUnavailable();
-                    };
+                    if (reloadBtn) reloadBtn.onclick = () => window.location.reload();
                 }
 
                 function ensureBox() {
@@ -1097,13 +1224,35 @@ function init() {
                     const content = document.getElementById('feed-content');
                     if (!content) return;
                     const msg = fromCacheCheck ? 'Checking cache and fetching updates...' : 'Fetching updates...';
-                    const spinner = \`<svg class="animate-spin loading-spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>\`;
+                    const spinner = \`<svg class="animate-spin loading-spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 8.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>\`;
                     const headerHtml = '<div class="box-header">Friend Activity <button class="action-btn subtle-action" id="reload-btn">Reload</button></div>';
                     content.innerHTML = headerHtml + \`<div class="state-msg loading-state">\${spinner}\${msg}</div>\`;
                     attachReloadListener();
                 }
 
-                function renderStories(stories, fromCache = false) { 
+                function clearLegacyActivityCaches() {
+                    const legacyKeys = [];
+                    for (let index = 0; index < localStorage.length; index++) {
+                        const key = localStorage.key(index);
+                        if (key && key.startsWith('anilist-feed-cache')) legacyKeys.push(key);
+                    }
+                    legacyKeys.forEach(key => localStorage.removeItem(key));
+                }
+
+                function renderPrefetchedActivities(data) {
+                    clearLegacyActivityCaches();
+                    if (!data || data.error) {
+                        const content = document.getElementById('feed-content');
+                        if (content) content.innerHTML = '<div class="box-header">AniList Friend Activity</div><div class="error-msg">' + (data?.error || 'Unable to load activities.') + '</div>';
+                        attachReloadListener();
+                        return;
+                    }
+                    localStorage.setItem(CURRENT_USER_KEY, data.currentUserName || '');
+                    localStorage.setItem(CURRENT_USER_AVATAR_KEY, data.currentUserAvatar || '');
+                    renderStories(data.stories || [], Boolean(data.fromCache));
+                }
+
+                function renderStories(stories, fromCache = false) {
                     const content = document.getElementById('feed-content');
                     if (!content) return;
 
@@ -1182,181 +1331,59 @@ function init() {
                     attachReloadListener();
                 }
                 
-                async function fetchActivities(token, forceRefresh = false) { 
-                    activeToken = token;
-                    if (!token) return renderTokenUnavailable();
-                    
-                    renderLoading(!forceRefresh); 
-                    
-                    const cached = localStorage.getItem(CACHE_KEY);
-                    if (!forceRefresh && cached) { 
-                        try {
-                            const data = JSON.parse(cached);
-                            if (Date.now() < data.timestamp + CACHE_DURATION_MS) {
-                                renderStories(data.stories, true);
-                                return;
-                            }
-                        } catch (e) {
-                            console.error("Failed to parse cache, proceeding with fetch.", e);
-                            localStorage.removeItem(CACHE_KEY);
-                        }
-                    }
-                    
-                    // Updated query to include media id and type
-                    const query = \`
-                    query { 
-                        Viewer { id name avatar { large medium } }
-                        Page(page: 1, perPage: 50) { 
-                            activities(type: MEDIA_LIST, sort: ID_DESC, isFollowing: true) { 
-                                ... on ListActivity { 
-                                    id 
-                                    media { 
-                                        id
-                                        type
-                                        title { romaji english } 
-                                        coverImage { extraLarge } 
-                                    } 
-                                    status 
-                                    progress 
-                                    createdAt
-                                    likeCount
-                                    isLiked
-                                    user { 
-                                        name 
-                                        avatar { large medium } 
-                                    } 
-                                } 
-                            } 
-                        } 
-                    }
-                    \`;
-
-                    try {
-                        const res = await fetch('https://graphql.anilist.co', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                            body: JSON.stringify({ query: query })
-                        });
-
-                        const json = await res.json();
-                        if (!res.ok || json.errors) throw new Error(json.errors ? json.errors[0].message : 'Invalid Token or Network Error');
-
-                        const currentUser = json.data.Viewer;
-                        const currentUserName = currentUser && currentUser.name;
-                        const currentUserId = currentUser && currentUser.id;
-                        const followedActs = json.data.Page.activities || [];
-                        const recencyCutoff = followedActs.length > 0
-                            ? Math.min(...followedActs.map(activity => activity.createdAt))
-                            : Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
-                        const currentUserAvatar = (currentUser.avatar && (currentUser.avatar.large || currentUser.avatar.medium)) || 'https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png';
-                        localStorage.setItem(CURRENT_USER_KEY, currentUserName || '');
-                        localStorage.setItem(CURRENT_USER_AVATAR_KEY, currentUserAvatar);
-                        let ownActs = [];
-                        if (currentUserId) {
-                            const ownActivitiesQuery = \`
-                            query ($userId: Int!, $createdAtGreater: Int!) {
-                                Page(page: 1, perPage: 50) {
-                                    activities(type: MEDIA_LIST, sort: ID_DESC, userId: $userId, createdAt_greater: $createdAtGreater) {
-                                        ... on ListActivity {
-                                            id
-                                            media {
-                                                id
-                                                type
-                                                title { romaji english }
-                                                coverImage { extraLarge }
-                                            }
-                                            status
-                                            progress
-                                            createdAt
-                                            likeCount
-                                            isLiked
-                                            user {
-                                                name
-                                                avatar { large medium }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            \`;
-                            try {
-                                const ownRes = await fetch('https://graphql.anilist.co', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                                    body: JSON.stringify({ query: ownActivitiesQuery, variables: { userId: currentUserId, createdAtGreater: recencyCutoff } })
-                                });
-                                const ownJson = await ownRes.json();
-                                if (!ownRes.ok || ownJson.errors) throw new Error(ownJson.errors ? ownJson.errors[0].message : 'Unable to fetch your activities');
-                                ownActs = ownJson.data.Page.activities || [];
-                            } catch (ownActivityError) {
-                                console.warn('Unable to fetch your activities; showing followed-user activities only.', ownActivityError);
-                            }
-                        }
-                        const rawActs = [...followedActs, ...ownActs]
-                            .filter((activity, index, activities) => activities.findIndex(item => item.id === activity.id) === index);
-                        const grouped = {};
-                        
-                        rawActs.forEach(act => {
-                            const uName = act.user.name;
-                            // Prioritize large avatar for better GIF support, fallback to medium
-                            const profileImage = act.user.avatar.large || act.user.avatar.medium;
-                            if (!grouped[uName]) grouped[uName] = { name: uName, profileImage: profileImage, status: 'new', isCurrentUser: uName === currentUserName, activities: [] };
-                            
-                            const title = act.media.title.english || act.media.title.romaji;
-                            
-                            // Use the new formatActivityStatus function for proper capitalization
-                            const textMain = formatActivityStatus(act.status, act.progress);
-
-                            grouped[uName].activities.push({
-                                id: act.id,
-                                mediaId: act.media.id,
-                                mediaType: act.media.type,
-                                textMain: textMain,
-                                mediaTitle: title,
-                                timestamp: timeAgo(act.createdAt),
-                                coverImage: act.media.coverImage.extraLarge,
-                                likeCount: act.likeCount,
-                                isLiked: act.isLiked,
-                            });
-                        });
-
-                        if (currentUserName && !grouped[currentUserName]) {
-                            const viewerAvatar = (currentUser.avatar && (currentUser.avatar.large || currentUser.avatar.medium)) || 'https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png';
-                            grouped[currentUserName] = { name: currentUserName, profileImage: viewerAvatar, status: 'new', isCurrentUser: true, activities: [] };
-                        }
-                        const finalStories = Object.values(grouped);
-                        finalStories.forEach(g => g.activities.reverse());
-
-                        localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), stories: finalStories }));
-                        renderStories(finalStories, false);
-
-                    } catch (e) {
-                        console.error("API Fetch Failed:", e);
-                        let errMsg = "Error: " + e.message;
-                        
-                        if (cached) {
-                            try { renderStories(JSON.parse(cached).stories, true); errMsg = "API Error: Showing stale cached data. Try refreshing later."; } 
-                            catch (cacheError) {}
-                        }
-                        const content = document.getElementById('feed-content');
-                        if (content) content.innerHTML = '<div class="box-header">AniList Friend Activity</div><div class="error-msg">' + errMsg + '</div>';
-                        attachReloadListener();
-                    }
-                }
-            
                 function mainLoop() {
                     if (!ensureBox()) return setTimeout(mainLoop, 500);
-                    if (INJECTED_TOKEN && INJECTED_TOKEN.trim() !== "") return fetchActivities(INJECTED_TOKEN, false);
-                    renderTokenUnavailable();
+                    if (!INJECTED_TOKEN || !INJECTED_TOKEN.trim()) return renderTokenUnavailable();
+                    renderPrefetchedActivities(PREFETCHED_DATA);
                 }
                 mainLoop();
             })();
             `; 
             return jsString;
         }
+
+        async function injectLoadingState(ctx: UiContext): Promise<void> {
+            if (await ctx.dom.queryOne(`#${LOADING_BOX_ID}`)) return;
+            const targetSelector = JSON.stringify(state.activeTargetSelector).replace(/<\/script/gi, '<\\/script');
+            const loadingScript = await ctx.dom.createElement("script");
+            loadingScript.setAttribute(LOADING_SCRIPT_ATTR, "true");
+            loadingScript.setText(`
+                (() => {
+                    const selector = ${targetSelector};
+                    const findTarget = () => {
+                        let target;
+                        try { target = document.querySelector(selector); } catch (_) { return; }
+                        if (!target || document.getElementById('${LOADING_BOX_ID}')) return;
+                        const loading = document.createElement('div');
+                        loading.id = '${LOADING_BOX_ID}';
+                        loading.style.cssText = 'box-sizing:border-box;width:100%;max-width:1300px;margin:16px auto 24px;padding:24px 16px;border-radius:12px;color:#9CA3AF;text-align:center;font-family:Inter,sans-serif;background:rgba(31,41,55,0.35);';
+                        loading.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:10px"><span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(156,163,175,.35);border-top-color:#9CA3AF;border-radius:50%;animation:anilistActivitySpin .8s linear infinite"></span><span>Loading AniList activities…</span></div><style>@keyframes anilistActivitySpin{to{transform:rotate(360deg)}}</style>';
+                        if (selector.includes('toolbar') || selector.includes('container') || selector.includes('column-left') || selector.includes('lists-container')) target.prepend(loading);
+                        else target.insertAdjacentElement('afterend', loading);
+                    };
+                    findTarget();
+                    let attempts = 0;
+                    const retryTimer = setInterval(() => {
+                        findTarget();
+                        attempts++;
+                        if (document.getElementById('${LOADING_BOX_ID}') || attempts >= 120) clearInterval(retryTimer);
+                    }, 250);
+                })();
+            `);
+            const body = await ctx.dom.queryOne("body");
+            if (body) body.append(loadingScript);
+        }
+
+        async function removeLoadingState(ctx: UiContext): Promise<void> {
+            const loading = await ctx.dom.queryOne(`#${LOADING_BOX_ID}`);
+            if (loading) await loading.remove();
+            const loadingScripts = await ctx.dom.query(`script[${LOADING_SCRIPT_ATTR}]`);
+            for (const script of loadingScripts) await script.remove();
+        }
   
         const handleContentBox = async (ctx: UiContext) => {  
             if (await ctx.dom.queryOne(`script[${SCRIPT_DATA_ATTR}]`)) return;
+            await injectLoadingState(ctx);
 
             let token = "";
             try {
@@ -1367,23 +1394,38 @@ function init() {
                 }
             } catch (e) {}
 
-            const script = await ctx.dom.createElement("script");  
-            script.setAttribute(SCRIPT_DATA_ATTR, "true");  
-            
             const currentSettings = {
                 activeTargetSelector: state.activeTargetSelector,
+                activityHistoryDays: state.activityHistoryDays,
+                cacheRefreshMinutes: state.cacheRefreshMinutes,
                 bgStyle: state.bgStyle,
                 ringColor: state.ringColor,
                 replyPosition: state.replyPosition, 
             };
 
-            script.setText(await getSmartInjectedScript(token, currentSettings));
+            let prefetchedData: any = null;
+            if (token) {
+                try {
+                    prefetchedData = await fetchActivitiesForPlugin(token, currentSettings);
+                } catch (error) {
+                    console.error('AniList activity fetch failed in plugin runtime:', error);
+                    prefetchedData = { stories: [], currentUserName: '', currentUserAvatar: DEFAULT_AVATAR, error: 'Unable to load AniList activities: ' + (error instanceof Error ? error.message : String(error)) };
+                }
+            }
+
+            await removeLoadingState(ctx);
+
+            const script = await ctx.dom.createElement("script");
+            script.setAttribute(SCRIPT_DATA_ATTR, "true");
+
+            script.setText(await getSmartInjectedScript(token, currentSettings, prefetchedData));
             
             const body = await ctx.dom.queryOne("body");
             if (body) body.append(script);
         };  
   
         const cleanupContentBox = async (ctx: UiContext) => {  
+            await removeLoadingState(ctx);
             const existingBox = await ctx.dom.queryOne('#' + INJECTED_BOX_ID);  
             if (existingBox) await existingBox.remove();  
               

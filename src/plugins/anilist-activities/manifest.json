@@ -1,7 +1,7 @@
 {
   "id": "anilist-activity",
   "name": "Anilist activity",
-  "version": "1.3.11",
+  "version": "1.3.14",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/src/plugins/anilist-activities/manifest.json",
   "description": "A plugin for viewing your friend's and your Anilist activities inside Seanime.",
   "author": "Pal",
@@ -12,7 +12,7 @@
   "lang": "multi",
   "userConfig": {
     "requiresConfig": false,
-    "version": 1,
+    "version": 2,
     "fields": [
       {
         "name": "injectionPoint",
@@ -39,6 +39,66 @@
         "label": "Manual Selector Override (CSS)",
         "type": "text",
         "default": ""
+      },
+      {
+        "name": "activityHistoryDays",
+        "label": "Activity History",
+        "type": "select",
+        "default": "7",
+        "options": [
+          {
+            "label": "1 day",
+            "value": "1"
+          },
+          {
+            "label": "3 days",
+            "value": "3"
+          },
+          {
+            "label": "7 days (Default)",
+            "value": "7"
+          },
+          {
+            "label": "14 days",
+            "value": "14"
+          },
+          {
+            "label": "30 days",
+            "value": "30"
+          },
+          {
+            "label": "90 days",
+            "value": "90"
+          }
+        ]
+      },
+      {
+        "name": "cacheRefreshMinutes",
+        "label": "Cache Refresh Interval",
+        "type": "select",
+        "default": "5",
+        "options": [
+          {
+            "label": "1 minute",
+            "value": "1"
+          },
+          {
+            "label": "5 minutes (Default)",
+            "value": "5"
+          },
+          {
+            "label": "15 minutes",
+            "value": "15"
+          },
+          {
+            "label": "30 minutes",
+            "value": "30"
+          },
+          {
+            "label": "60 minutes",
+            "value": "60"
+          }
+        ]
       },
       {
         "name": "bgStyle",
@@ -135,6 +195,12 @@
         "storage"
       ],
       "allow": {
+        "networkAccess": {
+          "allowedDomains": [
+            "graphql.anilist.co"
+          ],
+          "reasoning": "Required to fetch AniList activities in the plugin runtime before rendering the UI."
+        },
         "unsafeFlags": [
           {
             "flag": "dom-script-manipulation",
