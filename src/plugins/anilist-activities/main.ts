@@ -1333,6 +1333,7 @@ function init() {
                 
                 function mainLoop() {
                     if (!ensureBox()) return setTimeout(mainLoop, 500);
+                    activeToken = INJECTED_TOKEN;
                     if (!INJECTED_TOKEN || !INJECTED_TOKEN.trim()) return renderTokenUnavailable();
                     renderPrefetchedActivities(PREFETCHED_DATA);
                 }
