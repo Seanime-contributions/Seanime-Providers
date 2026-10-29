@@ -10,6 +10,7 @@ function init() {
         const SCRIPT_DATA_ATTR = "data-injected-box-script";  
         const LOADING_SCRIPT_ATTR = "data-anilist-activity-loading-script";
         const LOADING_BOX_ID = "anilist-activity-loading";
+        const LOADING_STATE_KEY = "__anilistActivityLoadingState";
 
         const SELECTOR_MAP = {
             'toolbar': 'div[data-home-toolbar-container="true"]',
@@ -191,6 +192,8 @@ function init() {
 
             const jsString = `
             (function() {
+                const loadingState = window['${LOADING_STATE_KEY}'];
+                if (loadingState && typeof loadingState.stop === 'function') loadingState.stop();
                 const styles = \`${styles}\`; 
                 const FEED_BG_CLASS = '${feedBgClass}';
 
@@ -1344,17 +1347,26 @@ function init() {
         }
 
         async function injectLoadingState(ctx: UiContext): Promise<void> {
-            if (await ctx.dom.queryOne(`#${LOADING_BOX_ID}`)) return;
             const targetSelector = JSON.stringify(state.activeTargetSelector).replace(/<\/script/gi, '<\\/script');
             const loadingScript = await ctx.dom.createElement("script");
             loadingScript.setAttribute(LOADING_SCRIPT_ATTR, "true");
             loadingScript.setText(`
                 (() => {
+                    const previousState = window['${LOADING_STATE_KEY}'];
+                    if (previousState && typeof previousState.stop === 'function') previousState.stop();
+                    const loadingState = { cancelled: false, timer: null, stop: null };
+                    loadingState.stop = () => {
+                        loadingState.cancelled = true;
+                        if (loadingState.timer) clearInterval(loadingState.timer);
+                        document.getElementById('${LOADING_BOX_ID}')?.remove();
+                        if (window['${LOADING_STATE_KEY}'] === loadingState) delete window['${LOADING_STATE_KEY}'];
+                    };
+                    window['${LOADING_STATE_KEY}'] = loadingState;
                     const selector = ${targetSelector};
                     const findTarget = () => {
                         let target;
                         try { target = document.querySelector(selector); } catch (_) { return; }
-                        if (!target || document.getElementById('${LOADING_BOX_ID}')) return;
+                        if (loadingState.cancelled || !target || document.getElementById('${LOADING_BOX_ID}')) return;
                         const loading = document.createElement('div');
                         loading.id = '${LOADING_BOX_ID}';
                         loading.style.cssText = 'box-sizing:border-box;width:100%;max-width:1300px;margin:16px auto 24px;padding:24px 16px;border-radius:12px;color:#9CA3AF;text-align:center;font-family:Inter,sans-serif;background:rgba(31,41,55,0.35);';
@@ -1364,10 +1376,15 @@ function init() {
                     };
                     findTarget();
                     let attempts = 0;
-                    const retryTimer = setInterval(() => {
+                    loadingState.timer = setInterval(() => {
                         findTarget();
                         attempts++;
-                        if (document.getElementById('${LOADING_BOX_ID}') || attempts >= 120) clearInterval(retryTimer);
+                        if (document.getElementById('${LOADING_BOX_ID}')) {
+                            clearInterval(loadingState.timer);
+                            loadingState.timer = null;
+                        } else if (attempts >= 120) {
+                            loadingState.stop();
+                        }
                     }, 250);
                 })();
             `);
@@ -1376,6 +1393,13 @@ function init() {
         }
 
         async function removeLoadingState(ctx: UiContext): Promise<void> {
+            const body = await ctx.dom.queryOne("body");
+            if (body) {
+                const cleanupScript = await ctx.dom.createElement("script");
+                cleanupScript.setText(`window['${LOADING_STATE_KEY}']?.stop?.();`);
+                body.append(cleanupScript);
+                await cleanupScript.remove();
+            }
             const loading = await ctx.dom.queryOne(`#${LOADING_BOX_ID}`);
             if (loading) await loading.remove();
             const loadingScripts = await ctx.dom.query(`script[${LOADING_SCRIPT_ATTR}]`);
