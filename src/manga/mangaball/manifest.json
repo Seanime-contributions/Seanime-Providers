@@ -1,7 +1,7 @@
 {
   "id": "dipland-mangaball",
   "name": "MangaBall",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/manifest.json",
   "language": "typescript",
   "type": "manga-provider",
@@ -10,33 +10,5 @@
   "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangaball.png",
   "website": "https://mangaball.net/",
   "lang": "multi",
-  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/provider.ts",
-  "userConfig": {
-    "requiresConfig": false,
-    "version": 1,
-    "fields": [
-      {
-        "name": "solver",
-        "label": "Solver",
-        "type": "select",
-        "default": "mpdp",
-        "options": [
-          {
-            "label": "mangaproxy.dipped.dev",
-            "value": "mpdp"
-          },
-          {
-            "label": "Custom",
-            "value": "custom"
-          }
-        ]
-      },
-      {
-        "name": "custom_solver",
-        "label": "Custom Solver URL",
-        "type": "text",
-        "default": "http://127.0.0.1:8191"
-      }
-    ]
-  }
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/manga/mangaball/provider.ts"
 }

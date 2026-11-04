@@ -136,11 +136,6 @@ class Provider {
       const response = await fetch("https://mangaproxy.dipped.dev/mangadot");
       const data = response.json<any>();
 
-      if (data.status !== "ok") {
-        console.error("Solver failed");
-        throw new Error("Solver failed");
-      }
-
       this.writeCache("mangadot_user_agent", JSON.stringify(data.user_agent));
       this.writeCache("mangadot_cookie", JSON.stringify(data.cookies));
     } else {
@@ -176,7 +171,7 @@ class Provider {
         "mangadot_user_agent",
         JSON.stringify(solution.userAgent),
       );
-      this.writeCache("mangadot_cookie", JSON.stringify(cookieHeader));
+      this.writeCache("mangadot_cookie", JSON.parse(cookieHeader).join("; "));
     }
   }
 
