@@ -113,7 +113,7 @@ class Provider {
     if (!videoUrl) throw new Error("Video URL not found in gate.php response");
 
     return {
-      server: "AnimeHeaven",
+      server: "Server 1",
       headers: {
         "Referer": "https://animeheaven.me/",
         "Origin": "https://animeheaven.me",
