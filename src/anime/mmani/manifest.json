@@ -3,7 +3,7 @@
   "name": "MMani",
   "description": "MMani is an online streaming provider for English-subbed anime.",
   "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/src/anime/mmani/manifest.json",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Pal",
   "type": "onlinestream-provider",
   "language": "javascript",

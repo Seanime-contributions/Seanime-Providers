@@ -24,10 +24,12 @@ class Provider {
     if (this.kfToken) return this.kfToken;
 
     const response = await fetch(this.base, { headers: this.commonHeaders });
+    console.log(`[MMani] token request status=${response.status}`);
     if (!response.ok) throw new Error(`MMani homepage request failed (HTTP ${response.status})`);
     const html = await response.text();
     const token = html.match(/\}\)\(window\.fetch\s*,\s*["']([^"']+)["']\s*\)/i)?.[1]
       || html.match(/X-KF-Req["']\s*,\s*["']([^"']+)["']/i)?.[1];
+    console.log(`[MMani] token found=${Boolean(token)} tokenLength=${token?.length || 0} homepageLength=${html.length}`);
     if (!token) throw new Error("MMani request token was not found");
 
     this.kfToken = token;
@@ -42,8 +44,15 @@ class Provider {
       ...(options.headers || {}),
     };
     const response = await fetch(url, { ...options, headers });
+    const body = await response.text();
+    console.log(`[MMani] JSON request url=${url} status=${response.status} response=${body}`);
     if (!response.ok) throw new Error(`MMani request failed (HTTP ${response.status})`);
-    return response.json();
+    try {
+      return JSON.parse(body);
+    } catch (error) {
+      console.error(`[MMani] invalid JSON response url=${url}`, error);
+      throw new Error("MMani returned invalid JSON");
+    }
   }
 
   async requestText(url, options = {}) {
