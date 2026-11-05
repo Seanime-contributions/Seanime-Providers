@@ -608,5 +608,17 @@
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/mangastash.ico",
     "website": "https://mangastash.org"
+  },
+  {
+    "id": "megaplay",
+    "name": "Megaplay",
+    "description": "Megaplay is an AniList-backed online streaming provider for subbed and dubbed anime.",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/megaplay/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://megaplay.buzz/favicon.ico",
+    "website": "https://megaplay.buzz/"
   }
 ]
