@@ -23,14 +23,26 @@ class Provider {
   async getKfToken() {
     if (this.kfToken) return this.kfToken;
 
-    const response = await fetch(this.base, { headers: this.commonHeaders });
+    let response;
+    try {
+      response = await fetch(this.base, { headers: this.commonHeaders });
+    } catch (error) {
+      console.log("[MMani] token request failed", error);
+      return "";
+    }
     console.log(`[MMani] token request status=${response.status}`);
-    if (!response.ok) throw new Error(`MMani homepage request failed (HTTP ${response.status})`);
+    if (!response.ok) {
+      console.log(`[MMani] homepage request failed status=${response.status}`);
+      return "";
+    }
     const html = await response.text();
     const token = html.match(/\}\)\(window\.fetch\s*,\s*["']([^"']+)["']\s*\)/i)?.[1]
       || html.match(/X-KF-Req["']\s*,\s*["']([^"']+)["']/i)?.[1];
     console.log(`[MMani] token found=${Boolean(token)} tokenLength=${token?.length || 0} homepageLength=${html.length}`);
-    if (!token) throw new Error("MMani request token was not found");
+    if (!token) {
+      console.log("[MMani] request token was not found");
+      return "";
+    }
 
     this.kfToken = token;
     return token;
@@ -43,15 +55,24 @@ class Provider {
       "X-KF-Req": token,
       ...(options.headers || {}),
     };
-    const response = await fetch(url, { ...options, headers });
+    let response;
+    try {
+      response = await fetch(url, { ...options, headers });
+    } catch (error) {
+      console.log(`[MMani] JSON request failed url=${url}`, error);
+      return null;
+    }
     const body = await response.text();
     console.log(`[MMani] JSON request url=${url} status=${response.status} response=${body}`);
-    if (!response.ok) throw new Error(`MMani request failed (HTTP ${response.status})`);
+    if (!response.ok) {
+      console.log(`[MMani] JSON request failed url=${url} status=${response.status}`);
+      return null;
+    }
     try {
       return JSON.parse(body);
     } catch (error) {
       console.log(`[MMani] invalid JSON response url=${url}`, error);
-      throw new Error("MMani returned invalid JSON");
+      return null;
     }
   }
 
@@ -62,8 +83,17 @@ class Provider {
       "X-KF-Req": token,
       ...(options.headers || {}),
     };
-    const response = await fetch(url, { ...options, headers });
-    if (!response.ok) throw new Error(`MMani request failed (HTTP ${response.status})`);
+    let response;
+    try {
+      response = await fetch(url, { ...options, headers });
+    } catch (error) {
+      console.log(`[MMani] text request failed url=${url}`, error);
+      return "";
+    }
+    if (!response.ok) {
+      console.log(`[MMani] text request failed url=${url} status=${response.status}`);
+      return "";
+    }
     return response.text();
   }
 
@@ -82,13 +112,16 @@ class Provider {
         subOrDub: "sub",
       }));
 
-    if (!mapped.length) throw new Error("No anime found");
+    if (!mapped.length) console.log(`[MMani] no anime found for query=${query.query}`);
     return mapped;
   }
 
   async findEpisodes(id) {
     const payload = await this.requestJson(`${this.base}/ajax.php?episodes&epid=${encodeURIComponent(id)}`);
-    if (!Array.isArray(payload)) throw new Error("MMani returned an invalid episode list");
+    if (!Array.isArray(payload)) {
+      console.log(`[MMani] invalid episode list for id=${id}`);
+      return [];
+    }
 
     const episodes = [];
     for (const server of payload) {
@@ -107,7 +140,7 @@ class Provider {
     }
 
     episodes.sort((a, b) => a.number - b.number);
-    if (!episodes.length) throw new Error("No episodes found");
+    if (!episodes.length) console.log(`[MMani] no episodes found for id=${id}`);
     return episodes;
   }
 
@@ -120,27 +153,42 @@ class Provider {
     }
 
     const links = await this.requestJson(`${this.base}/ajax.php?eplink&data=${encodeURIComponent(details.data)}`);
-    if (!Array.isArray(links)) throw new Error("MMani returned an invalid server list");
+    if (!Array.isArray(links)) {
+      console.log(`[MMani] invalid server list for data=${details.data}`);
+      return this.emptyEpisodeServer(server);
+    }
 
     const selected = links.find((item) => String(item?.server || "") === String(server)) || links[0];
-    if (!selected?.link) throw new Error(`MMani server ${server} is unavailable`);
+    if (!selected?.link) {
+      console.log(`[MMani] server unavailable server=${server}`);
+      return this.emptyEpisodeServer(server);
+    }
 
     const refererHeaders = {
       "Referer": `${this.base}/`,
     };
     const playerHtml = await this.requestText(selected.link, { headers: refererHeaders });
     const playerConfig = this.extractPlayerConfig(playerHtml);
-    if (!playerConfig?.videoUrl) throw new Error("MMani player configuration was not found");
+    if (!playerConfig?.videoUrl) {
+      console.log(`[MMani] player configuration not found url=${selected.link}`);
+      return this.emptyEpisodeServer(selected.server || server);
+    }
 
-    const streamUrl = new URL(playerConfig.videoUrl, selected.link).toString();
+    const streamUrl = this.resolveUrl(playerConfig.videoUrl, selected.link, "video");
+    if (!streamUrl) return this.emptyEpisodeServer(selected.server || server);
     const subtitles = (Array.isArray(playerConfig.tracks) ? playerConfig.tracks : [])
       .filter((track) => track && track.file && String(track.kind || "captions").toLowerCase() === "captions")
-      .map((track, index) => ({
-        id: `mmani-${index + 1}`,
-        url: new URL(track.file, selected.link).toString(),
-        language: String(track.label || "English"),
-        isDefault: Boolean(track.default) || index === 0,
-      }));
+      .map((track, index) => {
+        const subtitleUrl = this.resolveUrl(track.file, selected.link, "subtitle");
+        if (!subtitleUrl) return null;
+        return {
+          id: `mmani-${index + 1}`,
+          url: subtitleUrl,
+          language: String(track.label || "English"),
+          isDefault: Boolean(track.default) || index === 0,
+        };
+      })
+      .filter(Boolean);
 
     const playbackHeaders = {
       ...this.commonHeaders,
@@ -160,12 +208,30 @@ class Provider {
     };
   }
 
+  emptyEpisodeServer(server) {
+    return {
+      server: String(server || "MMani"),
+      headers: { ...this.commonHeaders },
+      videoSources: [],
+    };
+  }
+
+  resolveUrl(value, base, type) {
+    try {
+      return new URL(value, base).toString();
+    } catch (error) {
+      console.log(`[MMani] invalid ${type} URL value=${value}`, error);
+      return "";
+    }
+  }
+
   extractPlayerConfig(html) {
     const match = html.match(/window\.PLAYER_CONFIG\s*=\s*(\{[\s\S]*\})\s*;?\s*<\/script>/i);
     if (!match) return null;
     try {
       return JSON.parse(match[1]);
-    } catch (_) {
+    } catch (error) {
+      console.log("[MMani] invalid PLAYER_CONFIG JSON", error);
       return null;
     }
   }
