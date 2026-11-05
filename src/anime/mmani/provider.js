@@ -50,7 +50,7 @@ class Provider {
     try {
       return JSON.parse(body);
     } catch (error) {
-      console.error(`[MMani] invalid JSON response url=${url}`, error);
+      console.log(`[MMani] invalid JSON response url=${url}`, error);
       throw new Error("MMani returned invalid JSON");
     }
   }
