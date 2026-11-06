@@ -1,0 +1,14 @@
+{
+  "id": "zokoanime",
+  "name": "ZokoAnime",
+  "description": "ZokoAnime is an AniList-backed MAL ID online streaming provider for subbed and dubbed anime. Dubtitles may be available too",
+  "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/zokoanime/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "multi",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/zokoanime.png",
+  "website": "https://zokoanime.video/",
+  "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/zokoanime/provider.js"
+}

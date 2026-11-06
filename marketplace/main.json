@@ -620,5 +620,17 @@
     "lang": "multi",
     "icon": "https://megaplay.buzz/favicon.ico",
     "website": "https://megaplay.buzz/"
+  },
+  {
+    "id": "zokoanime",
+    "name": "ZokoAnime",
+    "description": "ZokoAnime is an AniList-backed MAL ID online streaming provider for subbed and dubbed anime.",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/zokoanime/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "multi",
+    "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/zokoanime.png",
+    "website": "https://zokoanime.video/"
   }
 ]
