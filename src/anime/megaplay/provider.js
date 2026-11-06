@@ -19,6 +19,7 @@ class Provider {
         Page(perPage: 25) {
           media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
             id
+            idMal
             title { romaji english native }
           }
         }
@@ -26,6 +27,8 @@ class Provider {
     `;
     const data = await this.anilistRequest(query, { search: opts.query });
     return (data?.data?.Page?.media || []).map(media => ({
+      // Seanime passes this value back to findEpisodes, so keep it as the AniList ID.
+      // findEpisodes requests idMal again and embeds it into each episode ID.
       id: String(media.id),
       title: media.title?.english || media.title?.romaji || media.title?.native || String(media.id),
       url: `https://anilist.co/anime/${media.id}`,
@@ -34,22 +37,24 @@ class Provider {
   }
 
   async findEpisodes(id) {
-    const mediaId = Number.parseInt(String(id), 10);
-    if (!Number.isFinite(mediaId)) return [];
+    const parsed = this.parseMediaId(id);
+    if (!parsed) return [];
 
     const query = `
       query ($id: Int) {
         Media(id: $id, type: ANIME) {
           id
+          idMal
           title { romaji english native }
           episodes
           nextAiringEpisode { episode }
         }
       }
     `;
-    const data = await this.anilistRequest(query, { id: mediaId });
+    const data = await this.anilistRequest(query, { id: parsed.anilistId });
     const media = data?.data?.Media;
     if (!media) return [];
+    const malId = parsed.malId || Number(media.idMal);
 
     const knownCount = Number(media.episodes);
     const nextAiringEpisode = Number(media.nextAiringEpisode?.episode);
@@ -63,10 +68,10 @@ class Provider {
     return Array.from({ length: count }, (_, index) => {
       const number = index + 1;
       return {
-        id: `${mediaId}:${number}`,
+        id: `${parsed.anilistId}:${malId || 0}:${number}`,
         number,
         title: `Episode ${number}`,
-        url: `${this.baseUrl}/stream/ani/${mediaId}/${number}/sub`,
+        url: `${this.baseUrl}/stream/ani/${parsed.anilistId}/${number}/sub`,
       };
     });
   }
@@ -79,15 +84,37 @@ class Provider {
     if (!selectedServer) throw new Error(`Unsupported Megaplay server: ${server}`);
 
     const audio = selectedServer.toLowerCase();
-    const streamUrl = `${this.baseUrl}/stream/ani/${parsed.mediaId}/${parsed.number}/${audio}`;
-    const page = await this.request(streamUrl, {
-      headers: { Referer: `${this.baseUrl}/` },
-    });
-    const html = await page.text();
-    const fileId = this.extractFileId(html);
+    const streamCandidates = [
+      parsed.anilistId
+        ? `${this.baseUrl}stream/ani/${parsed.anilistId}/${parsed.number}/${audio}`
+        : undefined,
+      parsed.malId
+        ? `${this.baseUrl}stream/mal/${parsed.malId}/${parsed.number}/${audio}`
+        : undefined,
+    ].filter(Boolean);
+
+    let streamUrl;
+    let fileId;
+    for (const candidate of streamCandidates) {
+      try {
+        const page = await this.request(candidate, {
+          allowHttpError: true,
+          headers: { Referer: `${this.baseUrl}/` },
+        });
+        if (!page.ok) continue;
+        const html = await page.text();
+        fileId = this.extractFileId(html);
+        if (fileId) {
+          streamUrl = candidate;
+          break;
+        }
+      } catch (error) {
+        // Try the MAL URL if the AniList URL fails at the network/request level.
+      }
+    }
     if (!fileId) throw new Error(`Megaplay file ID not found for episode ${parsed.number}`);
 
-    const sourceUrl = new URL("/stream/getSources", this.baseUrl);
+    const sourceUrl = new URL("stream/getSources", this.baseUrl);
     sourceUrl.searchParams.set("id", fileId);
     sourceUrl.searchParams.set("platform", "OTHER");
     const sourceResponse = await this.request(sourceUrl.toString(), {
@@ -143,11 +170,12 @@ class Provider {
   }
 
   async request(url, options = {}) {
+    const { allowHttpError, ...fetchOptions } = options;
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers: { "User-Agent": this.userAgent, ...(options.headers || {}) },
     });
-    if (!response.ok) throw new Error(`Request failed (${response.status}): ${url}`);
+    if (!response.ok && !allowHttpError) throw new Error(`Request failed (${response.status}): ${url}`);
     return response;
   }
 
@@ -162,10 +190,28 @@ class Provider {
     return dataIdMatch?.[1];
   }
 
-  parseEpisodeId(id) {
-    const match = String(id).match(/^(\d+):(\d+)$/);
+  parseMediaId(id) {
+    const match = String(id).match(/^(\d+)(?::(\d+))?$/);
     if (!match) return undefined;
-    return { mediaId: Number(match[1]), number: Number(match[2]) };
+    const anilistId = Number(match[1]);
+    const malId = Number(match[2]);
+    return {
+      anilistId,
+      malId: Number.isInteger(malId) && malId > 0 ? malId : undefined,
+    };
+  }
+
+  parseEpisodeId(id) {
+    const match = String(id).match(/^(\d+)(?::(\d+))?:(\d+)$/);
+    if (!match) return undefined;
+    const anilistId = Number(match[1]);
+    const possibleMalId = Number(match[2]);
+    const number = Number(match[3]);
+    return {
+      anilistId,
+      malId: Number.isInteger(possibleMalId) && possibleMalId > 0 ? possibleMalId : undefined,
+      number,
+    };
   }
 
   normalizeServer(server) {

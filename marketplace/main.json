@@ -617,7 +617,7 @@
     "author": "Pal",
     "type": "onlinestream-provider",
     "language": "javascript",
-    "lang": "en",
+    "lang": "multi",
     "icon": "https://megaplay.buzz/favicon.ico",
     "website": "https://megaplay.buzz/"
   }
