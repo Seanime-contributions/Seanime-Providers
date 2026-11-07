@@ -111,6 +111,8 @@ Or
 
 * [Dantotsu](https://discord.gg/MSJvfJzS7R) *(The Anilist activity plugin is inspired by Dantotsu's stories feature.)*
 
+* [EncDecEndpoints](https://github.com/smy778/EncDecEndpoints) — [By smy778](https://github.com/smy778) *(Used by the MegaPlay online streaming extension)*
+
 ### Contributors
 
 <p align="center">
