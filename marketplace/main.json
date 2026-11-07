@@ -632,5 +632,17 @@
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/zokoanime.png",
     "website": "https://zokoanime.video/"
+  },
+  {
+    "id": "megavid",
+    "name": "Megavid",
+    "description": "Megavid is an AniList-backed online streaming provider for subbed and dubbed anime with MAL fallback support.",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/megavid/manifest.json",
+    "author": "Pal",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "multi",
+    "icon": "",
+    "website": "https://megavid.buzz/"
   }
 ]

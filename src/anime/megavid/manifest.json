@@ -1,0 +1,14 @@
+{
+  "id": "megavid",
+  "name": "Megavid",
+  "description": "Megavid is an AniList-backed online streaming provider for subbed and dubbed anime. Dubtitles are also available",
+  "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/megavid/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "multi",
+  "icon": "",
+  "website": "https://megavid.buzz/",
+  "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/megavid/provider.js"
+}
