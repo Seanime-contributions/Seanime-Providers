@@ -14,9 +14,18 @@ class Provider {
 
   async search(query) {
     const searchUrl = `${this.baseUrl}/wp-admin/admin-ajax.php`;
+    const homeRes = await fetch(`${this.baseUrl}/`, {
+      headers: { "Accept": "text/html,application/xhtml+xml" },
+    });
+    if (!homeRes.ok) throw new Error(`Failed to load MyNimeku search form (HTTP ${homeRes.status})`);
+    const homeHtml = await homeRes.text();
+    const searchForm = homeHtml.match(/<form\b(?=[^>]*\bdata-live-search-form\b)[^>]*>/i)?.[0];
+    const nonce = searchForm ? getHtmlAttribute(searchForm, "data-nonce") : "";
+    if (!nonce) throw new Error("Could not find MyNimeku live-search nonce");
+
     const body = [
       `action=${encodeURIComponent("mynimeku_live_search")}`,
-      `nonce=${encodeURIComponent("92e6c9e843")}`,
+      `nonce=${encodeURIComponent(nonce)}`,
       `keyword=${encodeURIComponent(query.query)}`,
     ].join("&");
 
@@ -54,65 +63,82 @@ class Provider {
 
   async findEpisodes(id) {
     const res = await fetch(id);
+    if (!res.ok) throw new Error(`Failed to fetch MyNimeku series page (HTTP ${res.status})`);
     const html = await res.text();
     const episodes = [];
 
-    // Match each episode link block
-    const epRegex = /<a[^>]*class='komik-series-chapter-item'[^>]*data-episode-number='(\d+)'[^>]*href='([^']+)'[^>]*>[\s\S]*?<span class='komik-series-chapter-item__title'>([^<]+)<\/span>/g;
-
-    let match;
-    while ((match = epRegex.exec(html)) !== null) {
-      const number = parseInt(match[1]);
-      const url    = match[2];
-      const title  = match[3].trim();
-
+    const linkRegex = /<a\b(?=[^>]*\bclass\s*=\s*(["'])[^"']*\bkomik-series-chapter-item\b[^"']*\1)[^>]*>[\s\S]*?<\/a>/gi;
+    let linkMatch;
+    while ((linkMatch = linkRegex.exec(html)) !== null) {
+      const linkTag = linkMatch[0].match(/^<a\b[^>]*>/i)?.[0] || "";
+      const number = Number(getHtmlAttribute(linkTag, "data-episode-number"));
+      const rawUrl = getHtmlAttribute(linkTag, "href");
+      const titleMatch = linkMatch[0].match(/<span\b(?=[^>]*\bclass\s*=\s*(["'])[^"']*\bkomik-series-chapter-item__title\b[^"']*\1)[^>]*>([\s\S]*?)<\/span>/i);
+      const title = titleMatch ? decodeHtml(titleMatch[2].replace(/<[^>]*>/g, "")).trim() : "";
+      if (!Number.isFinite(number) || !rawUrl) continue;
+      const url = new URL(rawUrl, id).toString();
       episodes.push({ id: url, title, number, url });
     }
 
-    return episodes.reverse();
+    return episodes.sort((a, b) => a.number - b.number);
   }
 
   async findEpisodeServer(episode, server) {
     const res = await fetch(episode.url);
+    if (!res.ok) throw new Error(`Failed to fetch MyNimeku episode page (HTTP ${res.status})`);
     const html = await res.text();
 
-    const serverRegex = /<button[^>]*class='mynimeku-episode-server-btn[^']*'[^>]*data-player-url='([^']+)'[^>]*data-player-host='([^']+)'[^>]*>/g;
-
     const candidates = [];
-    let match;
-    const targetServer = server.toUpperCase();
+    const buttonRegex = /<button\b[^>]*>/gi;
+    let buttonMatch;
+    while ((buttonMatch = buttonRegex.exec(html)) !== null) {
+      const button = buttonMatch[0];
+      const classes = getHtmlAttribute(button, "class") || "";
+      if (!classes.split(/\s+/).includes("mynimeku-episode-server-btn")) continue;
+      const rawUrl = getHtmlAttribute(button, "data-player-url");
+      if (!rawUrl) continue;
+      const url = new URL(rawUrl, episode.url).toString();
+      const host = (getHtmlAttribute(button, "data-player-host") || "").toUpperCase();
 
-    while ((match = serverRegex.exec(html)) !== null) {
-      const url  = match[1].replace(/&#038;/g, "&");
-      const host = match[2].toUpperCase();
-
-      if (host.includes(targetServer)) {
-        const resolutionMatch = host.match(/(\d+)[pP]/);
-        const resolution = resolutionMatch ? parseInt(resolutionMatch[1]) : 0;
-        candidates.push({ url, host, resolution });
-      }
+      const resolutionMatch = host.match(/(\d+)P\b/);
+      candidates.push({ url, host, resolution: resolutionMatch ? Number(resolutionMatch[1]) : 0 });
     }
 
-    if (candidates.length === 0) {
-      const firstMatch = html.match(/data-player-url='([^']+)'/);
-      if (firstMatch) {
-        candidates.push({ url: firstMatch[1].replace(/&#038;/g, "&"), resolution: 0 });
-      } else {
-        throw new Error("No server URL found");
-      }
-    }
+    const targetServer = String(server || "").toUpperCase();
+    const matchingCandidates = targetServer && targetServer !== "DEFAULT"
+      ? candidates.filter(candidate => candidate.host.includes(targetServer))
+      : candidates;
+    const eligibleCandidates = matchingCandidates.length ? matchingCandidates : candidates;
 
-    candidates.sort((a, b) => b.resolution - a.resolution);
-    const selectedUrl = candidates[0].url;
+    if (!eligibleCandidates.length) throw new Error("No server URL found");
+    eligibleCandidates.sort((a, b) => b.resolution - a.resolution);
+    const selected = eligibleCandidates[0];
 
     return {
-      server,
+      server: server || "Default",
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Referer": `${this.baseUrl}/`,
       },
       videoSources: [
-        { url: selectedUrl, type: "mp4" },
+        { url: selected.url, type: "mp4", quality: selected.resolution ? `${selected.resolution}p` : "auto", subtitles: [] },
       ],
     };
   }
+}
+
+function getHtmlAttribute(tag, name) {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = String(tag).match(new RegExp(`(?:^|\\s)${escapedName}\\s*=\\s*(?:(["'])([\\s\\S]*?)\\1|([^\\s>]+))`, "i"));
+  return match ? decodeHtml(match[2] ?? match[3] ?? "") : "";
+}
+
+function decodeHtml(value) {
+  return String(value)
+    .replace(/&amp;/gi, "&")
+    .replace(/&#0*38;/gi, "&")
+    .replace(/&#x0*26;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*39;|&#x0*27;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
 }
