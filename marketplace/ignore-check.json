@@ -55,6 +55,11 @@
       "id": "animetoast",
       "ignore": true,
       "reason": "The website blocks shared IPs."
+    },
+    {
+      "id": "kuramanga",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
     }
   ]
 }

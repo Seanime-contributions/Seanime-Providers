@@ -145,7 +145,9 @@
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/asurascans.webp",
     "website": "",
-    "tags": []
+    "tags": [
+      "manhwa"
+    ]
   },
   {
     "id": "kuramanga",
@@ -158,7 +160,9 @@
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/kuramanga.ico",
     "website": "",
-    "tags": []
+    "tags": [
+      "manhwa"
+    ]
   },
   {
     "id": "ravenscans",
@@ -171,7 +175,9 @@
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/ravenscans.png",
     "website": "",
-    "tags": []
+    "tags": [
+      "manhwa"
+    ]
   },
   {
     "id": "mangabats",
