@@ -77,78 +77,17 @@ class Provider {
     const match = String(episode.id || "").match(/^(\d+):(\d+)$/);
     if (!match) throw new Error("Invalid AniTVPlus episode ID");
     const [, malId, streamEpisode] = match;
-    const apiUrl = `${this.embedBase}/hls3/uq/${encodeURIComponent(malId)}?episode=${encodeURIComponent(streamEpisode)}`;
-    const headers = {
-      Accept: "*/*",
-      "Accept-Language": "en-US,en;q=0.9",
-      Origin: this.streamOrigin,
-      Priority: "u=1, i",
-      Referer: `${this.streamOrigin}/`,
-      "Sec-CH-UA": '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
-      "Sec-CH-UA-Mobile": "?0",
-      "Sec-CH-UA-Platform": '"Windows"',
-      "Sec-Fetch-Dest": "empty",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "cross-site",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
-    };
-    let payload;
-    try {
-      const response = await fetch(apiUrl, { headers });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      payload = await response.json();
-    } catch (error) {
-      console.log(`[AniTVPlus] Primary HLS lookup failed: ${error?.message || error}`);
-    }
-
-    let playlistUrl;
-    let subtitles = [];
-    if (payload?.m3u8) {
-      playlistUrl = new URL(payload.m3u8, apiUrl).toString();
-    } else {
-      console.log("[AniTVPlus] Primary lookup returned no playlist; trying UQLoad resolver fallback");
-      const fallback = await this.resolveUqloadPlaylist(malId, streamEpisode, headers);
-      playlistUrl = fallback.playlistUrl;
-      subtitles = fallback.subtitles;
-      Object.assign(headers, fallback.headers);
-    }
-
-    if (payload?.meta) {
-      try {
-        const metaUrl = new URL(payload.meta, apiUrl).toString();
-        const metaResponse = await fetch(metaUrl, { headers });
-        // Use the final URL after redirects as the base for resolving subtitle
-        // paths. CDN edges (e.g. edge.animetvplus.xyz) sometimes rewrite the
-        // meta.json location.
-        const resolvedMetaUrl = metaResponse.url || metaUrl;
-        const meta = await metaResponse.json();
-        subtitles = (Array.isArray(meta?.subs) ? meta.subs : [])
-          .filter(track => track?.file)
-          .map((track, index) => {
-            const subtitleUrl = this.resolveSubtitleUrl(track.file, resolvedMetaUrl);
-            console.log(`[AniTVPlus] Subtitle base=${resolvedMetaUrl} file=${track.file} -> ${subtitleUrl}`);
-            return {
-              id: String(track.label || track.lang || `subtitle-${index + 1}`),
-              url: subtitleUrl,
-              language: track.lang || this.languageCode(track.label),
-              label: track.label || track.lang || `Subtitle ${index + 1}`,
-              isDefault: Boolean(track.default),
-            };
-          });
-      } catch (error) {
-        console.log(`[AniTVPlus] Could not load subtitle metadata: ${error?.message || error}`);
-      }
-    }
+    const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
+    const resolved = await this.resolveUqloadPlaylist(malId, streamEpisode, { "User-Agent": userAgent });
 
     return {
       server: "Default",
-      headers,
+      headers: resolved.headers,
       videoSources: [{
-        url: playlistUrl,
+        url: resolved.playlistUrl,
         quality: "auto",
         type: "m3u8",
-        headers,
-        subtitles,
+        subtitles: resolved.subtitles,
       }],
     };
   }
