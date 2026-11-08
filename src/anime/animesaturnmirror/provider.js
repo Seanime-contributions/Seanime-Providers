@@ -90,38 +90,53 @@ class Provider {
     async findEpisodeServer(episode, _server) {
         const server = _server !== "default" ? _server : "Server 1";
 
-        // Step 1: Get the episode page and extract the iframe embed URL
+        // Step 1: Get the episode page and extract the AnimeSaturn player URL
         const episodeRes = await fetch(episode.url, { method: 'GET', headers: this.defaultHeaders });
         if (!episodeRes.ok) throw new Error("Failed to fetch episode page: " + episodeRes.statusText);
         const episodeHtml = await episodeRes.text();
         const $ = LoadDoc(episodeHtml);
 
-        const iframeSrc = $("#pembed iframe").attr("src") || "";
-        if (!iframeSrc) {
-            throw new Error("Could not find embed iframe for episode: " + episode.url);
+        const playerSrc = $("#pembed iframe").attr("src") || "";
+        if (!playerSrc) {
+            throw new Error("Could not find player iframe for episode: " + episode.url);
         }
+        const playerUrl = resolveUrl(playerSrc, episode.url);
 
-
-        // Step 2: Fetch the player page to extract the JWPlayer file URL
-        const playerRes = await fetch(iframeSrc, { method: 'GET', headers: this.defaultHeaders });
+        // Step 2: Fetch the player page. It may contain a direct stream, or a
+        // second iframe (currently MegaPlay) whose page defines the playlist.
+        const playerRes = await fetch(playerUrl, {
+            method: 'GET',
+            headers: { ...this.defaultHeaders, 'Referer': episode.url },
+        });
         if (!playerRes.ok) throw new Error("Failed to fetch player page: " + playerRes.statusText);
         const playerHtml = await playerRes.text();
 
-        const fileMatch = playerHtml.match(/file:\s*"([^"]+)"/);
-        if (!fileMatch) {
-            throw new Error("Could not find file URL in player page");
+        let streamUrl = extractStreamUrl(playerHtml);
+        let streamPageUrl = playerUrl;
+
+        if (!streamUrl) {
+            const playerDoc = LoadDoc(playerHtml);
+            const embedSrc = playerDoc("iframe").attr("src") || "";
+            if (!embedSrc) {
+                throw new Error("Could not find a stream URL or nested iframe in player page");
+            }
+
+            const embedUrl = resolveUrl(embedSrc, playerUrl);
+            const embedRes = await fetch(embedUrl, {
+                method: 'GET',
+                headers: { ...this.defaultHeaders, 'Referer': playerUrl },
+            });
+            if (!embedRes.ok) throw new Error("Failed to fetch nested player page: " + embedRes.statusText);
+            const embedHtml = await embedRes.text();
+            streamUrl = extractStreamUrl(embedHtml);
+            streamPageUrl = embedUrl;
         }
 
-        const rawFileUrl = fileMatch[1].replace(/\\u0026/g, "&");
-
-        // Step 3: Determine type from the cache URL's src param
-        const srcParamMatch = rawFileUrl.match(/[?&]src=([^&]+)/);
-        const decodedSrc = srcParamMatch ? decodeURIComponent(srcParamMatch[1]) : rawFileUrl;
-        const fileType = decodedSrc.endsWith(".m3u8") ? "m3u8" : "mp4";
-
+        if (!streamUrl) throw new Error("Could not find a video stream URL in player page");
+        const fileType = getVideoSourceType(streamUrl);
 
         const headers = {
-            "Referer": iframeSrc,
+            "Referer": streamPageUrl,
             "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
             "Accept": "*/*",
             "Cache-Control": "no-cache",
@@ -130,7 +145,7 @@ class Provider {
 
         const videoSources = [{
             quality: "auto",
-            url: rawFileUrl,
+            url: streamUrl,
             type: fileType,
             subtitles: [],
         }];
@@ -144,6 +159,39 @@ class Provider {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+function resolveUrl(url, baseUrl) {
+    return new URL(url.replace(/&amp;/gi, "&"), baseUrl).toString();
+}
+
+function extractStreamUrl(html) {
+    const text = String(html);
+    const matches = [
+        text.match(/\bprimary\s*=\s*(["'])(.*?)\1/is),
+        text.match(/\bfile\s*:\s*(["'])(.*?)\1/is),
+    ];
+
+    for (const match of matches) {
+        if (!match) continue;
+        const url = match[2]
+            .replace(/\\u0026/gi, "&")
+            .replace(/\\x26/gi, "&")
+            .replace(/\\\//g, "/")
+            .replace(/&amp;/gi, "&")
+            .trim();
+        if (url) return url;
+    }
+
+    return "";
+}
+
+function getVideoSourceType(url) {
+    const parsedUrl = new URL(url);
+    const sourceHint = parsedUrl.searchParams.get("src") || parsedUrl.pathname;
+    if (/\.m3u8(?:$|[?#])/i.test(sourceHint)) return "m3u8";
+    if (/\.mp4(?:$|[?#])/i.test(sourceHint)) return "mp4";
+    return "unknown";
+}
 
 function cleanTitle(title) {
     return title
