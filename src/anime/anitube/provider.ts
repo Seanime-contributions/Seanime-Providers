@@ -96,20 +96,34 @@ class Provider {
     const blog2Match = html.match(blog2Regex);
 
     if (blog2Match) {
-      const embedUrl = blog2Match[1];
-      const embedRes = await fetch(embedUrl);
+      const embedUrl = blog2Match[1].replace(/&amp;/gi, "&");
+      const embedReferer = "https://anitube.zip/";
+      const embedRes = await fetch(embedUrl, {
+        headers: { "Referer": embedReferer }
+      });
+      if (!embedRes.ok) {
+        throw new Error(`Failed to fetch Blog2 player page: ${embedRes.status} ${embedRes.statusText}`);
+      }
       const embedHtml = await embedRes.text();
-      const fileRegex = /file:\s*'([^']+)'/;
+      const fileRegex = /\bfile\s*:\s*(["'])(.*?)\1/i;
       const fileMatch = embedHtml.match(fileRegex);
 
       if (fileMatch) {
+        const streamUrl = fileMatch[2]
+          .replace(/\\u0026/gi, "&")
+          .replace(/\\\//g, "/")
+          .replace(/&amp;/gi, "&");
+        const streamType = /\.m3u8(?:$|[?#])/i.test(streamUrl) ? "m3u8"
+          : /\.mp4(?:$|[?#])/i.test(streamUrl) ? "mp4"
+          : "unknown";
         return {
           server: "default",
-          videoSources: [{ 
-            url: fileMatch[1], 
-            quality: "auto", 
-            type: "hls",
-            headers: { "Referer": embedRes.url } // Pass the player URL as Referer
+          headers: { "Referer": embedReferer },
+          videoSources: [{
+            url: streamUrl,
+            quality: "auto",
+            type: streamType,
+            subtitles: [],
           }],
         };
       }
