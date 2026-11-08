@@ -63,7 +63,7 @@
       .hero-note { border-top: 1px solid var(--ink); padding-top: 14px; color: var(--muted); font-size: 13px; }
       .hero-note strong { color: var(--ink); display: block; margin-bottom: 4px; }
       .toolbar { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 0; }
-      .search-row { display: grid; grid-template-columns: minmax(220px, 1fr) 190px 190px auto; gap: 10px; }
+      .search-row { display: grid; grid-template-columns: minmax(220px, 1fr) 170px 170px 170px auto; gap: 10px; }
       .field { position: relative; }
       .field input, .field select { width: 100%; height: 44px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); color: var(--ink); padding: 0 13px; outline: none; transition: .18s ease; }
       .field input { padding-left: 40px; }
@@ -107,6 +107,7 @@
       .meta { display: flex; flex-wrap: wrap; gap: 6px; }
       .chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; color: var(--muted); font-size: 10px; }
       .chip b { color: var(--ink); font-weight: 600; }
+      .tag-chip { color: var(--ink); border-color: var(--line-strong); background: var(--soft); }
       .details { margin-top: 13px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 7px; }
       .detail { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: 11px; }
       .detail span:last-child { color: var(--ink); text-align: right; overflow-wrap: anywhere; }
@@ -151,6 +152,7 @@
             <label class="field"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search name, description, author, version…" autocomplete="off" /></label>
             <label class="field"><select id="author-filter" aria-label="Filter by author"><option value="">All authors</option></select></label>
             <label class="field"><select id="language-filter" aria-label="Filter by language"><option value="">All languages</option></select></label>
+            <label class="field"><select id="tag-filter" aria-label="Filter by marketplace tag"><option value="">All tags</option></select></label>
             <button class="clear-btn" id="clear-filters" type="button">Clear filters</button>
           </div>
           <nav class="tabs" aria-label="Extension categories"><button class="tab active" data-category="all" type="button">All</button><button class="tab" data-category="plugin" type="button">Plugins</button><button class="tab" data-category="onlinestream-provider" type="button">Online streams</button><button class="tab" data-category="manga-provider" type="button">Manga</button><button class="tab" data-category="anime-torrent-provider" type="button">Torrents</button></nav>
@@ -172,7 +174,8 @@
       const $ = (selector) => document.querySelector(selector);
       const $$ = (selector) => Array.from(document.querySelectorAll(selector));
       const placeholderDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='#1d1d1b'/><path d='M50 34v32M34 50h32' stroke='#494946' stroke-width='3'/></svg>");
-      const state = { items: [], category: "all", query: "", author: "", language: "" };
+      const marketplaceTags = ["fast sources", "large library", "stable sources", "dubtitles", "anilist", "nsfw", "misc", "enhancements", "sub & dub", "sub only", "dub only"];
+      const state = { items: [], category: "all", query: "", author: "", language: "", tag: "" };
       const previewFiles = [
         "anilist-activities-1.jpg", "anilist-activities-2.png",
         "anime-news-1.png", "anime-news-2.png",
@@ -209,7 +212,7 @@
       }
 
       function enrichItem(item, manifest) {
-        return { ...item, ...manifest, icon: manifest.icon || item.icon || "", name: item.name || item.id || "Unnamed", author: item.author || "Unknown", language: manifest.language || item.language || "Unknown", contentLanguage: manifest.lang || item.lang || "Unknown", version: manifest.version || item.version || "Unversioned", manifestLoaded: Object.keys(manifest).length > 0 };
+        return { ...item, ...manifest, icon: manifest.icon || item.icon || "", name: item.name || item.id || "Unnamed", author: item.author || "Unknown", language: manifest.language || item.language || "Unknown", contentLanguage: manifest.lang || item.lang || "Unknown", version: manifest.version || item.version || "Unversioned", tags: Array.isArray(item.tags) ? item.tags : [], manifestLoaded: Object.keys(manifest).length > 0 };
       }
 
       function updateSelect(select, values, label) {
@@ -222,8 +225,8 @@
       function currentItems() {
         const query = state.query.trim().toLocaleLowerCase();
         return state.items.filter(item => {
-          if (!categoryMatches(item) || (state.author && !authorNames(item.author).includes(state.author)) || (state.language && normalizeLanguage(item.contentLanguage) !== normalizeLanguage(state.language))) return false;
-          const haystack = [item.name, item.id, item.description, item.author, item.type, item.language, item.contentLanguage, item.version, item.website, item.episodeServers, item.supportsDub].map(normalized).join(" ");
+          if (!categoryMatches(item) || (state.author && !authorNames(item.author).includes(state.author)) || (state.language && normalizeLanguage(item.contentLanguage) !== normalizeLanguage(state.language)) || (state.tag && !item.tags.includes(state.tag))) return false;
+          const haystack = [item.name, item.id, item.description, item.author, item.type, item.language, item.contentLanguage, item.version, item.website, item.episodeServers, item.supportsDub, item.tags].map(normalized).join(" ");
           return !query || haystack.includes(query);
         });
       }
@@ -304,7 +307,8 @@
         const article = document.createElement("article"); article.className = "card"; article.style.animationDelay = `${Math.min(index, 12) * 24}ms`;
         const icon = item.icon || placeholderDataUrl;
         const rows = metadataRows(item).map(([key, value]) => `<div class="detail"><span>${escapeHtml(key)}</span><span>${escapeHtml(valueText(value))}</span></div>`).join("");
-        article.innerHTML = `<div class="card-top"><div class="identity"><img class="icon" src="${escapeHtml(icon)}" alt="" loading="lazy" /><div><h2>${escapeHtml(item.name)}</h2><div class="card-id mono">${escapeHtml(item.id || "")}</div></div></div><span class="version mono">v${escapeHtml(valueText(item.version).replace(/^v/i, ""))}</span></div><div class="card-body"><p class="description">${escapeHtml(item.description || "No description available.")}</p><div class="meta"><span class="chip"><b>${escapeHtml(typeLabel(item.type))}</b></span><span class="chip">${escapeHtml(item.contentLanguage)}</span><span class="chip">${escapeHtml(item.language)}</span>${item.manifestLoaded ? '<span class="chip">manifest ✓</span>' : '<span class="chip">catalog data</span>'}</div><div class="details">${rows}</div></div><div class="card-footer"><a class="action" href="${escapeHtml(item.manifestURI || "#")}" target="_blank" rel="noopener">Manifest ↗</a>${item.website ? `<a class="action" href="${escapeHtml(item.website)}" target="_blank" rel="noopener">Website ↗</a>` : ""}<button class="action install" type="button">Install</button></div>`;
+        const tags = item.tags.map(tag => `<span class="chip tag-chip">${escapeHtml(tag)}</span>`).join("");
+        article.innerHTML = `<div class="card-top"><div class="identity"><img class="icon" src="${escapeHtml(icon)}" alt="" loading="lazy" /><div><h2>${escapeHtml(item.name)}</h2><div class="card-id mono">${escapeHtml(item.id || "")}</div></div></div><span class="version mono">v${escapeHtml(valueText(item.version).replace(/^v/i, ""))}</span></div><div class="card-body"><p class="description">${escapeHtml(item.description || "No description available.")}</p><div class="meta"><span class="chip"><b>${escapeHtml(typeLabel(item.type))}</b></span><span class="chip">${escapeHtml(item.contentLanguage)}</span><span class="chip">${escapeHtml(item.language)}</span>${item.manifestLoaded ? '<span class="chip">manifest ✓</span>' : '<span class="chip">catalog data</span>'}${tags}</div><div class="details">${rows}</div></div><div class="card-footer"><a class="action" href="${escapeHtml(item.manifestURI || "#")}" target="_blank" rel="noopener">Manifest ↗</a>${item.website ? `<a class="action" href="${escapeHtml(item.website)}" target="_blank" rel="noopener">Website ↗</a>` : ""}<button class="action install" type="button">Install</button></div>`;
         const previewCarousel = renderPreviewCarousel(item);
         if (previewCarousel) article.insertBefore(previewCarousel, article.querySelector(".card-body"));
         const image = article.querySelector("img"); image.addEventListener("error", () => { image.src = placeholderDataUrl; });
@@ -333,13 +337,14 @@
           state.items = await Promise.all(rawItems.map(async item => enrichItem(item, await getManifest(item))));
           const authors = [...new Set(state.items.flatMap(item => authorNames(item.author)))].sort((a, b) => a.localeCompare(b));
           const languages = [...new Set(state.items.map(item => normalizeLanguage(item.contentLanguage)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-          updateSelect($("#author-filter"), authors, "All authors"); updateSelect($("#language-filter"), languages, "All languages");
+          const tags = [...new Set([...marketplaceTags, ...state.items.flatMap(item => item.tags)])];
+          updateSelect($("#author-filter"), authors, "All authors"); updateSelect($("#language-filter"), languages, "All languages"); updateSelect($("#tag-filter"), tags, "All tags");
           $("#data-status").textContent = `${state.items.length} extensions · ${state.items.filter(item => item.manifestLoaded).length} manifests parsed`;
           render();
         } catch (error) { console.error(error); $("#data-status").textContent = "Could not load marketplace/main.json"; $("#extension-grid").innerHTML = `<div class="empty"><strong>Could not load the catalog.</strong>Try refreshing the page.</div>`; }
       }
 
-      function resetFilters() { state.query = ""; state.author = ""; state.language = ""; $("#search").value = ""; $("#author-filter").value = ""; $("#language-filter").value = ""; render(); }
+      function resetFilters() { state.query = ""; state.author = ""; state.language = ""; state.tag = ""; $("#search").value = ""; $("#author-filter").value = ""; $("#language-filter").value = ""; $("#tag-filter").value = ""; render(); }
       function openSettings() { const values = settingValues(); $("#setting-uri").value = values.uri; $("#setting-port").value = values.port; $("#settings-modal").classList.remove("hidden"); $("#setting-uri").focus(); }
       function closeSettings() { $("#settings-modal").classList.add("hidden"); }
       const menuButton = $("#menu-button");
@@ -352,6 +357,7 @@
         $("#search").addEventListener("input", event => { state.query = event.target.value; render(); });
         $("#author-filter").addEventListener("change", event => { state.author = event.target.value; render(); });
         $("#language-filter").addEventListener("change", event => { state.language = event.target.value; render(); });
+        $("#tag-filter").addEventListener("change", event => { state.tag = event.target.value; render(); });
         $("#clear-filters").addEventListener("click", resetFilters);
         $("#settings-btn").addEventListener("click", openSettings); $("#settings-close").addEventListener("click", closeSettings); $("#settings-cancel").addEventListener("click", closeSettings);
         $("#settings-save").addEventListener("click", () => { localStorage.setItem("seanime_uri", $("#setting-uri").value.trim() || DEFAULT_URI); localStorage.setItem("seanime_port", $("#setting-port").value.trim() || DEFAULT_PORT); closeSettings(); showToast("Install settings saved"); });

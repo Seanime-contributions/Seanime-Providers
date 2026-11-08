@@ -9,7 +9,12 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangabuddy.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "large library",
+      "stable sources"
+    ]
   },
   {
     "id": "donghuastream",
@@ -21,7 +26,10 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/donghuastream.jpeg",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub only"
+    ]
   },
   {
     "id": "mangahub",
@@ -33,7 +41,11 @@
     "language": "javascript",
     "lang": "ru",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangahub.ico",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "mangakatana",
@@ -45,7 +57,10 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://mangakatana.com/static/img/fav.png",
-    "website": "https://mangakatana.com"
+    "website": "https://mangakatana.com",
+    "tags": [
+      "stable sources"
+    ]
   },
   {
     "id": "animeav1",
@@ -57,7 +72,10 @@
     "language": "javascript",
     "lang": "es",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animeav1.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub & dub"
+    ]
   },
   {
     "id": "atsumaru",
@@ -69,7 +87,10 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/atsumaru.ico",
-    "website": ""
+    "website": "",
+    "tags": [
+      "stable sources"
+    ]
   },
   {
     "id": "animesamamanga",
@@ -81,7 +102,11 @@
     "language": "javascript",
     "lang": "fr",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesama.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "lelmanga",
@@ -93,7 +118,8 @@
     "language": "javascript",
     "lang": "fr",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/lelmanga.png",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "taiyo",
@@ -105,7 +131,8 @@
     "language": "javascript",
     "lang": "pt",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/taiyo.jpeg",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "asurascans",
@@ -117,7 +144,8 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/asurascans.webp",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "kuramanga",
@@ -129,7 +157,8 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/kuramanga.ico",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "ravenscans",
@@ -141,7 +170,8 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/ravenscans.png",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "mangabats",
@@ -153,7 +183,10 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangabats.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "large library"
+    ]
   },
   {
     "id": "hentaisaturn",
@@ -165,7 +198,11 @@
     "language": "typescript",
     "lang": "it",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/hentaisaturn.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "nsfw",
+      "sub & dub"
+    ]
   },
   {
     "id": "animeunitymirror",
@@ -177,7 +214,11 @@
     "language": "javascript",
     "lang": "it",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animeunity.webp",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "animesaturnmirror",
@@ -189,7 +230,10 @@
     "language": "javascript",
     "lang": "it",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animesaturn.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub & dub"
+    ]
   },
   {
     "id": "animegg",
@@ -201,7 +245,12 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animegg.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "large library",
+      "stable sources",
+      "sub & dub"
+    ]
   },
   {
     "id": "anitube",
@@ -213,7 +262,10 @@
     "language": "typescript",
     "lang": "pt",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/anitube.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub & dub"
+    ]
   },
   {
     "id": "aniworld",
@@ -225,7 +277,12 @@
     "language": "typescript",
     "lang": "de",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/aniworld.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources",
+      "dub only"
+    ]
   },
   {
     "id": "animetoast",
@@ -237,7 +294,10 @@
     "language": "typescript",
     "lang": "de",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animetoast.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub & dub"
+    ]
   },
   {
     "id": "animeheaven",
@@ -249,7 +309,10 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/animeheaven.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub only"
+    ]
   },
   {
     "id": "hentaiworld",
@@ -261,7 +324,11 @@
     "language": "typescript",
     "lang": "it",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/hentaiworld.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "nsfw",
+      "sub & dub"
+    ]
   },
   {
     "id": "mynimeku",
@@ -273,7 +340,10 @@
     "language": "typescript",
     "lang": "id",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mynimeku.jpg",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub only"
+    ]
   },
   {
     "id": "nontonanime",
@@ -285,7 +355,10 @@
     "language": "typescript",
     "lang": "id",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/nontonanime.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "sub only"
+    ]
   },
   {
     "id": "mangaworldadult",
@@ -297,7 +370,10 @@
     "language": "typescript",
     "lang": "it",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/MangaWorld.jpeg",
-    "website": ""
+    "website": "",
+    "tags": [
+      "nsfw"
+    ]
   },
   {
     "id": "mangafreak",
@@ -309,7 +385,11 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangafreak.jpeg",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "LN-reader",
@@ -321,7 +401,11 @@
     "language": "typescript",
     "lang": "EN",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/ln.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "anilist",
+      "misc"
+    ]
   },
   {
     "id": "snow-effect",
@@ -333,7 +417,10 @@
     "language": "javascript",
     "lang": "EN",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/seanime-xmas.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "misc"
+    ]
   },
   {
     "id": "characters-info-plus",
@@ -345,7 +432,11 @@
     "language": "typescript",
     "lang": "MULTI",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/char-plus-info.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "anilist",
+      "enhancements"
+    ]
   },
   {
     "id": "antiseeding",
@@ -357,7 +448,10 @@
     "language": "typescript",
     "lang": "EN",
     "icon": "",
-    "website": ""
+    "website": "",
+    "tags": [
+      "enhancements"
+    ]
   },
   {
     "id": "anime-news",
@@ -369,7 +463,10 @@
     "language": "typescript",
     "lang": "EN",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/animenewsnetwork.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "misc"
+    ]
   },
   {
     "id": "cookie-clicker",
@@ -381,7 +478,10 @@
     "language": "typescript",
     "lang": "EN",
     "icon": "",
-    "website": ""
+    "website": "",
+    "tags": [
+      "misc"
+    ]
   },
   {
     "id": "anilist-activity",
@@ -393,7 +493,11 @@
     "language": "typescript",
     "lang": "MULTI",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/anilist.ico",
-    "website": ""
+    "website": "",
+    "tags": [
+      "anilist",
+      "misc"
+    ]
   },
   {
     "id": "komiku",
@@ -405,7 +509,11 @@
     "language": "javascript",
     "lang": "id",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/komiku.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "mynimekumanga",
@@ -417,7 +525,8 @@
     "language": "javascript",
     "lang": "id",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mynimeku.jpg",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "default-torrent-filters",
@@ -429,7 +538,10 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "",
-    "website": ""
+    "website": "",
+    "tags": [
+      "enhancements"
+    ]
   },
   {
     "id": "download-memory",
@@ -441,7 +553,8 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "",
-    "website": ""
+    "website": "",
+    "tags": []
   },
   {
     "id": "oneko",
@@ -453,7 +566,10 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/pal-droid/Seanime-Providers/main/public/oneko.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "misc"
+    ]
   },
   {
     "id": "ui-translation",
@@ -464,7 +580,10 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "",
-    "website": ""
+    "website": "",
+    "tags": [
+      "enhancements"
+    ]
   },
   {
     "id": "shademanga",
@@ -476,7 +595,8 @@
     "language": "typescript",
     "lang": "es",
     "icon": "https://raw.githubusercontent.com/yerasuu/My-Seanime-Providers/main/shademanga/icon.png",
-    "website": "https://shademanga.com/"
+    "website": "https://shademanga.com/",
+    "tags": []
   },
   {
     "id": "dipland-mangaball",
@@ -488,7 +608,8 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangaball.png",
-    "website": "https://mangaball.net/"
+    "website": "https://mangaball.net/",
+    "tags": []
   },
   {
     "id": "dipland-mangafire",
@@ -500,7 +621,8 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangafire.png",
-    "website": "https://mangafire.to/"
+    "website": "https://mangafire.to/",
+    "tags": []
   },
   {
     "id": "dipland-mangadot",
@@ -512,7 +634,8 @@
     "language": "typescript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/mangadot.png",
-    "website": "https://mangadot.net/"
+    "website": "https://mangadot.net/",
+    "tags": []
   },
   {
     "id": "shiro",
@@ -524,7 +647,12 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/shiro.ico",
-    "website": "https://anv.to/"
+    "website": "https://anv.to/",
+    "tags": [
+      "fast sources",
+      "large library",
+      "anilist"
+    ]
   },
   {
     "id": "xcomic",
@@ -535,7 +663,12 @@
     "type": "manga-provider",
     "language": "javascript",
     "lang": "en",
-    "website": "https://xcomic.me/"
+    "website": "https://xcomic.me/",
+    "tags": [
+      "fast sources",
+      "large library",
+      "stable sources"
+    ]
   },
   {
     "id": "fanfox",
@@ -547,7 +680,11 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/refs/heads/main/public/fanfox.png",
-    "website": ""
+    "website": "",
+    "tags": [
+      "fast sources",
+      "stable sources"
+    ]
   },
   {
     "id": "animeunion",
@@ -559,7 +696,11 @@
     "language": "javascript",
     "lang": "it",
     "icon": "https://animeunion.tv/favicon.ico",
-    "website": "https://animeunion.tv"
+    "website": "https://animeunion.tv",
+    "tags": [
+      "fast sources",
+      "sub & dub"
+    ]
   },
   {
     "id": "animetvplus",
@@ -571,7 +712,12 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/animetvplus.png",
-    "website": "https://animetvplus.xyz/"
+    "website": "https://animetvplus.xyz/",
+    "tags": [
+      "fast sources",
+      "sub & dub",
+      "dubtitles"
+    ]
   },
   {
     "id": "waifu-dex",
@@ -583,7 +729,10 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/waifudex.jpg",
-    "website": "https://danbooru.donmai.us/"
+    "website": "https://danbooru.donmai.us/",
+    "tags": [
+      "nsfw"
+    ]
   },
   {
     "id": "shonen",
@@ -595,7 +744,10 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/shonen.png",
-    "website": "https://shonen.to"
+    "website": "https://shonen.to",
+    "tags": [
+      "sub only"
+    ]
   },
   {
     "id": "mangastash",
@@ -607,7 +759,8 @@
     "language": "javascript",
     "lang": "en",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/mangastash.ico",
-    "website": "https://mangastash.org"
+    "website": "https://mangastash.org",
+    "tags": []
   },
   {
     "id": "megaplay",
@@ -619,7 +772,12 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "https://megaplay.buzz/favicon.ico",
-    "website": "https://megaplay.buzz/"
+    "website": "https://megaplay.buzz/",
+    "tags": [
+      "fast sources",
+      "anilist",
+      "sub & dub"
+    ]
   },
   {
     "id": "zokoanime",
@@ -631,7 +789,13 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/zokoanime.png",
-    "website": "https://zokoanime.video/"
+    "website": "https://zokoanime.video/",
+    "tags": [
+      "fast sources",
+      "dubtitles",
+      "anilist",
+      "sub & dub"
+    ]
   },
   {
     "id": "megavid",
@@ -643,6 +807,11 @@
     "language": "javascript",
     "lang": "multi",
     "icon": "",
-    "website": "https://megavid.buzz/"
+    "website": "https://megavid.buzz/",
+    "tags": [
+      "dubtitles",
+      "anilist",
+      "sub & dub"
+    ]
   }
 ]
