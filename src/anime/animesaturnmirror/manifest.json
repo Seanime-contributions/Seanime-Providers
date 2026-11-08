@@ -3,7 +3,7 @@
   "name": "AnimeSaturn (Mirror)",
   "description": "AnimeSaturn mirror",
   "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animesaturnmirror/manifest.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Pal",
   "type": "onlinestream-provider",
   "language": "javascript",
