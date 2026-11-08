@@ -45,6 +45,11 @@
       "id": "shonen",
       "ignore": true,
       "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "atsumaru",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
     }
   ]
 }
