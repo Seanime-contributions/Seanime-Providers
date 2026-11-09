@@ -28,7 +28,8 @@
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/donghuastream.jpeg",
     "website": "",
     "tags": [
-      "sub only"
+      "sub only",
+      "donghua"
     ]
   },
   {
@@ -363,7 +364,8 @@
     "icon": "https://raw.githubusercontent.com/pal-droid/seanime-providers/refs/heads/main/public/nontonanime.png",
     "website": "",
     "tags": [
-      "sub only"
+      "sub only",
+      "donghua"
     ]
   },
   {
