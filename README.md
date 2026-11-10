@@ -88,6 +88,12 @@ Use **[this page](https://seanime-contributions.github.io/Seanime-Providers/down
 
 ---
 
+## Want to contribute?
+
+See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for provider and plugin guidelines, marketplace tags, testing commands, and pull request requirements.
+
+---
+
 ### Want to suggest more providers?
 > *PR's welcomed!*
 
