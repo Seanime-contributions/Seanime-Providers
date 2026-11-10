@@ -60,6 +60,11 @@
       "id": "kuramanga",
       "ignore": true,
       "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
+    },
+    {
+      "id": "donghuastream",
+      "ignore": true,
+      "reason": "The website blocks shared IPs from hosting platforms such as Vercel."
     }
   ]
 }
