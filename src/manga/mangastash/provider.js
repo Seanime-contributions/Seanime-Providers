@@ -3,7 +3,7 @@
 class Provider {
   constructor() {
     this.siteBase = "https://mangastash.org";
-    this.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+    this.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
   }
 
   getSettings() {
@@ -11,6 +11,25 @@ class Provider {
       supportsMultiLanguage: false,
       supportsMultiScanlator: false,
     };
+  }
+
+  // Headers matching a browser <img> request for page images
+  pageHeaders(referer, cookies) {
+    const headers = {
+      "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Priority": "i",
+      "Referer": referer,
+      "sec-ch-ua": '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"Windows"',
+      "sec-fetch-dest": "image",
+      "sec-fetch-mode": "no-cors",
+      "sec-fetch-site": "same-origin",
+      "User-Agent": this.userAgent,
+    };
+    if (cookies) headers["Cookie"] = cookies;
+    return headers;
   }
 
   async fetchHTML(url) {
@@ -97,8 +116,19 @@ class Provider {
     const chapterPath = normalizeSitePath(id, this.siteBase);
     if (!chapterPath) return [];
     try {
+      // The chapter page itself is fetched normally.
       const chapterUrl = new URL(chapterPath, this.siteBase).toString();
       const html = await this.fetchHTML(chapterUrl);
+
+      // Scrape the mr-imgok value from the meta tag on the reader page.
+      const imgok = getAttribute(
+        html.match(/<meta\b[^>]*\bname=["']mr-imgok["'][^>]*>/i)?.[0] || "",
+        "content"
+      );
+      const cookies = imgok ? `mr_imgok=${imgok}` : "";
+
+      // Referer for page images excludes the trailing slash
+      const pageReferer = chapterUrl.replace(/\/+$/, "");
       const pages = [];
       const seen = new Set();
       const pageStarts = Array.from(html.matchAll(/<div\b(?=[^>]*\bclass=["'][^"']*\breader-page\b[^"']*["'])[^>]*>/gi));
@@ -119,7 +149,8 @@ class Provider {
         pages.push({
           url: imageUrl,
           index: Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber - 1 : pages.length,
-          headers: { Referer: chapterUrl },
+          // Full browser-like headers for the image request, including the mr_imgok cookie.
+          headers: this.pageHeaders(pageReferer, cookies),
         });
       }
 
