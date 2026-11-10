@@ -3,7 +3,7 @@
   "name": "MangaStash",
   "description": "Search MangaStash and read manga chapters in English.",
   "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/manga/mangastash/manifest.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Pal",
   "type": "manga-provider",
   "language": "javascript",
