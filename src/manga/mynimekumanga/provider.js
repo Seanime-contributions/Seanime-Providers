@@ -5,11 +5,29 @@ class Provider {
     this.baseUrl = "https://www.mynimeku.com";
   }
 
+  async getSearchNonce() {
+    const res = await fetch(`${this.baseUrl}/`, {
+      headers: {
+        "Referer": `${this.baseUrl}/`,
+      },
+    });
+
+    if (!res.ok) throw new Error(`Failed to load MyNimeKu root page: ${res.status}`);
+
+    const html = await res.text();
+    const formMatch = html.match(/<form\b[^>]*\bid=["']search-form["'][^>]*>/i);
+    const nonceMatch = formMatch?.[0].match(/\bdata-nonce\s*=\s*["']([^"']+)["']/i);
+    if (!nonceMatch) throw new Error("MyNimeKu search nonce not found");
+
+    return nonceMatch[1];
+  }
+
   async search(query) {
+    const nonce = await this.getSearchNonce();
     const searchUrl = `${this.baseUrl}/wp-admin/admin-ajax.php`;
     const body = [
       `action=${encodeURIComponent("mynimeku_live_search")}`,
-      `nonce=${encodeURIComponent("92e6c9e843")}`,
+      `nonce=${encodeURIComponent(nonce)}`,
       `keyword=${encodeURIComponent(query.query)}`,
     ].join("&");
 
