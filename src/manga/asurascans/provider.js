@@ -14,9 +14,13 @@ class Provider {
     return fetch(url, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-        Accept: "*/*",
-        Referer: this.api,
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        Referer: `${this.api}/`,
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Upgrade-Insecure-Requests": "1",
       },
     });
   }
@@ -65,34 +69,77 @@ class Provider {
   }
 
   async findChapters(mangaId) {
-    // mangaId is now the full public_url like "/comics/emperor-of-solo-play-fc4c7eba"
-    const comicUrl = `${this.api}${mangaId}`;
+    // Search may return either a root-relative public_url or an absolute URL.
+    // Do not prepend the API host twice when the latter is returned.
+    const rawMangaId = String(mangaId || "").trim().replace(/^['"]|['"]$/g, "");
+    const comicUrl = /^https?:\/\//i.test(rawMangaId)
+      ? rawMangaId
+      : `${this.api}${rawMangaId.startsWith("/") ? "" : "/"}${rawMangaId}`;
     try {
-      const response = await this.fetchWithHeaders(comicUrl);
-      if (!response.ok) return [];
-      const html = await response.text();
+      const urls = [comicUrl];
+      if (/^https?:\/\/asurascans\.com\//i.test(comicUrl)) {
+        urls.push(comicUrl.replace(/^https?:\/\/asurascans\.com/i, "https://www.asurascans.com"));
+      }
+      let response;
+      let html = "";
+      for (let i = 0; i < urls.length; i++) {
+        if (i > 0) console.warn("Retrying chapter page on fallback host:", urls[i]);
+        response = await this.fetchWithHeaders(urls[i]);
+        console.log("Chapter page:", response.status, response.url || urls[i]);
+        if (!response.ok) {
+          console.error("Chapter page request failed:", response.status);
+          continue;
+        }
+        html = await response.text();
+        console.log("HTML length:", html.length, "has chapter links:", html.includes("/chapter/"));
+        if (html.includes("/chapter/")) break;
+        console.warn("Chapter page contained no chapter links");
+      }
+      if (!response || !response.ok || !html.includes("/chapter/")) return [];
 
       const chapters = [];
       const seen = new Set();
 
-      // Chapter links: href="/comics/{full-slug}/chapter/{num}"
-      const chapterRegex = /href="(\/comics\/[^"]+\/chapter\/([^"]+))"/gi;
+      // Parse every href and inspect its URL path instead of depending on the
+      // exact surrounding anchor markup.
+      const normalizedHtml = String(html)
+        .replace(/&quot;/gi, '"')
+        .replace(/&#x27;|&#39;/gi, "'")
+        .replace(/&amp;/gi, "&")
+        .replace(/\\(["'])/g, "$1");
+      const hrefRegex = /\bhref\s*=\s*(["'])(.*?)\1/gi;
       let match;
-      while ((match = chapterRegex.exec(html)) !== null) {
-        const fullPath = match[1];
-        const chapterNum = match[2];
+      while ((match = hrefRegex.exec(normalizedHtml)) !== null) {
+        const href = match[2].trim();
+        let url;
+        try {
+          url = new URL(href, response.url || comicUrl);
+        } catch (_error) {
+          continue;
+        }
+
+        const chapterMatch = url.pathname.match(/\/comics\/[^/]+\/chapter\/([^/]+)\/?$/i);
+        if (!chapterMatch) continue;
+
+        const chapterNum = chapterMatch[1];
 
         if (seen.has(chapterNum)) continue;
         seen.add(chapterNum);
 
         chapters.push({
-          id: `${this.api}${fullPath}`,
+          id: url.href,
+          url: url.href,
           title: `Chapter ${chapterNum}`,
           chapter: chapterNum,
+          index: 0,
         });
       }
 
-      return chapters.sort((a, b) => parseFloat(a.chapter) - parseFloat(b.chapter));
+      chapters.sort((a, b) => parseFloat(a.chapter) - parseFloat(b.chapter));
+      chapters.forEach((chapter, index) => {
+        chapter.index = index;
+      });
+      return chapters;
     } catch (e) {
       console.error("findChapters error:", e);
       return [];
