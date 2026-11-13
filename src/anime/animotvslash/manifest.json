@@ -1,0 +1,13 @@
+{
+  "id": "animotvslash",
+  "name": "AnimoTVSlash",
+  "description": "AnimoTVSlash is an online streaming provider for subbed anime in english",
+  "manifestURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animotvslash/manifest.json",
+  "version": "1.1.6",
+  "author": "Pal",
+  "type": "onlinestream-provider",
+  "language": "javascript",
+  "lang": "en",
+  "icon": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/public/animotvslash.png",
+  "payloadURI": "https://raw.githubusercontent.com/Pal-droid/Seanime-Providers/main/src/anime/animotvslash/provider.js"
+}
