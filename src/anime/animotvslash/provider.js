@@ -141,9 +141,11 @@ class Provider {
 
     const subtitles = (data.subtitles || [])
       .filter((s) => s && s.url)
-      .map((s) => ({
+      .map((s, index) => ({
+        id: `animotvslash-subtitle-${index + 1}`,
         url: s.url,
-        language: s.language || s.label,
+        language: s.language || s.label || "Unknown",
+        isDefault: Boolean(s.default) || index === 0,
       }));
 
     return {
@@ -156,7 +158,7 @@ class Provider {
         {
           url: source.url,
           quality: source.name || "auto",
-          type: data.type === "hls" ? "hls" : "mp4",
+          type: data.type === "hls" ? "m3u8" : "mp4",
           subtitles,
         },
       ],
