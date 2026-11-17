@@ -1,0 +1,13 @@
+{
+  "id": "animesfhd",
+  "name": "AnimesFHD",
+  "version": "1.0.0",
+  "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/src/anime/animesfhd/manifest.json",
+  "language": "typescript",
+  "type": "onlinestream-provider",
+  "description": "Online streaming provider for anime in Brazilian Portuguese, subbed and dubbed (animesfhd.net).",
+  "author": "animesfhd",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/animesfhd.png",
+  "lang": "pt-BR",
+  "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/src/anime/animesfhd/provider.ts"
+}
