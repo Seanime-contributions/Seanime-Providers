@@ -60,19 +60,37 @@ class Provider {
     const query = String(options?.query || "").trim();
     if (!query) return [];
 
-    const searchUrl = new URL("/api/v1/anime", this.apiBase);
-    searchUrl.searchParams.set("q", query);
-    searchUrl.searchParams.set("limit", "8");
+    const fetchPage = async (page) => {
+      const searchUrl = new URL("/api/v1/anime", this.apiBase);
+      searchUrl.searchParams.set("q", query);
+      searchUrl.searchParams.set("limit", "8");
+      searchUrl.searchParams.set("page", String(page));
+      const response = await fetch(searchUrl.toString(), {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) throw new Error(`AnimeUnion search failed on page ${page} (HTTP ${response.status})`);
+      return response.json();
+    };
 
-    const response = await fetch(searchUrl.toString(), {
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) throw new Error(`AnimeUnion search failed (HTTP ${response.status})`);
+    const firstPage = await fetchPage(1);
+    const results = Array.isArray(firstPage?.data) ? [...firstPage.data] : [];
+    const reportedPages = Number(firstPage?.meta?.totalPages);
+    const totalPages = Number.isInteger(reportedPages) && reportedPages > 1 ? Math.min(reportedPages, 1000) : 1;
+    for (let start = 2; start <= totalPages; start += 4) {
+      const pageNumbers = Array.from({ length: Math.min(4, totalPages - start + 1) }, (_, index) => start + index);
+      const pages = await Promise.allSettled(pageNumbers.map(fetchPage));
+      for (const [index, page] of pages.entries()) {
+        if (page.status === "fulfilled" && Array.isArray(page.value?.data)) {
+          results.push(...page.value.data);
+        } else if (page.status === "rejected") {
+          console.error(`[Union] Failed to fetch search page ${pageNumbers[index]}`, page.reason);
+        }
+      }
+    }
 
-    const payload = await response.json();
-    const results = Array.isArray(payload?.data) ? payload.data : [];
-    return results
-      .filter((anime) => anime && anime.slug && Number.isInteger(Number(anime.episodeCount)) && Number(anime.episodeCount) > 0)
+    const uniqueResults = Array.from(new Map(results.filter((anime) => anime?.slug).map((anime) => [String(anime.slug), anime])).values());
+    return uniqueResults
+      .filter((anime) => anime && anime.slug)
       .filter((anime) => {
         const languages = Array.isArray(anime.availableLanguages) ? anime.availableLanguages.map((value) => String(value).toUpperCase()) : [];
         return !options?.dub || !languages.length || languages.some((language) => language.startsWith("DUB"));
@@ -83,10 +101,9 @@ class Provider {
         const hasDub = languages.some((language) => language.startsWith("DUB"));
         const subOrDub = hasSub && hasDub ? "both" : hasDub ? "dub" : hasSub ? "sub" : "both";
         const slug = String(anime.slug);
-        const episodeCount = Number(anime.episodeCount);
         return {
-          // Carry episodeCount into findEpisodes without an extra request.
-          id: `${slug}|${episodeCount}`,
+          // Keep the stable slug in the anime ID; episode totals can be unknown or stale.
+          id: slug,
           title: anime.titleEng || anime.title || anime.titleIta || slug,
           image: anime.coverImage || anime.bannerImage,
           url: `${this.siteBase}/anime/${encodeURIComponent(slug)}`,
@@ -97,19 +114,38 @@ class Provider {
 
   async findEpisodes(id) {
     const [slug, countValue] = String(id || "").split("|");
-    const episodeCount = Number.parseInt(countValue, 10);
-    if (!slug || !/^[\w-]+$/.test(slug) || !Number.isInteger(episodeCount) || episodeCount < 1) return [];
+    if (!slug || !/^[\w-]+$/.test(slug)) return [];
 
+    const legacyCount = Number.parseInt(countValue || "", 10);
     const encodedSlug = encodeURIComponent(slug);
-    return Array.from({ length: episodeCount }, (_, index) => {
-      const number = index + 1;
-      return {
-        id: `${slug}|${number}`,
-        number,
-        title: `Episode ${number}`,
-        url: `${this.siteBase}/anime/${encodedSlug}/${number}/__data.json?x-sveltekit-invalidated=01`,
-      };
-    });
+    const animePageUrl = `${this.siteBase}/anime/${encodedSlug}/__data.json?x-sveltekit-invalidated=01`;
+    let episodeRows = [];
+    try {
+      const response = await fetch(animePageUrl, {
+        headers: { Accept: "application/json", Referer: `${this.siteBase}/` },
+      });
+      if (!response.ok) throw new Error(`AnimeUnion anime request failed (HTTP ${response.status})`);
+      const animePage = decodeSvelteKitData(await response.json());
+      const episodes = animePage?.episodes;
+      episodeRows = Array.isArray(episodes) ? episodes : Array.isArray(episodes?.data) ? episodes.data : [];
+    } catch (error) {
+      console.error(`[Union] Could not load episode list for ${slug}`, error);
+    }
+
+    const numbers = episodeRows
+      .map((episode, index) => Number(episode?.number) || index + 1)
+      .filter((number) => Number.isInteger(number) && number > 0);
+    const count = numbers.length || (Number.isInteger(legacyCount) && legacyCount > 0 ? legacyCount : 0);
+    const episodeNumbers = numbers.length
+      ? Array.from(new Set(numbers)).sort((a, b) => a - b)
+      : Array.from({ length: count }, (_, index) => index + 1);
+
+    return episodeNumbers.map((number) => ({
+      id: `${slug}|${number}`,
+      number,
+      title: `Episode ${number}`,
+      url: `${this.siteBase}/anime/${encodedSlug}/${number}/__data.json?x-sveltekit-invalidated=01`,
+    }));
   }
 
   async findEpisodeServer(episode, server) {
