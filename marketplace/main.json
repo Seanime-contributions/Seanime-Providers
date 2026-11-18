@@ -824,5 +824,21 @@
     "tags": [
       "sub only"
     ]
+  },
+  {
+    "id": "animesfhd",
+    "name": "AnimesFHD",
+    "description": "AnimesFHD is an online streaming provider for Brazilian Portuguese anime, subbed and dubbed.",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/src/anime/animesfhd/manifest.json",
+    "author": "animesfhd",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "pt-BR",
+    "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/animesfhd.png",
+    "website": "https://animesfhd.net/",
+    "tags": [
+      "sub & dub",
+      "large library"
+    ]
   }
 ]
