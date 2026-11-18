@@ -3,7 +3,7 @@
   "name": "AnimeUnion",
   "description": "AnimeUnion search and streaming with available subtitle and dub episode sources.",
   "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/anime/animeunion/manifest.json",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Pal",
   "type": "onlinestream-provider",
   "language": "javascript",
