@@ -832,7 +832,7 @@
     "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/src/anime/animesfhd/manifest.json",
     "author": "animesfhd",
     "type": "onlinestream-provider",
-    "language": "typescript",
+    "language": "javascript",
     "lang": "pt-BR",
     "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/main/public/animesfhd.png",
     "website": "https://animesfhd.net/",
