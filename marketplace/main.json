@@ -840,5 +840,21 @@
       "sub & dub",
       "large library"
     ]
+  },
+  {
+    "id": "konomi-moe",
+    "name": "Konomi.moe",
+    "description": "Personalised anime recommendations learned from your own preferences.",
+    "manifestURI": "https://raw.githubusercontent.com/AbnormallyGrim/konomi-moe/refs/heads/main/seanime/release/konomi-moe.json",
+    "author": "AbnormallyGrim",
+    "type": "plugin",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/AbnormallyGrim/konomi-moe/refs/heads/main/seanime/release/konomi-moe.png",
+    "website": "https://github.com/AbnormallyGrim/konomi-moe",
+    "tags": [
+      "anilist",
+      "enhancements"
+    ]
   }
 ]
