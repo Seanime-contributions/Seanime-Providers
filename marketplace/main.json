@@ -871,5 +871,35 @@
       "anilist",
       "enhancements"
     ]
+  },
+  {
+    "id": "discord-rich-presence",
+    "name": "Discord RPC",
+    "description": "Customizable Discord Rich Presence with anime artwork, episode format presets, native episode-name fallback, and selectable update intervals.",
+    "manifestURI": "https://seanime.gaury.dev/plugins/discord/manifest.json",
+    "author": "gaury (@nxfu)",
+    "type": "plugin",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://seanime.gaury.dev/icons/discord.png",
+    "website": "https://seanime.gaury.dev/",
+    "tags": [
+      "enhancements"
+    ]
+  },
+  {
+    "id": "miruro-cx",
+    "name": "Miruro",
+    "description": "Miruro is an online streaming provider for subbed and dubbed anime with multiple servers and subtitles.",
+    "manifestURI": "https://seanime.gaury.dev/online/miruro/manifest.json",
+    "author": "gaury (@nxfu)",
+    "type": "onlinestream-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://seanime.gaury.dev/icons/miruro.png",
+    "website": "https://www.miruro.cx/",
+    "tags": [
+      "sub & dub"
+    ]
   }
 ]
