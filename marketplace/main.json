@@ -758,6 +758,21 @@
     "tags": []
   },
   {
+    "id": "chikari",
+    "name": "Chikari",
+    "description": "Chikari manga provider for Seanime",
+    "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/manga/chikari/manifest.json",
+    "author": "Pal",
+    "type": "manga-provider",
+    "language": "javascript",
+    "lang": "en",
+    "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/chikari.png",
+    "website": "https://chikari.moe/",
+    "tags": [
+      "misc"
+    ]
+  },
+  {
     "id": "megaplay",
     "name": "Megaplay",
     "description": "Megaplay is an AniList-backed online streaming provider for subbed and dubbed anime.",

@@ -1,0 +1,13 @@
+{
+  "id": "chikari",
+  "name": "Chikari",
+  "description": "Chikari manga provider for Seanime",
+  "manifestURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/manga/chikari/manifest.json",
+  "version": "1.0.0",
+  "author": "Pal",
+  "icon": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/public/chikari.png",
+  "type": "manga-provider",
+  "language": "javascript",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Seanime-contributions/Seanime-Providers/refs/heads/main/src/manga/chikari/provider.js"
+}
