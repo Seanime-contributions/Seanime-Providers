@@ -89,6 +89,7 @@
       .preview-carousel { padding: 0 18px 14px; }
       .preview-frame { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 16 / 9; min-height: 174px; border: 1px solid var(--line); border-radius: 10px; background: #080808; }
       .preview-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .preview-image { cursor: zoom-in; }
       .preview-arrow { position: absolute; top: 50%; display: grid; place-items: center; width: 30px; height: 38px; transform: translateY(-50%); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; background: rgba(8,8,8,.78); color: var(--ink); cursor: pointer; font-size: 22px; line-height: 1; transition: background .16s ease, opacity .16s ease; }
       .preview-arrow:hover { background: rgba(38,38,36,.96); }
       .preview-arrow:disabled { opacity: .35; cursor: default; }
@@ -124,6 +125,11 @@
       .footer-row a { text-underline-offset: 3px; }
       .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(17, 17, 17, .55); opacity: 1; transition: opacity .2s; }
       .modal-backdrop.hidden { display: none; opacity: 0; }
+      .lightbox-backdrop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: clamp(16px, 4vw, 56px); background: rgba(0, 0, 0, .9); }
+      .lightbox-backdrop.hidden { display: none; }
+      .lightbox-image { display: block; max-width: 100%; max-height: calc(100vh - 32px); object-fit: contain; border: 1px solid var(--line-strong); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, .55); }
+      .lightbox-close { position: fixed; top: 18px; right: 20px; width: 42px; height: 42px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--panel); color: var(--ink); cursor: pointer; font-size: 25px; line-height: 1; }
+      .lightbox-close:hover { background: var(--soft); }
       .modal { width: min(440px, 100%); background: var(--panel); border: 1px solid var(--ink); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.2); padding: 22px; }
       .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
       .modal h2 { margin: 0; font-size: 16px; }
@@ -168,6 +174,10 @@
     <div class="toast" id="toast" role="status"></div>
     <div class="modal-backdrop hidden" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="modal"><div class="modal-head"><h2 id="settings-title">Install settings</h2><button class="icon-btn" id="settings-close" type="button" aria-label="Close settings">×</button></div><p class="hero-copy" style="font-size:13px;margin:0">Choose the Seanime server that should receive installations.</p><label for="setting-uri">Server URI</label><input id="setting-uri" type="text" placeholder="http://localhost" /><label for="setting-port">Server port</label><input id="setting-port" type="text" placeholder="43211" /><div class="modal-actions"><button class="action" id="settings-cancel" type="button">Cancel</button><button class="action install" id="settings-save" type="button">Save settings</button></div></div>
+    </div>
+    <div class="lightbox-backdrop hidden" id="screenshot-lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview">
+      <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close screenshot preview">×</button>
+      <img class="lightbox-image" id="lightbox-image" alt="" />
     </div>
 
     <script>
@@ -241,6 +251,24 @@
         return rows.slice(0, 6);
       }
 
+      function openScreenshotLightbox(src, alt, trigger) {
+        const lightbox = $("#screenshot-lightbox");
+        const image = $("#lightbox-image");
+        image.src = src;
+        image.alt = alt;
+        lightbox.returnFocusTo = trigger;
+        lightbox.classList.remove("hidden");
+        $("#lightbox-close").focus();
+      }
+
+      function closeScreenshotLightbox() {
+        const lightbox = $("#screenshot-lightbox");
+        if (lightbox.classList.contains("hidden")) return;
+        lightbox.classList.add("hidden");
+        $("#lightbox-image").removeAttribute("src");
+        lightbox.returnFocusTo?.focus();
+      }
+
       function renderPreviewCarousel(item) {
         const slug = String(item.id || "").toLocaleLowerCase();
         const previews = previewsBySlug[previewSlugAliases[slug] || slug];
@@ -256,6 +284,13 @@
         image.className = "preview-image";
         image.loading = "lazy";
         image.alt = `${item.name} screenshot 1 of ${previews.length}`;
+        image.tabIndex = 0;
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", `Enlarge ${image.alt}`);
+        image.addEventListener("click", () => openScreenshotLightbox(image.src, image.alt, image));
+        image.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); image.click(); }
+        });
         frame.append(image);
 
         const footer = document.createElement("div");
@@ -280,6 +315,7 @@
           current = (index + previews.length) % previews.length;
           image.src = previews[current].src;
           image.alt = `${item.name} screenshot ${current + 1} of ${previews.length}`;
+          image.setAttribute("aria-label", `Enlarge ${image.alt}`);
           count.textContent = `${current + 1} / ${previews.length}`;
           buttons.forEach((button, buttonIndex) => button.setAttribute("aria-current", String(buttonIndex === current)));
         };
@@ -363,7 +399,9 @@
         $("#settings-btn").addEventListener("click", openSettings); $("#settings-close").addEventListener("click", closeSettings); $("#settings-cancel").addEventListener("click", closeSettings);
         $("#settings-save").addEventListener("click", () => { localStorage.setItem("seanime_uri", $("#setting-uri").value.trim() || DEFAULT_URI); localStorage.setItem("seanime_port", $("#setting-port").value.trim() || DEFAULT_PORT); closeSettings(); showToast("Install settings saved"); });
         $("#settings-modal").addEventListener("click", event => { if (event.target.id === "settings-modal") closeSettings(); });
-        document.addEventListener("keydown", event => { if (event.key === "Escape") closeSettings(); });
+        $("#lightbox-close").addEventListener("click", closeScreenshotLightbox);
+        $("#screenshot-lightbox").addEventListener("click", event => { if (event.target.id === "screenshot-lightbox") closeScreenshotLightbox(); });
+        document.addEventListener("keydown", event => { if (event.key === "Escape") { closeScreenshotLightbox(); closeSettings(); } });
         loadCatalog();
       });
     </script>
