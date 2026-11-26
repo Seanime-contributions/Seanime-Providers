@@ -129,6 +129,7 @@ Or
   <a href="https://github.com/dip-land"><img src="https://avatars.githubusercontent.com/u/82669765?v=4" width="64" alt="dip-land"></a>
   <a href="https://github.com/LostMorality"><img src="https://avatars.githubusercontent.com/u/187643700?v=4" width="64" alt="LostMorality"></a>
   <a href="https://github.com/animesfhd"><img src="https://avatars.githubusercontent.com/u/336853658?v=4" width="64" alt="animesfhd"></a>
+  <a href="https://github.com/AbnormallyGrim"><img src="https://avatars.githubusercontent.com/u/344536500?v=4" width="64" alt="AbnormallyGrim"></a>
 </p>
 
 ---
